@@ -34,7 +34,7 @@ export function LeadAnswerEditor({
   return (
     <div className="space-y-5">
       <div>
-        <label className="block text-[11px] font-semibold text-muted-foreground uppercase tracking-wide mb-1.5">
+        <label className="block text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1.5">
           Título del bloque
         </label>
         <input
@@ -46,14 +46,14 @@ export function LeadAnswerEditor({
       </div>
 
       <div>
-        <label className="block text-[11px] font-semibold text-muted-foreground uppercase tracking-wide mb-1.5">
+        <label className="block text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1.5">
           Pregunta a desglosar
         </label>
         <PreguntaPicker clienteId={clienteId} def={def} onChange={patch} />
       </div>
 
       <div>
-        <label className="block text-[11px] font-semibold text-muted-foreground uppercase tracking-wide mb-1.5">
+        <label className="block text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1.5">
           Visualización
         </label>
         <select
@@ -64,7 +64,7 @@ export function LeadAnswerEditor({
           <option value="bars">Barras — totales del período</option>
           <option value="daily">Tabla diaria — cuántos por día y de qué está hecho</option>
         </select>
-        <p className="text-[11px] text-muted-foreground/70 mt-1">
+        <p className="text-xs text-muted-foreground mt-1">
           La tabla diaria muestra el total de contactos de cada día y su reparto por respuesta,
           incluidos los que no contestaron.
         </p>
@@ -72,7 +72,7 @@ export function LeadAnswerEditor({
 
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <label className="block text-[11px] font-semibold text-muted-foreground uppercase tracking-wide mb-1.5">
+          <label className="block text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1.5">
             Máximo de respuestas
           </label>
           <select
@@ -143,10 +143,10 @@ export function LeadAnswerEditor({
       </div>
 
       <div>
-        <label className="block text-[11px] font-semibold text-muted-foreground uppercase tracking-wide mb-1.5">
+        <label className="block text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1.5">
           Filtro de campañas del bloque
         </label>
-        <p className="text-[11px] text-muted-foreground/70 mb-2">
+        <p className="text-xs text-muted-foreground mb-2">
           Se aplica DESPUÉS del filtro de la pestaña, acotando lo que esta ya deja pasar.
         </p>
         <CampaignFilterPicker
@@ -157,7 +157,7 @@ export function LeadAnswerEditor({
         />
       </div>
 
-      <p className="text-[11px] text-muted-foreground/70 border-t border-border pt-3">
+      <p className="text-xs text-muted-foreground border-t border-border pt-3">
         Este bloque mide <span className="text-foreground">solo leads</span>. No ofrece gasto ni CPL
         por respuesta porque la inversión se mide por campaña y no sabe qué contestó cada lead;
         repartirla daría un costo inventado.

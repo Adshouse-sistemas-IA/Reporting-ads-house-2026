@@ -397,7 +397,7 @@ export function DateRangeSelector({
           {isCustomSelected && (
             <div className="mt-2 pt-2 border-t border-border space-y-2">
               <div className="flex flex-col gap-1">
-                <span className="text-xs text-muted-foreground/70 ml-1">Desde</span>
+                <span className="text-xs text-muted-foreground ml-1">Desde</span>
                 <input
                   type="date"
                   max={fmt(hoyColombia())}
@@ -407,7 +407,7 @@ export function DateRangeSelector({
                 />
               </div>
               <div className="flex flex-col gap-1">
-                <span className="text-xs text-muted-foreground/70 ml-1">Hasta</span>
+                <span className="text-xs text-muted-foreground ml-1">Hasta</span>
                 <input
                   type="date"
                   max={fmt(hoyColombia())}
@@ -415,7 +415,7 @@ export function DateRangeSelector({
                   onChange={(e) => setCustomTo(e.target.value)}
                   className="bg-muted text-foreground border-none rounded p-1.5 text-sm focus:ring-1 focus:ring-ring cursor-pointer w-full"
                 />
-                <span className="text-[10px] text-muted-foreground/60 ml-1">
+                <span className="text-xs text-muted-foreground ml-1">
                   Máximo hoy: aún no hay datos de días futuros.
                 </span>
               </div>

@@ -1,5 +1,6 @@
 'use client';
 
+import { polaridadMetrica, tonoDelta } from '@/lib/polaridad-metrica';
 import React from 'react';
 import { Card, CardHeader, CardDescription, CardContent } from '@/components/ui/card';
 import { useSortable } from '@dnd-kit/sortable';
@@ -106,8 +107,8 @@ export const SortableCard = React.memo(function SortableCard({
         className="col-span-1 bg-card/50 border border-border rounded-xl px-3 py-2 flex items-center gap-2 cursor-pointer hover:bg-accent hover:border-muted-foreground/30 transition"
         onClick={onToggleCollapse}
       >
-        <ChevronRight className="w-3 h-3 text-muted-foreground/70 flex-shrink-0" />
-        <span className="text-xs text-muted-foreground/70 truncate" title={card.label}>
+        <ChevronRight className="w-3 h-3 text-muted-foreground flex-shrink-0" />
+        <span className="text-xs text-muted-foreground truncate" title={card.label}>
           {card.label}
         </span>
       </div>
@@ -125,10 +126,19 @@ export const SortableCard = React.memo(function SortableCard({
       ? Math.min(100, Math.max(0, (card.value / targetVal) * 100))
       : null;
 
-  // Delta display
+  // Delta: el color sale de la polaridad de la métrica (un CPL que sube es
+  // peor aunque el número crezca), no del signo.
   const hasDelta = card.showDelta && card.delta !== null && card.delta !== undefined;
-  const deltaPositive = hasDelta && (card.delta ?? 0) >= 0;
   const deltaAbs = hasDelta ? Math.abs(card.delta ?? 0) : 0;
+  const tono = hasDelta
+    ? tonoDelta(card.delta, polaridadMetrica(card.formula, card.label, card.mejorSi))
+    : 'neutro';
+  const tonoClase =
+    tono === 'bien'
+      ? 'bg-good-soft text-good'
+      : tono === 'mal'
+        ? 'bg-bad-soft text-bad'
+        : 'bg-muted text-muted-foreground';
 
   // «Total Leads» puede ser lo que atribuye Meta o los contactos recibidos: el
   // rótulo lo escribe el usuario, así que la fuente se explica aparte.
@@ -138,7 +148,7 @@ export const SortableCard = React.memo(function SortableCard({
     <Card
       ref={setNodeRef}
       style={style}
-      className={`col-span-1 bg-card border-border transition relative group ${isPuzzleMode ? 'ring-1 ring-border hover:border-muted-foreground/50 hover:shadow-lg' : 'hover:border-muted-foreground/30'}`}
+      className={`col-span-1 gap-2 py-4 bg-card border-border shadow-none transition relative group ${isPuzzleMode ? 'ring-1 ring-border hover:border-muted-foreground/50 hover:shadow-lg' : 'hover:border-muted-foreground/30'}`}
     >
       {isPuzzleMode ? (
         <div className="absolute top-2 right-2 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity z-10">
@@ -168,7 +178,7 @@ export const SortableCard = React.memo(function SortableCard({
                 e.stopPropagation();
                 onDuplicate();
               }}
-              className="p-1 text-muted-foreground/70 hover:text-emerald-400 bg-card/80 border border-border hover:border-emerald-500/40 rounded transition"
+              className="p-1 text-muted-foreground hover:text-emerald-400 bg-card/80 border border-border hover:border-emerald-500/40 rounded transition"
               title="Duplicar"
             >
               <Copy className="w-3 h-3" />
@@ -180,7 +190,7 @@ export const SortableCard = React.memo(function SortableCard({
                 e.stopPropagation();
                 onQuickEdit();
               }}
-              className="p-1 text-muted-foreground/70 hover:text-indigo-400 bg-card/80 border border-border hover:border-indigo-500/40 rounded transition"
+              className="p-1 text-muted-foreground hover:text-indigo-400 bg-card/80 border border-border hover:border-indigo-500/40 rounded transition"
               title="Editar"
             >
               <Pencil className="w-3 h-3" />
@@ -189,7 +199,7 @@ export const SortableCard = React.memo(function SortableCard({
           {onToggleCollapse && (
             <button
               onClick={onToggleCollapse}
-              className="p-1 text-muted-foreground/50 hover:text-muted-foreground bg-card/80 border border-border rounded transition"
+              className="p-1 text-muted-foreground hover:text-muted-foreground bg-card/80 border border-border rounded transition"
               title="Ocultar"
             >
               <ChevronUp className="w-3 h-3" />
@@ -197,20 +207,20 @@ export const SortableCard = React.memo(function SortableCard({
           )}
         </div>
       )}
-      <CardHeader className="pb-2">
-        <CardDescription className="text-muted-foreground font-medium pr-8 flex items-center gap-1.5">
+      <CardHeader className="px-4 pb-0">
+        <CardDescription className="text-[13px] text-muted-foreground font-medium pr-8 flex items-center gap-1.5">
           <span className="truncate">{card.label}</span>
           {fuenteLead && (
             <span title={fuenteLead} aria-label={fuenteLead} className="flex-shrink-0 cursor-help">
-              <HelpCircle className="w-3.5 h-3.5 text-muted-foreground/60" />
+              <HelpCircle className="w-3.5 h-3.5 text-muted-foreground" />
             </span>
           )}
         </CardDescription>
       </CardHeader>
-      <CardContent className="overflow-hidden">
+      <CardContent className="overflow-hidden px-4">
         {/* Main value */}
         <p
-          className={`truncate text-2xl lg:text-3xl font-bold font-mono tabular-nums tracking-tight ${valueColorClass}`}
+          className={`truncate text-2xl lg:text-[28px] leading-tight font-semibold tabular-nums tracking-tight ${valueColorClass}`}
         >
           {formatValue(card.value, {
             prefix: card.prefix,
@@ -222,17 +232,31 @@ export const SortableCard = React.memo(function SortableCard({
 
         {/* Delta badge */}
         {hasDelta && (
-          <div
-            className={`flex items-center gap-1 mt-1.5 text-xs font-medium ${deltaPositive ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-500 dark:text-red-400'}`}
-          >
-            {card.delta === 0 ? (
-              <Minus className="w-3 h-3" />
-            ) : deltaPositive ? (
-              <TrendingUp className="w-3 h-3" />
-            ) : (
-              <TrendingDown className="w-3 h-3" />
+          <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mt-2 text-xs">
+            <span
+              className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 font-semibold tabular-nums ${tonoClase}`}
+              title="Variación frente al período anterior"
+            >
+              {card.delta === 0 ? (
+                <Minus className="w-3 h-3" />
+              ) : (card.delta ?? 0) > 0 ? (
+                <TrendingUp className="w-3 h-3" />
+              ) : (
+                <TrendingDown className="w-3 h-3" />
+              )}
+              {deltaAbs.toFixed(1)}%{tono === 'bien' ? ' mejor' : tono === 'mal' ? ' peor' : ''}
+            </span>
+            {card.prevValue !== null && card.prevValue !== undefined && (
+              <span className="text-muted-foreground tabular-nums truncate">
+                Antes:{' '}
+                {formatValue(card.prevValue, {
+                  prefix: card.prefix,
+                  suffix: card.suffix,
+                  decimals: card.decimals ?? 2,
+                  moneda: monedaReporte,
+                })}
+              </span>
             )}
-            <span>{deltaAbs.toFixed(1)}% vs período anterior</span>
           </div>
         )}
 
@@ -319,11 +343,8 @@ export const SortableChart = React.memo(function SortableChart({
         className="col-span-1 md:col-span-4 bg-card/50 border border-border rounded-xl px-4 py-2.5 flex items-center gap-2 cursor-pointer hover:bg-accent hover:border-muted-foreground/30 transition"
         onClick={onToggleCollapse}
       >
-        <ChevronRight className="w-3.5 h-3.5 text-muted-foreground/70 flex-shrink-0" />
-        <span
-          className="text-sm text-muted-foreground/70 truncate"
-          title={chart.title || 'Gráfica'}
-        >
+        <ChevronRight className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0" />
+        <span className="text-sm text-muted-foreground truncate" title={chart.title || 'Gráfica'}>
           {chart.title || 'Gráfica'}
         </span>
       </div>
@@ -362,7 +383,7 @@ export const SortableChart = React.memo(function SortableChart({
                 e.stopPropagation();
                 onDuplicate();
               }}
-              className="p-1.5 text-muted-foreground/70 hover:text-emerald-400 bg-card/80 border border-border hover:border-emerald-500/40 rounded transition"
+              className="p-1.5 text-muted-foreground hover:text-emerald-400 bg-card/80 border border-border hover:border-emerald-500/40 rounded transition"
               title="Duplicar"
             >
               <Copy className="w-3.5 h-3.5" />
@@ -374,7 +395,7 @@ export const SortableChart = React.memo(function SortableChart({
                 e.stopPropagation();
                 onQuickEdit();
               }}
-              className="p-1.5 text-muted-foreground/70 hover:text-indigo-400 bg-card/80 border border-border hover:border-indigo-500/40 rounded transition"
+              className="p-1.5 text-muted-foreground hover:text-indigo-400 bg-card/80 border border-border hover:border-indigo-500/40 rounded transition"
               title="Editar"
             >
               <Pencil className="w-3.5 h-3.5" />
@@ -383,7 +404,7 @@ export const SortableChart = React.memo(function SortableChart({
           {onToggleCollapse && (
             <button
               onClick={onToggleCollapse}
-              className="p-1.5 text-muted-foreground/50 hover:text-muted-foreground bg-card/80 rounded border border-border transition"
+              className="p-1.5 text-muted-foreground hover:text-muted-foreground bg-card/80 rounded border border-border transition"
               title="Ocultar"
             >
               <ChevronUp className="w-3.5 h-3.5" />
@@ -551,7 +572,7 @@ export const SortableText = React.memo(function SortableText({
       className={`flex items-center justify-between mb-2 pb-2 border-b ${accent === 'indigo' ? 'border-indigo-500/20' : 'border-border'}`}
     >
       <span
-        className={`text-[10px] font-bold uppercase tracking-widest ${accent === 'indigo' ? 'text-indigo-600 dark:text-indigo-400/70' : 'text-muted-foreground/70'}`}
+        className={`text-xs font-bold uppercase tracking-widest ${accent === 'indigo' ? 'text-indigo-600 dark:text-indigo-400/70' : 'text-muted-foreground'}`}
       >
         {label}
       </span>
@@ -584,12 +605,12 @@ export const SortableText = React.memo(function SortableText({
 
       {/* Width */}
       <div className="flex items-center gap-2 flex-wrap">
-        <span className="text-[10px] text-muted-foreground/70 shrink-0 w-12">Ancho:</span>
+        <span className="text-xs text-muted-foreground shrink-0 w-12">Ancho:</span>
         {(['full', 'half', 'small'] as const).map((w) => (
           <button
             key={w}
             onClick={() => onUpdate?.({ separatorWidth: w })}
-            className={`px-2.5 py-1 text-[10px] font-medium rounded border transition ${(block.separatorWidth || 'full') === w ? 'bg-secondary border-ring text-secondary-foreground' : 'bg-muted border-border text-muted-foreground hover:border-muted-foreground/50 hover:text-foreground'}`}
+            className={`px-2.5 py-1 text-xs font-medium rounded border transition ${(block.separatorWidth || 'full') === w ? 'bg-secondary border-ring text-secondary-foreground' : 'bg-muted border-border text-muted-foreground hover:border-muted-foreground/50 hover:text-foreground'}`}
           >
             {w === 'full' ? '━ Completo' : w === 'half' ? '── 50%' : '· Pequeño'}
           </button>
@@ -598,7 +619,7 @@ export const SortableText = React.memo(function SortableText({
 
       {/* Style */}
       <div className="flex items-center gap-2 flex-wrap">
-        <span className="text-[10px] text-muted-foreground/70 shrink-0 w-12">Estilo:</span>
+        <span className="text-xs text-muted-foreground shrink-0 w-12">Estilo:</span>
         {(
           [
             ['line', '────'],
@@ -610,7 +631,7 @@ export const SortableText = React.memo(function SortableText({
           <button
             key={s}
             onClick={() => onUpdate?.({ separatorStyle: s as TextBlockDef['separatorStyle'] })}
-            className={`px-2.5 py-1 text-[10px] font-mono rounded border transition ${(block.separatorStyle || 'line') === s ? 'bg-secondary border-ring text-secondary-foreground' : 'bg-muted border-border text-muted-foreground hover:border-muted-foreground/50 hover:text-foreground'}`}
+            className={`px-2.5 py-1 text-xs font-mono rounded border transition ${(block.separatorStyle || 'line') === s ? 'bg-secondary border-ring text-secondary-foreground' : 'bg-muted border-border text-muted-foreground hover:border-muted-foreground/50 hover:text-foreground'}`}
           >
             {label}
           </button>
@@ -619,7 +640,7 @@ export const SortableText = React.memo(function SortableText({
 
       {/* Color */}
       <div className="flex items-center gap-2 flex-wrap">
-        <span className="text-[10px] text-muted-foreground/70 shrink-0 w-12">Color:</span>
+        <span className="text-xs text-muted-foreground shrink-0 w-12">Color:</span>
         {(['zinc', 'white', 'indigo', 'emerald', 'amber', 'rose', 'cyan'] as const).map((c) => {
           const dotColors: Record<string, string> = {
             zinc: 'bg-muted-foreground',
@@ -660,7 +681,7 @@ export const SortableText = React.memo(function SortableText({
           <button
             key={s}
             onClick={() => onUpdate?.({ style: s })}
-            className={`px-2 py-0.5 text-[10px] font-bold uppercase rounded border transition ${block.style === s ? 'bg-indigo-600 border-indigo-500 text-white' : 'bg-muted border-border text-muted-foreground hover:border-muted-foreground/50 hover:text-foreground'}`}
+            className={`px-2 py-0.5 text-xs font-bold uppercase rounded border transition ${block.style === s ? 'bg-indigo-600 border-indigo-500 text-white' : 'bg-muted border-border text-muted-foreground hover:border-muted-foreground/50 hover:text-foreground'}`}
           >
             {s.toUpperCase()}
           </button>
@@ -692,7 +713,7 @@ export const SortableText = React.memo(function SortableText({
           <button
             key={w}
             onClick={() => onUpdate?.({ colSpan: w })}
-            className={`px-2 py-0.5 text-[10px] rounded border transition ${colSpan === w ? 'bg-indigo-600 border-indigo-500 text-white' : 'bg-muted border-border text-muted-foreground hover:border-muted-foreground/50 hover:text-foreground'}`}
+            className={`px-2 py-0.5 text-xs rounded border transition ${colSpan === w ? 'bg-indigo-600 border-indigo-500 text-white' : 'bg-muted border-border text-muted-foreground hover:border-muted-foreground/50 hover:text-foreground'}`}
           >
             {w}/4
           </button>
@@ -701,7 +722,7 @@ export const SortableText = React.memo(function SortableText({
 
       {/* Color row */}
       <div className="flex items-center gap-2">
-        <span className="text-[10px] text-muted-foreground/70 shrink-0">Color:</span>
+        <span className="text-xs text-muted-foreground shrink-0">Color:</span>
         {(['white', 'zinc', 'indigo', 'emerald', 'amber', 'rose', 'cyan', 'blue'] as const).map(
           (c) => {
             const dotColors: Record<string, string> = {
@@ -745,11 +766,8 @@ export const SortableText = React.memo(function SortableText({
         className={`${colSpanClass} bg-card/40 border border-border rounded-lg px-3 py-2 flex items-center gap-2 cursor-pointer hover:bg-accent hover:border-muted-foreground/30 transition`}
         onClick={onToggleCollapse}
       >
-        <ChevronRight className="w-3 h-3 text-muted-foreground/70 flex-shrink-0" />
-        <span
-          className="text-xs text-muted-foreground/70 truncate"
-          title={block.content || 'Sección'}
-        >
+        <ChevronRight className="w-3 h-3 text-muted-foreground flex-shrink-0" />
+        <span className="text-xs text-muted-foreground truncate" title={block.content || 'Sección'}>
           {block.content || 'Sección'}
         </span>
       </div>
@@ -785,7 +803,7 @@ export const SortableText = React.memo(function SortableText({
                   e.stopPropagation();
                   onDuplicate();
                 }}
-                className="p-1 text-muted-foreground/70 hover:text-emerald-400 bg-card/80 border border-border hover:border-emerald-500/40 rounded transition"
+                className="p-1 text-muted-foreground hover:text-emerald-400 bg-card/80 border border-border hover:border-emerald-500/40 rounded transition"
                 title="Duplicar"
               >
                 <Copy className="w-3 h-3" />
@@ -797,7 +815,7 @@ export const SortableText = React.memo(function SortableText({
                   e.stopPropagation();
                   onQuickEdit();
                 }}
-                className="p-1 text-muted-foreground/70 hover:text-indigo-400 bg-card/80 border border-border hover:border-indigo-500/40 rounded transition"
+                className="p-1 text-muted-foreground hover:text-indigo-400 bg-card/80 border border-border hover:border-indigo-500/40 rounded transition"
                 title="Editar"
               >
                 <Pencil className="w-3 h-3" />
@@ -806,7 +824,7 @@ export const SortableText = React.memo(function SortableText({
             {onToggleCollapse && (
               <button
                 onClick={onToggleCollapse}
-                className="p-1 text-muted-foreground/50 hover:text-muted-foreground bg-card/80 border border-border rounded transition"
+                className="p-1 text-muted-foreground hover:text-muted-foreground bg-card/80 border border-border rounded transition"
                 title="Ocultar"
               >
                 <ChevronUp className="w-3 h-3" />
@@ -849,8 +867,8 @@ export const SortableTable = React.memo(function SortableTable({
         className="col-span-1 md:col-span-4 bg-card/50 border border-border rounded-xl px-4 py-2.5 flex items-center gap-2 cursor-pointer hover:bg-accent hover:border-muted-foreground/30 transition"
         onClick={onToggleCollapse}
       >
-        <ChevronRight className="w-3.5 h-3.5 text-muted-foreground/70 flex-shrink-0" />
-        <span className="text-sm text-muted-foreground/70 truncate" title={title || 'Tabla'}>
+        <ChevronRight className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0" />
+        <span className="text-sm text-muted-foreground truncate" title={title || 'Tabla'}>
           {title || 'Tabla'}
         </span>
       </div>
@@ -894,7 +912,7 @@ export const SortableTable = React.memo(function SortableTable({
                 e.stopPropagation();
                 onDuplicate();
               }}
-              className="p-1.5 text-muted-foreground/70 hover:text-emerald-400 bg-card/80 border border-border hover:border-emerald-500/40 rounded transition"
+              className="p-1.5 text-muted-foreground hover:text-emerald-400 bg-card/80 border border-border hover:border-emerald-500/40 rounded transition"
               title="Duplicar"
             >
               <Copy className="w-3.5 h-3.5" />
@@ -906,7 +924,7 @@ export const SortableTable = React.memo(function SortableTable({
                 e.stopPropagation();
                 onQuickEdit();
               }}
-              className="p-1.5 text-muted-foreground/70 hover:text-indigo-400 bg-card/80 border border-border hover:border-indigo-500/40 rounded transition"
+              className="p-1.5 text-muted-foreground hover:text-indigo-400 bg-card/80 border border-border hover:border-indigo-500/40 rounded transition"
               title="Editar"
             >
               <Pencil className="w-3.5 h-3.5" />
@@ -918,7 +936,7 @@ export const SortableTable = React.memo(function SortableTable({
                 e.stopPropagation();
                 onToggleCollapse();
               }}
-              className="p-1.5 text-muted-foreground/50 hover:text-muted-foreground bg-card/80 rounded border border-border transition"
+              className="p-1.5 text-muted-foreground hover:text-muted-foreground bg-card/80 rounded border border-border transition"
               title="Ocultar"
             >
               <ChevronUp className="w-3.5 h-3.5" />

@@ -51,7 +51,7 @@ export function LeadsExclusionBar({
         })}
       </div>
       {estado === 'incluidos' && excluidos > 0 && (
-        <p className="text-[11px] text-muted-foreground">
+        <p className="text-xs text-muted-foreground">
           {excluidos.toLocaleString()} lead{excluidos === 1 ? '' : 's'} no cuenta
           {excluidos === 1 ? '' : 'n'} en los informes (sin atribución o excluido
           {excluidos === 1 ? '' : 's'} por la regla del cliente).

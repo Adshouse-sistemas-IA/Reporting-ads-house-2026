@@ -50,6 +50,28 @@
   --color-brand-blue-light: var(--brand-blue-light);
   --color-brand-emerald: var(--brand-emerald);
   --color-brand-violet: var(--brand-violet);
+  --color-good: var(--good);
+  --color-good-soft: var(--good-soft);
+  --color-warn: var(--warn);
+  --color-warn-soft: var(--warn-soft);
+  --color-bad: var(--bad);
+  --color-bad-soft: var(--bad-soft);
+}
+
+/* Rediseño: indigo deja de ser un cuarto azul y se alinea con el azul de
+   marca, sin tocar los cientos de clases `indigo-*` del código. */
+@theme {
+  --color-indigo-50: oklch(0.97 0.014 258);
+  --color-indigo-100: oklch(0.932 0.032 258);
+  --color-indigo-200: oklch(0.882 0.059 258);
+  --color-indigo-300: oklch(0.809 0.096 258);
+  --color-indigo-400: oklch(0.68 0.13 258);
+  --color-indigo-500: oklch(0.58 0.15 258);
+  --color-indigo-600: oklch(0.482 0.138 258);
+  --color-indigo-700: oklch(0.42 0.12 258);
+  --color-indigo-800: oklch(0.36 0.1 258);
+  --color-indigo-900: oklch(0.31 0.08 258);
+  --color-indigo-950: oklch(0.24 0.06 258);
 }
 
 /* ─── AdsHouse Brand Tokens ──────────────────────────────────────────────── */
@@ -72,8 +94,8 @@
   --radius: 0.625rem;
 
   /* Surfaces */
-  --background: oklch(0.98 0 0); /* #F8F8F8 — soft white   */
-  --foreground: oklch(0.13 0 0); /* #1C1C1C — near black   */
+  --background: oklch(0.977 0.004 255); /* gris con leve tinte azul */
+  --foreground: oklch(0.2 0.015 260); /* casi negro azulado      */
   --card: oklch(1 0 0); /* #FFFFFF — pure white   */
   --card-foreground: oklch(0.13 0 0);
   --popover: oklch(1 0 0);
@@ -88,8 +110,9 @@
   --secondary-foreground: oklch(0.13 0 0);
 
   /* Muted / neutral */
-  --muted: oklch(0.95 0 0);
-  --muted-foreground: oklch(0.48 0 0); /* #6E6E6E — WCAG AA ✓   */
+  --muted: oklch(0.955 0.005 255);
+  /* Más oscuro que antes: soporta las variantes /70 heredadas sin bajar de AA */
+  --muted-foreground: oklch(0.42 0.015 260);
 
   /* Accent = light red tint */
   --accent: oklch(0.96 0.008 27);
@@ -99,8 +122,8 @@
   --destructive: var(--brand-red);
 
   /* Borders / inputs */
-  --border: oklch(0.88 0 0);
-  --input: oklch(0.88 0 0);
+  --border: oklch(0.905 0.006 255);
+  --input: oklch(0.86 0.008 255);
   --ring: var(--brand-blue);
 
   /* Chart chrome (axes, grid, tooltip text) */
@@ -124,18 +147,26 @@
   --sidebar-primary-foreground: oklch(1 0 0);
   --sidebar-accent: oklch(0.955 0.012 258);
   --sidebar-accent-foreground: oklch(0.13 0 0);
-  --sidebar-border: oklch(0.88 0 0);
+  --sidebar-border: oklch(0.905 0.006 255);
+
+  /* Estados semánticos: mejor / atención / peor */
+  --good: oklch(0.52 0.13 155);
+  --good-soft: oklch(0.95 0.035 155);
+  --warn: oklch(0.55 0.13 65);
+  --warn-soft: oklch(0.96 0.045 80);
+  --bad: oklch(0.53 0.19 27);
+  --bad-soft: oklch(0.95 0.03 25);
   --sidebar-ring: var(--brand-blue);
 }
 
 /* ─── Dark Mode ──────────────────────────────────────────────────────────── */
 .dark {
   /* Surfaces */
-  --background: oklch(0.115 0 0); /* #151515 — near black   */
-  --foreground: oklch(0.96 0 0); /* #F5F5F5 — off white    */
-  --card: oklch(0.165 0 0); /* #222222 — dark card    */
+  --background: oklch(0.16 0.008 260); /* azul noche muy oscuro */
+  --foreground: oklch(0.95 0.004 255);
+  --card: oklch(0.2 0.01 260);
   --card-foreground: oklch(0.96 0 0);
-  --popover: oklch(0.175 0 0);
+  --popover: oklch(0.21 0.01 260);
   --popover-foreground: oklch(0.96 0 0);
 
   /* Primary = bright near-white for generic use */
@@ -147,8 +178,8 @@
   --secondary-foreground: oklch(0.96 0 0);
 
   /* Muted */
-  --muted: oklch(0.235 0 0);
-  --muted-foreground: oklch(0.62 0 0); /* #888 — WCAG AA ✓       */
+  --muted: oklch(0.25 0.01 260);
+  --muted-foreground: oklch(0.74 0.012 255);
 
   /* Accent */
   --accent: oklch(0.235 0 0);
@@ -177,7 +208,7 @@
   --chart-5: oklch(0.65 0.185 295); /* Violet light       */
 
   /* Sidebar */
-  --sidebar: oklch(0.138 0 0);
+  --sidebar: oklch(0.185 0.01 260);
   --sidebar-foreground: oklch(0.96 0 0);
   --sidebar-primary: var(--brand-blue-light);
   --sidebar-primary-foreground: oklch(0.115 0 0);
@@ -185,6 +216,13 @@
   --sidebar-accent-foreground: oklch(0.96 0 0);
   --sidebar-border: oklch(1 0 0 / 8%);
   --sidebar-ring: var(--brand-blue-light);
+
+  --good: oklch(0.76 0.14 155);
+  --good-soft: oklch(0.3 0.05 155);
+  --warn: oklch(0.8 0.13 75);
+  --warn-soft: oklch(0.32 0.05 75);
+  --bad: oklch(0.72 0.16 25);
+  --bad-soft: oklch(0.32 0.06 25);
 }
 
 /* ─── Base Styles ────────────────────────────────────────────────────────── */
@@ -225,38 +263,20 @@
   color: transparent;
 }
 
-/* Active nav items: single-hue gradient, darkened tail */
-.nav-active-red {
-  background-image: linear-gradient(
-    135deg,
-    var(--brand-red) 0%,
-    color-mix(in oklch, var(--brand-red), black 18%) 100%
-  );
-  box-shadow: 0 2px 8px oklch(0.548 0.215 27 / 35%);
-}
-.nav-active-blue {
-  background-image: linear-gradient(
-    135deg,
-    var(--brand-blue) 0%,
-    color-mix(in oklch, var(--brand-blue), black 18%) 100%
-  );
-  box-shadow: 0 2px 8px oklch(0.482 0.138 258 / 35%);
-}
-.nav-active-emerald {
-  background-image: linear-gradient(
-    135deg,
-    var(--brand-emerald) 0%,
-    color-mix(in oklch, var(--brand-emerald), black 18%) 100%
-  );
-  box-shadow: 0 2px 8px oklch(0.696 0.15 162 / 35%);
-}
+/* Ítem activo del menú: un solo estilo, fondo suave y texto azul (sin gradientes) */
+.nav-active-red,
+.nav-active-blue,
+.nav-active-emerald,
 .nav-active-violet {
-  background-image: linear-gradient(
-    135deg,
-    var(--brand-violet) 0%,
-    color-mix(in oklch, var(--brand-violet), black 18%) 100%
-  );
-  box-shadow: 0 2px 8px oklch(0.606 0.219 293 / 35%);
+  background: var(--sidebar-accent);
+  color: var(--primary) !important;
+}
+.dark .nav-active-red,
+.dark .nav-active-blue,
+.dark .nav-active-emerald,
+.dark .nav-active-violet {
+  background: oklch(0.482 0.138 258 / 22%);
+  color: var(--brand-blue-light) !important;
 }
 
 /* Atmospheric glows — lower opacity in light mode via --ambient-glow-opacity */
@@ -267,7 +287,8 @@
   pointer-events: none;
   border-radius: 9999px;
   filter: blur(140px);
-  opacity: var(--ambient-glow-opacity);
+  /* Rediseño: los resplandores no aportan información; se apagan */
+  display: none;
 }
 .ambient-glow-red {
   background: var(--brand-red);
@@ -284,7 +305,7 @@
 
 /* Numeric data: mono + tabular figures (KPIs, table columns) */
 .font-data {
-  font-family: var(--font-mono);
+  font-family: var(--font-sans);
   font-variant-numeric: tabular-nums;
 }
 

@@ -110,7 +110,7 @@ export default async function SaleDetailPage({ params }: { params: Promise<{ sal
         </Link>
         <div className="flex items-end justify-between gap-4 flex-wrap mt-2">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight text-foreground">
+            <h1 className="text-2xl font-semibold tracking-tight text-foreground">
               {sale.customer_name ?? 'Venta sin nombre'}
             </h1>
             <p className="text-xs text-muted-foreground mt-1 font-mono">
@@ -162,11 +162,11 @@ export default async function SaleDetailPage({ params }: { params: Promise<{ sal
         <div className="px-6 py-4 border-b border-border">
           <h2 className="text-sm font-semibold text-foreground">Journey del visitor</h2>
           {sale.visitor_id ? (
-            <p className="text-[11px] text-muted-foreground mt-0.5 font-mono">
+            <p className="text-xs text-muted-foreground mt-0.5 font-mono">
               visitor_id: {sale.visitor_id}
             </p>
           ) : (
-            <p className="text-[11px] text-muted-foreground mt-0.5">
+            <p className="text-xs text-muted-foreground mt-0.5">
               Sin visitor_id resuelto — no hay cruce con pixel_events.
             </p>
           )}
@@ -196,11 +196,11 @@ export default async function SaleDetailPage({ params }: { params: Promise<{ sal
                   </div>
                   <div className="flex-1 min-w-0 pt-0.5">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                      <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                         #{i + 1} · {e.event_type}
                         {e.event_name ? ` · ${e.event_name}` : ''}
                       </span>
-                      <span className="text-[10px] text-muted-foreground/70">
+                      <span className="text-xs text-muted-foreground">
                         {new Date(e.created_at).toLocaleString()}
                       </span>
                     </div>
@@ -208,7 +208,7 @@ export default async function SaleDetailPage({ params }: { params: Promise<{ sal
                       <p className="text-xs text-foreground/90 mt-0.5 truncate">{e.page_url}</p>
                     )}
                     {(e.utm_source || e.click_id) && (
-                      <p className="text-[11px] font-mono mt-1">
+                      <p className="text-xs font-mono mt-1">
                         {e.utm_source && (
                           <span className="text-emerald-600 dark:text-emerald-400">
                             {e.utm_source}
@@ -231,7 +231,7 @@ export default async function SaleDetailPage({ params }: { params: Promise<{ sal
                 <ShoppingBag className="h-3.5 w-3.5 text-white" />
               </div>
               <div className="flex-1 pt-0.5">
-                <span className="text-[10px] font-semibold uppercase tracking-wider text-amber-600 dark:text-amber-400">
+                <span className="text-xs font-semibold uppercase tracking-wider text-amber-600 dark:text-amber-400">
                   venta · {importeConMoneda(sale)}
                 </span>
                 <p className="text-xs text-foreground/90 mt-0.5">
@@ -258,7 +258,7 @@ export default async function SaleDetailPage({ params }: { params: Promise<{ sal
           </div>
           <table className="w-full">
             <thead className="bg-muted/60">
-              <tr className="text-left text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+              <tr className="text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                 <th className="px-4 py-2">Hora</th>
                 <th className="px-4 py-2">Evento</th>
                 <th className="px-4 py-2">Status</th>
@@ -279,7 +279,7 @@ export default async function SaleDetailPage({ params }: { params: Promise<{ sal
                 const ok = d.response_status && d.response_status >= 200 && d.response_status < 300;
                 return (
                   <tr key={d.id}>
-                    <td className="px-4 py-2 text-[11px] text-muted-foreground">
+                    <td className="px-4 py-2 text-xs text-muted-foreground">
                       {new Date(d.created_at).toLocaleTimeString()}
                     </td>
                     <td className="px-4 py-2 text-xs font-mono text-violet-600 dark:text-violet-400">
@@ -296,16 +296,13 @@ export default async function SaleDetailPage({ params }: { params: Promise<{ sal
                         {d.response_status ?? 'fail'}
                       </span>
                       {d.error && (
-                        <p
-                          className="text-[10px] text-red-500 truncate max-w-[20ch]"
-                          title={d.error}
-                        >
+                        <p className="text-xs text-red-500 truncate max-w-[20ch]" title={d.error}>
                           <AlertCircle className="h-2.5 w-2.5 inline mr-0.5" />
                           {d.error}
                         </p>
                       )}
                     </td>
-                    <td className="px-4 py-2 text-right text-[11px] text-muted-foreground font-mono">
+                    <td className="px-4 py-2 text-right text-xs text-muted-foreground font-mono">
                       {d.duration_ms != null ? `${d.duration_ms}ms` : '—'}
                     </td>
                   </tr>
@@ -332,7 +329,7 @@ function KV({
 }) {
   return (
     <div className="flex items-baseline justify-between gap-4">
-      <span className="text-[11px] text-muted-foreground">{label}</span>
+      <span className="text-xs text-muted-foreground">{label}</span>
       <span
         className={`text-xs text-right text-foreground ${
           mono ? 'font-mono' : ''
@@ -360,13 +357,11 @@ function TouchCard({
   return (
     <div className="rounded-2xl border border-border bg-card p-5">
       <div className="flex items-center gap-2 mb-3">
-        <span
-          className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded ${cls}`}
-        >
+        <span className={`text-xs font-bold uppercase tracking-wider px-2 py-0.5 rounded ${cls}`}>
           {label}
         </span>
         {touch?.ts && (
-          <span className="text-[10px] text-muted-foreground">
+          <span className="text-xs text-muted-foreground">
             {new Date(touch.ts).toLocaleString()}
           </span>
         )}

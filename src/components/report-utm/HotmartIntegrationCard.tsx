@@ -150,7 +150,7 @@ export function HotmartIntegrationCard({
             {EVENTOS_HOTMART.map((e) => (
               <code
                 key={e}
-                className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-muted text-foreground/90"
+                className="text-xs font-mono px-1.5 py-0.5 rounded bg-muted text-foreground/90"
               >
                 {e}
               </code>
@@ -196,7 +196,7 @@ export function HotmartIntegrationCard({
           </button>
         </div>
         {!hottokListo && (
-          <p className="text-[11px] text-muted-foreground">
+          <p className="text-xs text-muted-foreground">
             Guardalo antes de activar el webhook en Hotmart: sin hottok los eventos se rechazan.
           </p>
         )}
@@ -210,7 +210,7 @@ export function HotmartIntegrationCard({
             : 'Todavía no llegó ningún evento.'}
         </p>
         {integration?.last_error && <LastErrorAlert message={integration.last_error} />}
-        <p className="text-[11px] text-muted-foreground">
+        <p className="text-xs text-muted-foreground">
           Evitá el envío de prueba de Hotmart: manda una compra ficticia que entraría como venta.
           Basta con esperar al próximo evento real.
         </p>
@@ -242,7 +242,7 @@ export function HotmartIntegrationCard({
           </p>
           {revealedSecret ? (
             <div className="rounded-lg border border-blue-200 dark:border-blue-500/30 bg-blue-50/40 dark:bg-blue-500/5 p-3">
-              <p className="text-[10px] font-semibold uppercase tracking-wider text-blue-700 dark:text-blue-400 mb-2">
+              <p className="text-xs font-semibold uppercase tracking-wider text-blue-700 dark:text-blue-400 mb-2">
                 Secreto · guardalo ahora, solo se muestra una vez
               </p>
               <CopyField
@@ -301,7 +301,7 @@ function Paso({ n, titulo, children }: { n: number; titulo: string; children: Re
     <section className="space-y-2">
       <h4 className="flex items-center gap-2 text-xs font-semibold text-foreground">
         <span
-          className={`inline-flex h-5 w-5 items-center justify-center rounded-full text-[10px] ${ACCENT}`}
+          className={`inline-flex h-5 w-5 items-center justify-center rounded-full text-xs ${ACCENT}`}
         >
           {n}
         </span>

@@ -253,7 +253,9 @@ export function SoporteClient({
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">🗺️ Roadmap</h1>
+          <h1 className="text-2xl font-semibold tracking-tight text-foreground">
+            Roadmap y soporte
+          </h1>
           <p className="text-muted-foreground text-sm mt-0.5">
             {activeCount} pendiente{activeCount !== 1 ? 's' : ''} · {tickets.length} total
           </p>
@@ -287,7 +289,7 @@ export function SoporteClient({
                       key={k}
                       type="button"
                       onClick={() => setForm({ ...form, tipo: k })}
-                      className={`flex items-center gap-1.5 py-2 px-3 rounded-lg border text-xs font-medium transition ${form.tipo === k ? tp.color : 'bg-background border-border text-muted-foreground/70 hover:border-ring'}`}
+                      className={`flex items-center gap-1.5 py-2 px-3 rounded-lg border text-xs font-medium transition ${form.tipo === k ? tp.color : 'bg-background border-border text-muted-foreground hover:border-ring'}`}
                     >
                       <Icon className="w-3.5 h-3.5" />
                       {tp.label}
@@ -301,7 +303,7 @@ export function SoporteClient({
             <div className="space-y-1.5">
               <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                 Cliente{' '}
-                <span className="text-muted-foreground/70 normal-case font-normal">(opcional)</span>
+                <span className="text-muted-foreground normal-case font-normal">(opcional)</span>
               </label>
               <select
                 value={form.cliente_id}
@@ -355,7 +357,7 @@ export function SoporteClient({
                     key={p}
                     type="button"
                     onClick={() => setForm({ ...form, prioridad: p })}
-                    className={`flex-1 py-2 px-2 rounded-lg border text-xs font-medium transition ${form.prioridad === p ? PRIORITY_MAP[p].bg + ' ' + PRIORITY_MAP[p].color : 'bg-background border-border text-muted-foreground/70 hover:border-ring'}`}
+                    className={`flex-1 py-2 px-2 rounded-lg border text-xs font-medium transition ${form.prioridad === p ? PRIORITY_MAP[p].bg + ' ' + PRIORITY_MAP[p].color : 'bg-background border-border text-muted-foreground hover:border-ring'}`}
                   >
                     {PRIORITY_MAP[p].label}
                   </button>
@@ -416,7 +418,7 @@ export function SoporteClient({
       {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-3">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/70" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
@@ -469,8 +471,7 @@ export function SoporteClient({
       {/* Ticket list */}
       <div className="overflow-hidden rounded-xl border border-border bg-card">
         {filtered.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-16 text-muted-foreground/70">
-            <span className="text-3xl mb-3">🗺️</span>
+          <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
             <p className="font-medium text-muted-foreground">Sin ítems que mostrar</p>
             <p className="text-sm mt-1">Prueba cambiando el filtro o el término de búsqueda.</p>
           </div>
@@ -493,11 +494,11 @@ export function SoporteClient({
                     <span className="text-sm font-semibold text-blue-600 dark:text-blue-400">
                       {t.cliente?.nombre ? `🏢 ${t.cliente.nombre}` : '🌐 Interno'}
                     </span>
-                    <span className="text-xs text-muted-foreground/70 flex items-center gap-1 mt-0.5">
+                    <span className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
                       <User className="w-3 h-3 shrink-0" />
                       {t.nombre_solicitante}
                     </span>
-                    <span className="text-xs text-muted-foreground/70 flex items-center gap-1">
+                    <span className="text-xs text-muted-foreground flex items-center gap-1">
                       <Calendar className="w-3 h-3 shrink-0" />
                       {safeDate(t.fecha_solicitud, 'dd MMM yyyy')}
                     </span>
@@ -509,13 +510,13 @@ export function SoporteClient({
                       {t.requerimiento}
                     </p>
                     {t.observaciones && (
-                      <p className="mt-1.5 text-xs text-muted-foreground/70 flex items-start gap-1">
+                      <p className="mt-1.5 text-xs text-muted-foreground flex items-start gap-1">
                         <MessageSquare className="w-3.5 h-3.5 mt-0.5 shrink-0" />
                         {t.observaciones}
                       </p>
                     )}
                     {t.responsable && (
-                      <p className="mt-1 text-xs text-muted-foreground/70 flex items-center gap-1">
+                      <p className="mt-1 text-xs text-muted-foreground flex items-center gap-1">
                         <User className="w-3.5 h-3.5 shrink-0" /> Responsable: {t.responsable}
                       </p>
                     )}
@@ -598,7 +599,7 @@ export function SoporteClient({
                           });
                           setEditingTicket(t);
                         }}
-                        className="text-muted-foreground/70 hover:text-indigo-600 dark:hover:text-indigo-400 transition mt-0.5"
+                        className="text-muted-foreground hover:text-indigo-600 dark:hover:text-indigo-400 transition mt-0.5"
                         title="Editar"
                       >
                         <Edit2 className="w-4 h-4" />
@@ -668,7 +669,7 @@ export function SoporteClient({
                       key={k}
                       type="button"
                       onClick={() => setEditForm({ ...editForm, tipo: k })}
-                      className={`flex items-center gap-1.5 py-2 px-3 rounded-lg border text-xs font-medium transition ${editForm.tipo === k ? tp.color : 'bg-background border-border text-muted-foreground/70 hover:border-ring'}`}
+                      className={`flex items-center gap-1.5 py-2 px-3 rounded-lg border text-xs font-medium transition ${editForm.tipo === k ? tp.color : 'bg-background border-border text-muted-foreground hover:border-ring'}`}
                     >
                       <Icon className="w-3.5 h-3.5" />
                       {tp.label}
@@ -687,7 +688,7 @@ export function SoporteClient({
                     key={p}
                     type="button"
                     onClick={() => setEditForm({ ...editForm, prioridad: p })}
-                    className={`flex-1 py-2 px-2 rounded-lg border text-xs font-medium transition ${editForm.prioridad === p ? PRIORITY_MAP[p].bg + ' ' + PRIORITY_MAP[p].color : 'bg-background border-border text-muted-foreground/70 hover:border-ring'}`}
+                    className={`flex-1 py-2 px-2 rounded-lg border text-xs font-medium transition ${editForm.prioridad === p ? PRIORITY_MAP[p].bg + ' ' + PRIORITY_MAP[p].color : 'bg-background border-border text-muted-foreground hover:border-ring'}`}
                   >
                     {PRIORITY_MAP[p].label}
                   </button>

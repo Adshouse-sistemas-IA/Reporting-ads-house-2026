@@ -17,7 +17,7 @@ export function StatusBadge({ status }: { status: string }) {
   const cls = STATUS_CLASSES[status] ?? 'bg-muted text-muted-foreground';
   return (
     <span
-      className={`inline-flex text-[10px] font-semibold uppercase tracking-wider px-2 py-1 rounded-md ${cls}`}
+      className={`inline-flex text-xs font-semibold uppercase tracking-wider px-2 py-1 rounded-md ${cls}`}
     >
       {status}
     </span>
@@ -38,7 +38,7 @@ export function IntegrationStatusBadge({
   if (status !== 'active') return <StatusBadge status={status} />;
   return (
     <span
-      className={`inline-flex text-[10px] font-semibold uppercase tracking-wider px-2 py-1 rounded-md ${activeCls}`}
+      className={`inline-flex text-xs font-semibold uppercase tracking-wider px-2 py-1 rounded-md ${activeCls}`}
     >
       {status}
     </span>

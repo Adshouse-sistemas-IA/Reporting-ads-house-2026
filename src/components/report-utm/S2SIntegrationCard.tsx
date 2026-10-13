@@ -166,7 +166,7 @@ export function S2SIntegrationCard({
 
       {revealedToken ? (
         <div className="rounded-lg border border-blue-200 dark:border-blue-500/30 bg-blue-50/40 dark:bg-blue-500/5 p-4">
-          <p className="text-[10px] font-semibold uppercase tracking-wider text-blue-700 dark:text-blue-400 mb-2">
+          <p className="text-xs font-semibold uppercase tracking-wider text-blue-700 dark:text-blue-400 mb-2">
             S2S Token · guardalo ahora
           </p>
           <CopyField
@@ -194,7 +194,7 @@ export function S2SIntegrationCard({
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <p className="text-xs font-semibold text-foreground">Instalación en WordPress</p>
-            <p className="text-[11px] text-muted-foreground mt-0.5">
+            <p className="text-xs text-muted-foreground mt-0.5">
               Plugin v{PLUGIN_VERSION} · comparalo con la versión que liste WP en Plugins
             </p>
           </div>
@@ -231,7 +231,7 @@ export function S2SIntegrationCard({
           </p>
         )}
 
-        <ol className="list-decimal list-inside space-y-1 text-[11px] text-muted-foreground">
+        <ol className="list-decimal list-inside space-y-1 text-xs text-muted-foreground">
           <li>WP Admin → Plugins → Añadir nuevo → Subir plugin: subí el ZIP y activalo.</li>
           <li>Ajustes → Report UTM: pegá el slug y la URL base, y activá el toggle.</li>
           <li>Opciones avanzadas: pegá el S2S Token (si lo perdiste, rotalo acá abajo).</li>

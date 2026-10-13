@@ -108,7 +108,7 @@ export function SyncFreshnessBadge({
 
   return (
     <div
-      className="flex items-center gap-1.5 text-[11px]"
+      className="flex items-center gap-1.5 text-xs"
       title={`${etiqueta}. Última verificación: ${relativo}${errorMsg ? `\nÚltimo error: ${errorMsg}` : ''}`}
     >
       <span className={`h-2 w-2 rounded-full ${dot} ${color === 'rojo' ? 'animate-pulse' : ''}`} />

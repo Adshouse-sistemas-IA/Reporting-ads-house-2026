@@ -117,14 +117,14 @@ export default async function PublicBiDeliveryPage({ params }: Params) {
         {/* Navegador de entregas anteriores */}
         {otherDeliveries.length > 0 && (
           <div className="mb-6 flex items-center gap-2 flex-wrap">
-            <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+            <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               Otros períodos:
             </span>
             {otherDeliveries.map((d) => (
               <Link
                 key={d.id}
                 href={`/report/bi/d/${d.delivery_token}`}
-                className="px-2.5 py-1 rounded-full bg-muted text-[11px] font-medium text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
+                className="px-2.5 py-1 rounded-full bg-muted text-xs font-medium text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
               >
                 {d.period_label}
               </Link>
@@ -139,7 +139,7 @@ export default async function PublicBiDeliveryPage({ params }: Params) {
           lockedDates={{ from: delivery.date_from, to: delivery.date_to }}
         />
 
-        <p className="mt-8 text-center text-[10px] text-muted-foreground">
+        <p className="mt-8 text-center text-xs text-muted-foreground">
           {delivery.period_label} · {delivery.date_from} → {delivery.date_to} ·{' '}
           {cliente?.nombre ? `${cliente.nombre} · ` : ''}Ad House Reporting
         </p>

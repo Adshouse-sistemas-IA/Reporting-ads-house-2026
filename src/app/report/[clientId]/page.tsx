@@ -1,5 +1,6 @@
 import { getDashboardData } from '@/app/(app)/dashboard/_actions';
 import { DateRangeSelector } from '@/app/(app)/dashboard/components/DateRangeSelector';
+import { SearchX } from 'lucide-react';
 import { DashboardClient } from '@/app/(app)/dashboard/components/DashboardClient';
 import { rangoPorDefectoCliente } from '@/lib/colombia-date';
 import { createAdminClient } from '@/utils/supabase/server';
@@ -54,9 +55,11 @@ export default async function PublicReportPage(props: {
     return (
       <div className="flex flex-col items-center justify-center min-h-[50vh] text-center space-y-4">
         <div className="w-16 h-16 bg-card rounded-full flex items-center justify-center border border-border">
-          <span className="text-2xl">🔍</span>
+          <SearchX className="h-6 w-6 text-muted-foreground" />
         </div>
-        <h1 className="text-2xl font-bold text-foreground">Reporte no encontrado</h1>
+        <h1 className="text-2xl font-semibold text-foreground tracking-tight">
+          Reporte no encontrado
+        </h1>
         <p className="text-muted-foreground">
           El cliente solicitado no existe o no tiene datos disponibles.
         </p>

@@ -605,7 +605,7 @@ export function ConfiguracionClient({
             <CardContent className="p-0">
               {rules.length === 0 ? (
                 <div className="p-12 text-center text-muted-foreground">
-                  <VolumeX className="h-10 w-10 text-muted-foreground/50 mx-auto mb-3" />
+                  <VolumeX className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
                   <p className="text-base font-semibold">No hay reglas de alerta configuradas</p>
                   <p className="text-sm mt-1 mb-4">
                     Crea tu primera regla para empezar a monitorear presupuestos y ROAS.
@@ -665,7 +665,7 @@ export function ConfiguracionClient({
                               <span className="text-emerald-500 font-semibold">
                                 {formattedThresh}
                               </span>
-                              <div className="text-[11px] text-muted-foreground font-sans mt-0.5">
+                              <div className="text-xs text-muted-foreground font-sans mt-0.5">
                                 Periodo: {WINDOW_LABELS[rule.time_window]} (Cooldown:{' '}
                                 {rule.cooldown_hours}h)
                               </div>
@@ -675,7 +675,7 @@ export function ConfiguracionClient({
                                 {rule.channels.includes('in_app') && (
                                   <Badge
                                     variant="outline"
-                                    className="bg-amber-500/10 text-amber-500 border-amber-500/20 text-[10px] py-0.5"
+                                    className="bg-amber-500/10 text-amber-500 border-amber-500/20 text-xs py-0.5"
                                   >
                                     Campanita
                                   </Badge>
@@ -683,7 +683,7 @@ export function ConfiguracionClient({
                                 {rule.channels.includes('whatsapp') && (
                                   <Badge
                                     variant="outline"
-                                    className="bg-emerald-500/10 text-emerald-500 border-emerald-500/20 text-[10px] py-0.5"
+                                    className="bg-emerald-500/10 text-emerald-500 border-emerald-500/20 text-xs py-0.5"
                                   >
                                     WhatsApp
                                   </Badge>
@@ -825,7 +825,7 @@ export function ConfiguracionClient({
                               <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
                             )}
                           </div>
-                          <span className="text-[10px] text-muted-foreground mt-1 block">
+                          <span className="text-xs text-muted-foreground mt-1 block">
                             Formatos soportados: PNG, JPG, WEBP, SVG. Máx. 2MB.
                           </span>
                         </div>
@@ -849,13 +849,13 @@ export function ConfiguracionClient({
                               variant="ghost"
                               size="sm"
                               onClick={() => setLogoUrl('')}
-                              className="text-[10px] text-red-500 hover:text-red-600 h-6 px-2"
+                              className="text-xs text-red-500 hover:text-red-600 h-6 px-2"
                             >
                               Eliminar logo
                             </Button>
                           </div>
                         ) : (
-                          <div className="text-center p-4 text-xs text-muted-foreground/60">
+                          <div className="text-center p-4 text-xs text-muted-foreground">
                             No hay un logo personalizado configurado. Se mostrará el logo original
                             (AdsHouse).
                           </div>
@@ -906,7 +906,7 @@ export function ConfiguracionClient({
                               <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
                             )}
                           </div>
-                          <span className="text-[10px] text-muted-foreground mt-1 block">
+                          <span className="text-xs text-muted-foreground mt-1 block">
                             Formatos soportados: ICO, PNG, SVG. Máx. 1MB.
                           </span>
                         </div>
@@ -930,13 +930,13 @@ export function ConfiguracionClient({
                               variant="ghost"
                               size="sm"
                               onClick={() => setFaviconUrl('')}
-                              className="text-[10px] text-red-500 hover:text-red-600 h-6 px-2"
+                              className="text-xs text-red-500 hover:text-red-600 h-6 px-2"
                             >
                               Eliminar favicon
                             </Button>
                           </div>
                         ) : (
-                          <div className="text-center p-4 text-xs text-muted-foreground/60">
+                          <div className="text-center p-4 text-xs text-muted-foreground">
                             No hay un favicon personalizado configurado. Se mostrará el ícono
                             original.
                           </div>
@@ -1031,7 +1031,7 @@ export function ConfiguracionClient({
                                   : 'border-border hover:border-muted-foreground/40 bg-card'
                               }`}
                             >
-                              <span className="text-[11px] font-bold text-foreground truncate w-full">
+                              <span className="text-xs font-bold text-foreground truncate w-full">
                                 {theme.name}
                               </span>
                               <div className="flex gap-1.5 mt-2">
@@ -1434,7 +1434,7 @@ export function ConfiguracionClient({
                     placeholder="24"
                     className="bg-muted/50 border-border"
                   />
-                  <p className="text-[10px] text-muted-foreground">
+                  <p className="text-xs text-muted-foreground">
                     Tiempo de espera mínimo antes de volver a disparar otra alerta por esta regla.
                   </p>
                 </div>
@@ -1518,7 +1518,7 @@ export function ConfiguracionClient({
                     <p className="font-bold text-sm">
                       {testResult.isTriggered ? 'DISPARARÍA ALERTA' : 'CONDICIÓN NO CUMPLIDA (OK)'}
                     </p>
-                    <p className="text-[11px] opacity-90">
+                    <p className="text-xs opacity-90">
                       El valor calculado ({testResult.actualValue.toFixed(2)}){' '}
                       {testResult.isTriggered ? 'cumple' : 'no cumple'} la condición{' '}
                       {testResult.operator} {testResult.threshold}
@@ -1575,7 +1575,7 @@ export function ConfiguracionClient({
                 </div>
 
                 {testResult.diasSinTasa > 0 && (
-                  <p className="text-[11px] text-muted-foreground">
+                  <p className="text-xs text-muted-foreground">
                     Sin tasa de cambio para {testResult.diasSinTasa} día(s): esos ingresos de
                     Hotmart quedaron en USD.
                   </p>

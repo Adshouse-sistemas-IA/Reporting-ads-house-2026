@@ -225,7 +225,7 @@ export function ScorecardWidget({ title, config, filters, calculatedFields = [] 
               <span className="text-base font-medium text-muted-foreground pb-0.5">{simbolo} </span>
             )}
             <p
-              className="text-3xl font-bold font-mono tabular-nums leading-none text-foreground"
+              className="text-3xl font-bold tabular-nums leading-none text-foreground"
               style={thresholdStatus ? { color: GOAL_COLOR[thresholdStatus] } : undefined}
             >
               {value !== null ? formatVal(value, format, decimals, decMoneda) : '—'}
@@ -239,7 +239,7 @@ export function ScorecardWidget({ title, config, filters, calculatedFields = [] 
                   style={{ width: `${progressPct}%`, background: '#10b981' }}
                 />
               </div>
-              <p className="text-[10px] text-muted-foreground">
+              <p className="text-xs text-muted-foreground">
                 {progressPct.toFixed(0)}% del objetivo (
                 {formatVal(target as number, format, undefined, decMoneda)})
               </p>
@@ -248,13 +248,13 @@ export function ScorecardWidget({ title, config, filters, calculatedFields = [] 
           {compare && delta !== null && (
             <div className="flex items-center gap-1.5">
               <DeltaBadge delta={delta} lowerIsBetter={isLowerBetter(metric)} />
-              <span className="text-[10px] text-muted-foreground">vs período anterior</span>
+              <span className="text-xs text-muted-foreground">vs período anterior</span>
             </div>
           )}
           {goal && (
             <div className="flex items-center gap-1" style={{ color: GOAL_COLOR[goal.status] }}>
               <Target className="h-3 w-3" />
-              <span className="text-[10px] font-medium">
+              <span className="text-xs font-medium">
                 Meta: {goal.mustNotExceed ? '≤' : '≥'}{' '}
                 {formatVal(goal.target, format, undefined, decMoneda)}
                 {' · '}
@@ -268,7 +268,7 @@ export function ScorecardWidget({ title, config, filters, calculatedFields = [] 
           <AvisosConsultaNote avisos={avisosConsulta} />
         </div>
       )}
-      <p className="text-[10px] text-muted-foreground/60 uppercase tracking-wider">{label}</p>
+      <p className="text-xs text-muted-foreground uppercase tracking-wider">{label}</p>
     </div>
   );
 }

@@ -169,7 +169,7 @@ function ChartEditor({
       </div>
 
       <div className="space-y-2">
-        <p className="text-[10px] text-muted-foreground/70 uppercase font-medium tracking-wider">
+        <p className="text-xs text-muted-foreground uppercase font-medium tracking-wider">
           Métricas
         </p>
         {chart.valueFormulas.map((formula, i) => (
@@ -209,7 +209,7 @@ function ChartEditor({
             {chart.valueFormulas.length > 1 && (
               <button
                 onClick={() => removeMetric(i)}
-                className="text-muted-foreground/50 hover:text-red-400 transition flex-shrink-0"
+                className="text-muted-foreground hover:text-red-400 transition flex-shrink-0"
               >
                 <X className="w-3 h-3" />
               </button>
@@ -219,7 +219,7 @@ function ChartEditor({
         {chart.valueFormulas.length < 5 && (
           <button
             onClick={addMetric}
-            className="flex items-center gap-1 text-[10px] text-muted-foreground/70 hover:text-amber-400 transition mt-1"
+            className="flex items-center gap-1 text-xs text-muted-foreground hover:text-amber-400 transition mt-1"
           >
             <Plus className="w-3 h-3" /> Añadir métrica
           </button>
@@ -242,14 +242,14 @@ function ChartEditor({
             campaignNames={campaignNames}
           />
           <div className="flex items-center gap-1">
-            <span className="text-[10px] text-muted-foreground/70">Agrupación:</span>
+            <span className="text-xs text-muted-foreground">Agrupación:</span>
             <select
               value={chart.dimension || ''}
               onChange={(e) => {
                 const dim = e.target.value || undefined;
                 onChange({ ...chart, dimension: dim as any });
               }}
-              className="bg-background border border-border text-foreground/90 rounded px-1.5 py-0.5 text-[10px]"
+              className="bg-background border border-border text-foreground/90 rounded px-1.5 py-0.5 text-xs"
             >
               <option value="">Temporal (Fecha)</option>
               <optgroup label="Meta">
@@ -267,11 +267,11 @@ function ChartEditor({
 
           {chart.dimension && (
             <div className="flex items-center gap-1">
-              <span className="text-[10px] text-muted-foreground/70">Top N:</span>
+              <span className="text-xs text-muted-foreground">Top N:</span>
               <select
                 value={chart.topN || 10}
                 onChange={(e) => onChange({ ...chart, topN: Number(e.target.value) })}
-                className="bg-background border border-border text-foreground/90 rounded px-1.5 py-0.5 text-[10px]"
+                className="bg-background border border-border text-foreground/90 rounded px-1.5 py-0.5 text-xs"
               >
                 {[5, 10, 15, 20, 30].map((n) => (
                   <option key={n} value={n}>
@@ -283,7 +283,7 @@ function ChartEditor({
           )}
 
           <div className="flex items-center gap-1 flex-shrink-0">
-            <span className="text-[10px] text-muted-foreground/70">Alto:</span>
+            <span className="text-xs text-muted-foreground">Alto:</span>
             <input
               type="number"
               value={chart.height || 240}
@@ -294,7 +294,7 @@ function ChartEditor({
               min={100}
               max={600}
             />
-            <span className="text-[9px] text-muted-foreground/50">px</span>
+            <span className="text-xs text-muted-foreground">px</span>
           </div>
         </div>
       </div>
@@ -434,9 +434,9 @@ function RankingEditor({
         placeholder="Título de la tabla"
       />
 
-      <div className="flex flex-wrap items-center gap-2 text-[10px]">
+      <div className="flex flex-wrap items-center gap-2 text-xs">
         <div className="flex items-center gap-1">
-          <span className="text-muted-foreground/70">Dimensión:</span>
+          <span className="text-muted-foreground">Dimensión:</span>
           <select
             value={ranking.dimension}
             onChange={(e) => onChange({ ...ranking, dimension: e.target.value as any })}
@@ -455,7 +455,7 @@ function RankingEditor({
           </select>
         </div>
         <div className="flex items-center gap-1">
-          <span className="text-muted-foreground/70">Top:</span>
+          <span className="text-muted-foreground">Top:</span>
           <select
             value={ranking.topN}
             onChange={(e) => onChange({ ...ranking, topN: Number(e.target.value) })}
@@ -469,7 +469,7 @@ function RankingEditor({
           </select>
         </div>
         <div className="flex items-center gap-1">
-          <span className="text-muted-foreground/70">Orden:</span>
+          <span className="text-muted-foreground">Orden:</span>
           <select
             value={ranking.sortOrder}
             onChange={(e) => onChange({ ...ranking, sortOrder: e.target.value as 'desc' | 'asc' })}
@@ -480,7 +480,7 @@ function RankingEditor({
           </select>
         </div>
         <div className="flex items-center gap-1">
-          <span className="text-muted-foreground/70">Columna ord.:</span>
+          <span className="text-muted-foreground">Columna ord.:</span>
           <select
             value={ranking.sortColumnIndex}
             onChange={(e) => onChange({ ...ranking, sortColumnIndex: Number(e.target.value) })}
@@ -521,7 +521,7 @@ function RankingEditor({
       )}
 
       <div className="space-y-2 pt-2 border-t border-border">
-        <p className="text-[10px] text-muted-foreground/70 font-medium uppercase tracking-wider">
+        <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">
           Columnas de métricas
         </p>
         {ranking.columns.map((col, ci) => (
@@ -563,7 +563,7 @@ function RankingEditor({
                 onChange({ ...ranking, columns: cols });
               }}
               title="Heatmap"
-              className={`flex-shrink-0 w-6 h-6 rounded border text-xs transition ${col.highlight ? 'bg-indigo-500/20 border-indigo-500/40 text-indigo-600 dark:text-indigo-400' : 'bg-card border-border text-muted-foreground/70 hover:text-muted-foreground'}`}
+              className={`flex-shrink-0 w-6 h-6 rounded border text-xs transition ${col.highlight ? 'bg-indigo-500/20 border-indigo-500/40 text-indigo-600 dark:text-indigo-400' : 'bg-card border-border text-muted-foreground hover:text-muted-foreground'}`}
             >
               ✦
             </button>
@@ -577,7 +577,7 @@ function RankingEditor({
                       : ranking.sortColumnIndex;
                   onChange({ ...ranking, columns: cols, sortColumnIndex: newSortIdx });
                 }}
-                className="flex-shrink-0 text-muted-foreground/50 hover:text-red-400 transition"
+                className="flex-shrink-0 text-muted-foreground hover:text-red-400 transition"
               >
                 <X className="w-3 h-3" />
               </button>
@@ -592,7 +592,7 @@ function RankingEditor({
             ];
             onChange({ ...ranking, columns: cols });
           }}
-          className="text-[10px] text-cyan-500 hover:text-cyan-400 flex items-center gap-1 mt-1"
+          className="text-xs text-cyan-500 hover:text-cyan-400 flex items-center gap-1 mt-1"
         >
           <Plus className="w-3 h-3" /> Agregar columna
         </button>
@@ -618,7 +618,7 @@ function TableColumnsEditor({
 }) {
   return (
     <div className="space-y-2">
-      <p className="text-[10px] text-muted-foreground/70 uppercase font-medium tracking-wider">
+      <p className="text-xs text-muted-foreground uppercase font-medium tracking-wider">
         Columnas visibles en la tabla
       </p>
       {columns.map((col, i) => (
@@ -671,7 +671,7 @@ function TableColumnsEditor({
               />
               <button
                 onClick={() => onChange(columns.filter((_, idx) => idx !== i))}
-                className="flex-shrink-0 text-muted-foreground/50 hover:text-red-400 transition"
+                className="flex-shrink-0 text-muted-foreground hover:text-red-400 transition"
                 title="Eliminar columna"
               >
                 <X className="w-3.5 h-3.5" />
@@ -695,7 +695,7 @@ function TableColumnsEditor({
             },
           ])
         }
-        className="text-[10px] text-indigo-600 dark:text-indigo-400 hover:text-indigo-300 flex items-center gap-1 mt-1"
+        className="text-xs text-indigo-600 dark:text-indigo-400 hover:text-indigo-300 flex items-center gap-1 mt-1"
       >
         <Plus className="w-3 h-3" /> Nueva columna
       </button>
@@ -904,7 +904,7 @@ export function QuickEditModal({
             </Button>
             <button
               onClick={onClose}
-              className="text-muted-foreground/70 hover:text-foreground transition p-1 hover:bg-accent rounded-lg"
+              className="text-muted-foreground hover:text-foreground transition p-1 hover:bg-accent rounded-lg"
             >
               <X className="w-4 h-4" />
             </button>

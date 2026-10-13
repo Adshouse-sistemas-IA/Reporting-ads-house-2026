@@ -272,7 +272,7 @@ export function SheetCamposSection({ clienteId }: { clienteId: string }) {
         ) : campos.length === 0 ? (
           <div className="rounded-lg border border-dashed border-border p-6 text-center space-y-1">
             <p className="text-sm text-muted-foreground">Todavía no hay campos definidos.</p>
-            <p className="text-xs text-muted-foreground/70">
+            <p className="text-xs text-muted-foreground">
               Un campo une, por ejemplo, la columna “rango de ingresos” de un formulario con “cuál
               es tu rango de ingresos” de otro, y agrupa “20 a 100” y “20-100” en un solo valor por
               el que puedes filtrar.
@@ -293,20 +293,20 @@ export function SheetCamposSection({ clienteId }: { clienteId: string }) {
                     <span className="flex items-center gap-2">
                       <span className="text-sm text-foreground truncate">{campo.nombre}</span>
                       {!campo.activo && (
-                        <span className="text-[10px] text-muted-foreground/60 border border-border rounded px-1">
+                        <span className="text-xs text-muted-foreground border border-border rounded px-1">
                           inactivo
                         </span>
                       )}
                       {campo.alta_cardinalidad && (
                         <span
-                          className="text-[10px] text-amber-600 dark:text-amber-400 border border-amber-500/30 rounded px-1"
+                          className="text-xs text-amber-600 dark:text-amber-400 border border-amber-500/30 rounded px-1"
                           title="Demasiados valores distintos: no se ofrece como categoría"
                         >
                           muchos valores
                         </span>
                       )}
                     </span>
-                    <span className="block text-[11px] text-muted-foreground/70 truncate">
+                    <span className="block text-xs text-muted-foreground truncate">
                       {columnas} columnas en {pestanas} {pestanas === 1 ? 'pestaña' : 'pestañas'}
                       {suyas.length > 0 &&
                         ` · ${suyas.length} ${suyas.length === 1 ? 'vista' : 'vistas'}`}
@@ -343,7 +343,7 @@ export function SheetCamposSection({ clienteId }: { clienteId: string }) {
         )}
 
         {!cargando && fuentes.length === 0 && (
-          <p className="text-xs text-muted-foreground/60">
+          <p className="text-xs text-muted-foreground">
             Aún no hay pestañas sincronizadas. Configura y sincroniza un Google Sheet arriba para
             poder mapear sus columnas.
           </p>

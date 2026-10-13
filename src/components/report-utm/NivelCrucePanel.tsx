@@ -101,7 +101,7 @@ export function NivelCrucePanel({
               key={n}
               type="button"
               onClick={() => setNivel(n)}
-              className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-medium ${
+              className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-medium ${
                 nivel === n ? 'bg-emerald-600 text-white' : 'text-muted-foreground hover:bg-accent'
               }`}
             >
@@ -110,7 +110,7 @@ export function NivelCrucePanel({
             </button>
           ))}
         </div>
-        <label className="ml-auto flex items-center gap-1.5 text-[11px] text-muted-foreground cursor-pointer select-none">
+        <label className="ml-auto flex items-center gap-1.5 text-xs text-muted-foreground cursor-pointer select-none">
           <input
             type="checkbox"
             checked={soloSinResolver}
@@ -129,7 +129,7 @@ export function NivelCrucePanel({
       </div>
 
       {!habilitado && (
-        <p className="px-6 py-2 text-[11px] text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-500/10 border-b border-border">
+        <p className="px-6 py-2 text-xs text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-500/10 border-b border-border">
           La corrección manual por conjunto y anuncio se activa al instalar la migración 079. Lo que
           se resuelve solo (IDs y nombres conocidos) ya funciona.
         </p>
@@ -145,7 +145,7 @@ export function NivelCrucePanel({
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead className="bg-muted/60">
-              <tr className="text-left text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+              <tr className="text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                 <th className="px-6 py-3">Valor en {CAMPO[nivel]}</th>
                 <th className="px-6 py-3 text-right">Leads</th>
                 <th className="px-6 py-3">Estado</th>
@@ -170,9 +170,7 @@ export function NivelCrucePanel({
                       )}
                       {row.value}
                     </td>
-                    <td className="px-6 py-3 text-right text-xs font-mono tabular-nums">
-                      {row.count}
-                    </td>
+                    <td className="px-6 py-3 text-right text-xs tabular-nums">{row.count}</td>
                     <td className="px-6 py-3">
                       {row.resolved ? (
                         <span className="inline-flex items-center gap-1.5 text-xs text-foreground">
@@ -180,7 +178,7 @@ export function NivelCrucePanel({
                           <span className="max-w-[240px] truncate" title={row.resolved}>
                             {row.resolved}
                           </span>
-                          <span className="px-1.5 py-0.5 rounded-md text-[10px] font-medium text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10">
+                          <span className="px-1.5 py-0.5 rounded-md text-xs font-medium text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10">
                             {row.via === 'manual' ? 'Manual' : row.es_id ? 'Por ID' : 'Nombre'}
                           </span>
                         </span>
@@ -214,7 +212,7 @@ export function NivelCrucePanel({
                           {row.suggestion && (
                             <span
                               title={`Sugerido: ${row.suggestion.name}`}
-                              className="shrink-0 inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-medium text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10"
+                              className="shrink-0 inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-xs font-medium text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10"
                             >
                               <Sparkles className="h-3 w-3" /> {row.suggestion.confidence}%
                             </span>
@@ -223,13 +221,13 @@ export function NivelCrucePanel({
                             type="button"
                             onClick={() => guardar(row)}
                             disabled={!habilitado || !elegido || ocupado === row.value}
-                            className="shrink-0 flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] font-medium text-white nav-active-emerald disabled:opacity-40"
+                            className="shrink-0 flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium text-white nav-active-emerald disabled:opacity-40"
                           >
                             <Plus className="h-3 w-3" /> Mapear
                           </button>
                         </div>
                       ) : (
-                        <span className="text-[11px] text-muted-foreground">
+                        <span className="text-xs text-muted-foreground">
                           {row.resolved ? '—' : 'Sin entidades en el rango para elegir.'}
                         </span>
                       )}
@@ -248,8 +246,8 @@ export function NivelCrucePanel({
 function Dato({ label, valor }: { label: string; valor: string }) {
   return (
     <div>
-      <p className="text-[10px] text-muted-foreground">{label}</p>
-      <p className="text-sm font-semibold font-mono tabular-nums text-foreground">{valor}</p>
+      <p className="text-xs text-muted-foreground">{label}</p>
+      <p className="text-sm font-semibold tabular-nums text-foreground">{valor}</p>
     </div>
   );
 }

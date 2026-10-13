@@ -134,7 +134,7 @@ export function PublicLinkButton({
             </Button>
           </div>
           {token && (
-            <p className="text-[10px] text-muted-foreground/70 flex items-center gap-1 -mt-1">
+            <p className="text-xs text-muted-foreground flex items-center gap-1 -mt-1">
               <ExternalLink className="w-3 h-3" />
               Accesible sin iniciar sesión
             </p>
@@ -147,7 +147,7 @@ export function PublicLinkButton({
             </p>
             <div className="space-y-1.5 max-h-56 overflow-y-auto pr-1">
               {tabs.length === 0 ? (
-                <p className="text-xs text-muted-foreground/70 italic py-2">
+                <p className="text-xs text-muted-foreground italic py-2">
                   No hay pestañas configuradas aún.
                 </p>
               ) : (
@@ -184,7 +184,7 @@ export function PublicLinkButton({
                       </div>
                       <span className="text-sm font-medium">{tab.nombre}</span>
                       {tab.keyword_meta && (
-                        <span className="ml-auto text-[10px] bg-muted px-1.5 py-0.5 rounded text-muted-foreground/70 font-mono shrink-0">
+                        <span className="ml-auto text-xs bg-muted px-1.5 py-0.5 rounded text-muted-foreground font-mono shrink-0">
                           {tab.keyword_meta}
                         </span>
                       )}
@@ -194,7 +194,7 @@ export function PublicLinkButton({
               )}
             </div>
             {tabs.length > 0 && (
-              <p className="text-[10px] text-muted-foreground/70 mt-2">
+              <p className="text-xs text-muted-foreground mt-2">
                 {selectedTabIds.length === 0
                   ? 'Sin pestañas seleccionadas — el link mostrará todas las pestañas.'
                   : `${selectedTabIds.length} pestaña${selectedTabIds.length > 1 ? 's' : ''} seleccionada${selectedTabIds.length > 1 ? 's' : ''}`}
@@ -210,7 +210,7 @@ export function PublicLinkButton({
 
             <div className="space-y-3">
               <div>
-                <label className="block text-[10px] font-medium text-muted-foreground mb-1">
+                <label className="block text-xs font-medium text-muted-foreground mb-1">
                   Logo del cliente (URL)
                 </label>
                 <Input
@@ -225,7 +225,7 @@ export function PublicLinkButton({
               </div>
 
               <div>
-                <label className="block text-[10px] font-medium text-muted-foreground mb-1">
+                <label className="block text-xs font-medium text-muted-foreground mb-1">
                   Color de acento
                 </label>
                 <div className="flex flex-wrap gap-1.5">
@@ -249,7 +249,7 @@ export function PublicLinkButton({
                         setAccent('');
                         setSaved(false);
                       }}
-                      className="h-7 px-2 rounded-full border border-border text-[10px] text-muted-foreground hover:text-foreground"
+                      className="h-7 px-2 rounded-full border border-border text-xs text-muted-foreground hover:text-foreground"
                     >
                       Quitar
                     </button>
@@ -258,7 +258,7 @@ export function PublicLinkButton({
               </div>
 
               <div>
-                <label className="block text-[10px] font-medium text-muted-foreground mb-1">
+                <label className="block text-xs font-medium text-muted-foreground mb-1">
                   Título del encabezado
                 </label>
                 <Input
@@ -273,7 +273,7 @@ export function PublicLinkButton({
               </div>
 
               <div>
-                <label className="block text-[10px] font-medium text-muted-foreground mb-1">
+                <label className="block text-xs font-medium text-muted-foreground mb-1">
                   Mensaje de bienvenida
                 </label>
                 <textarea

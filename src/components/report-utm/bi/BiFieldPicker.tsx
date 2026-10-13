@@ -239,7 +239,7 @@ export function BiFieldPicker({
                 >
                   {!s.available && <Lock className="h-3 w-3 shrink-0 text-amber-500" />}
                   <span className="flex-1 min-w-0 leading-snug break-words">{s.label}</span>
-                  <span className="text-[10px] tabular-nums opacity-60">{s.fields.length}</span>
+                  <span className="text-xs tabular-nums opacity-60">{s.fields.length}</span>
                   {s.id === activa.id && <ChevronRight className="h-3 w-3 shrink-0" />}
                 </button>
               </li>
@@ -249,11 +249,11 @@ export function BiFieldPicker({
           {/* ── Paso 2: el campo ── */}
           <div className="max-h-80 overflow-y-auto" onMouseLeave={() => setHover(null)}>
             <div className="px-3 py-2 border-b border-border bg-muted/30">
-              <p className="text-[10px] text-muted-foreground leading-snug">
+              <p className="text-xs text-muted-foreground leading-snug">
                 {activa.nota ?? GRAIN_TEXT[activa.grain]}
               </p>
               {!activa.available && (
-                <p className="mt-1 flex items-start gap-1 text-[10px] text-amber-600 dark:text-amber-500">
+                <p className="mt-1 flex items-start gap-1 text-xs text-amber-600 dark:text-amber-500">
                   <AlertCircle className="h-3 w-3 shrink-0 mt-[1px]" />
                   {activa.unavailableReason}
                 </p>
@@ -281,7 +281,7 @@ export function BiFieldPicker({
               return campos.map((f, i) => (
                 <div key={f.id}>
                   {conGrupos && (i === 0 || campos[i - 1].group !== f.group) && (
-                    <p className="sticky top-0 z-10 px-3 pt-2 pb-1 bg-card border-b border-border text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+                    <p className="sticky top-0 z-10 px-3 pt-2 pb-1 bg-card border-b border-border text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                       {f.group}
                     </p>
                   )}
@@ -308,16 +308,16 @@ export function BiFieldPicker({
       <div className="border-t border-border bg-muted/30 px-3 py-2 min-h-[3.25rem]">
         {ficha ? (
           <>
-            <p className="text-[11px] font-medium text-foreground leading-snug break-words">
+            <p className="text-xs font-medium text-foreground leading-snug break-words">
               {ficha.field.label}
               <span className="font-normal text-muted-foreground"> · {ficha.sourceLabel}</span>
             </p>
-            <p className="mt-0.5 text-[10px] text-muted-foreground leading-snug">
+            <p className="mt-0.5 text-xs text-muted-foreground leading-snug">
               {ficha.field.help || descripcionPorDefecto(ficha.field)}
             </p>
           </>
         ) : (
-          <p className="text-[10px] text-muted-foreground leading-snug">
+          <p className="text-xs text-muted-foreground leading-snug">
             Pasa el ratón por un campo para ver qué mide y cómo usarlo.
           </p>
         )}
@@ -395,22 +395,22 @@ function FieldRow({
             {shortLabel ?? field.label}
           </span>
           {field.recommended && (
-            <span className="shrink-0 text-[9px] uppercase tracking-wide text-emerald-600 dark:text-emerald-400">
+            <span className="shrink-0 text-xs uppercase tracking-wide text-emerald-600 dark:text-emerald-400">
               recomendada
             </span>
           )}
         </span>
         {sourceLabel && (
-          <span className="block text-[10px] text-muted-foreground truncate">{sourceLabel}</span>
+          <span className="block text-xs text-muted-foreground truncate">{sourceLabel}</span>
         )}
         {noCruza && (
-          <span className="mt-0.5 flex items-start gap-1 text-[10px] text-amber-600 dark:text-amber-500">
+          <span className="mt-0.5 flex items-start gap-1 text-xs text-amber-600 dark:text-amber-500">
             <Info className="h-2.5 w-2.5 shrink-0 mt-[2px]" />
             No se desglosa por la dimensión elegida: saldría en el total.
           </span>
         )}
         {overlaps.length > 0 && (
-          <span className="mt-0.5 flex items-start gap-1 text-[10px] text-amber-600 dark:text-amber-500">
+          <span className="mt-0.5 flex items-start gap-1 text-xs text-amber-600 dark:text-amber-500">
             <Info className="h-2.5 w-2.5 shrink-0 mt-[2px]" />
             Mide lo mismo que {overlaps.join(', ')}: no las sumes juntas.
           </span>

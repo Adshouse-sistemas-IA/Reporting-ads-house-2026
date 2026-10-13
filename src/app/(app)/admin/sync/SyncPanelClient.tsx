@@ -330,7 +330,7 @@ export function SyncPanelClient({ data, isAdmin }: { data: SyncPanelData; isAdmi
                                 <p className="mb-1 text-xs font-semibold text-muted-foreground">
                                   Avisos y errores
                                 </p>
-                                <pre className="max-h-64 overflow-auto whitespace-pre-wrap break-all rounded bg-background p-2 font-mono text-[11px] text-amber-700 dark:text-amber-400">
+                                <pre className="max-h-64 overflow-auto whitespace-pre-wrap break-all rounded bg-background p-2 font-mono text-xs text-amber-700 dark:text-amber-400">
                                   {problemas.join('\n')}
                                 </pre>
                               </div>
@@ -340,7 +340,7 @@ export function SyncPanelClient({ data, isAdmin }: { data: SyncPanelData; isAdmi
                                 <summary className="cursor-pointer text-xs text-muted-foreground">
                                   Traza completa ({resto.length} línea{resto.length > 1 ? 's' : ''})
                                 </summary>
-                                <pre className="mt-1 max-h-64 overflow-auto whitespace-pre-wrap break-all rounded bg-background p-2 font-mono text-[11px] text-muted-foreground">
+                                <pre className="mt-1 max-h-64 overflow-auto whitespace-pre-wrap break-all rounded bg-background p-2 font-mono text-xs text-muted-foreground">
                                   {resto.join('\n')}
                                 </pre>
                               </details>

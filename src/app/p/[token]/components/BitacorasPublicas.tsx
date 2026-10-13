@@ -19,7 +19,7 @@ export function BitacorasPublicas({ entries }: { entries: Bitacora[] }) {
               // entradas que ya estaban en la base de datos.
               dangerouslySetInnerHTML={{ __html: sanitizarHtmlBitacora(entry.contenido) }}
             />
-            <div className="flex items-center gap-2 mt-3 text-xs text-muted-foreground/60">
+            <div className="flex items-center gap-2 mt-3 text-xs text-muted-foreground">
               {entry.author_name && <span>{entry.author_name}</span>}
               {entry.author_name && <span>·</span>}
               <span>

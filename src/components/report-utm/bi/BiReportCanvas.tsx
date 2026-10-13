@@ -759,21 +759,21 @@ export function BiReportCanvas({
                       <>
                         <div className="fixed inset-0 z-10" onClick={() => setQuickOpen(false)} />
                         <div className="absolute right-0 z-20 mt-1 w-52 rounded-xl border border-border bg-card shadow-xl overflow-hidden py-1">
-                          <p className="px-3 py-1.5 text-[9px] font-semibold uppercase tracking-wider text-muted-foreground">
+                          <p className="px-3 py-1.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                             Agregar KPI
                           </p>
                           {QUICK_WIDGETS.map((p, i) => (
                             <button
                               key={p.metric}
                               onClick={() => handleAddQuick(i)}
-                              className="w-full px-3 py-1.5 text-left text-[11px] text-foreground hover:bg-accent transition-colors"
+                              className="w-full px-3 py-1.5 text-left text-xs text-foreground hover:bg-accent transition-colors"
                             >
                               {p.label}
                             </button>
                           ))}
                           {preguntasCliente.length > 0 && (
                             <>
-                              <p className="px-3 pt-2 pb-1 text-[9px] font-semibold uppercase tracking-wider text-muted-foreground border-t border-border mt-1">
+                              <p className="px-3 pt-2 pb-1 text-xs font-semibold uppercase tracking-wider text-muted-foreground border-t border-border mt-1">
                                 Respuestas de formulario
                               </p>
                               {preguntasCliente.map((f) => (
@@ -781,7 +781,7 @@ export function BiReportCanvas({
                                   key={f.clave}
                                   onClick={() => void handleAddRespuestas(f.clave)}
                                   title="Reparto de respuestas y tabla por campaña con leads y CPL de cada respuesta"
-                                  className="w-full px-3 py-1.5 text-left text-[11px] text-foreground hover:bg-accent transition-colors"
+                                  className="w-full px-3 py-1.5 text-left text-xs text-foreground hover:bg-accent transition-colors"
                                 >
                                   {f.nombre}
                                 </button>
@@ -846,7 +846,7 @@ export function BiReportCanvas({
 
         {/* Hint de modo edición */}
         {editMode && (
-          <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/5 px-4 py-2.5 text-[11px] text-emerald-700 dark:text-emerald-300 flex items-center gap-2 flex-wrap">
+          <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/5 px-4 py-2.5 text-xs text-emerald-700 dark:text-emerald-300 flex items-center gap-2 flex-wrap">
             <Pencil className="h-3.5 w-3.5 flex-shrink-0" />
             <span>
               <strong>Modo edición:</strong> pasa el cursor sobre un widget para editarlo,
@@ -876,7 +876,7 @@ export function BiReportCanvas({
         {(activeDrills.length > 0 || (filtersDirty && !readonly)) && (
           <div className="flex items-center gap-2 flex-wrap">
             {activeDrills.length > 0 && (
-              <span className="flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+              <span className="flex items-center gap-1 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                 Filtrando por:
                 <HelpTip text="Haz clic en una barra o porción de un gráfico para filtrar todo el informe por ese valor (drill-down). Haz clic de nuevo en el chip para quitar el filtro. Con «Guardar filtros» el informe recuerda exactamente los chips que estén puestos en ese momento." />
               </span>
@@ -885,7 +885,7 @@ export function BiReportCanvas({
               <button
                 key={k}
                 onClick={() => handleDrill(k, v as string)}
-                className="flex items-center gap-1 px-2 py-1 rounded-full bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 text-[11px] font-medium hover:bg-emerald-500/25 transition-colors"
+                className="flex items-center gap-1 px-2 py-1 rounded-full bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 text-xs font-medium hover:bg-emerald-500/25 transition-colors"
               >
                 <EtiquetaBi clave={k} fallback={drillLabel(k)} />: {v}
                 <X className="h-3 w-3" />
@@ -897,7 +897,7 @@ export function BiReportCanvas({
                 onClick={handleSaveFilters}
                 disabled={savingFilters}
                 title="Deja el informe guardado con exactamente estos filtros (los que quitaste no volverán a aparecer)"
-                className="flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-medium bg-amber-500/15 text-amber-700 dark:text-amber-300 hover:bg-amber-500/25 transition-colors disabled:opacity-50"
+                className="flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-amber-500/15 text-amber-700 dark:text-amber-300 hover:bg-amber-500/25 transition-colors disabled:opacity-50"
               >
                 {filtersSaved ? <Check className="h-3 w-3" /> : <Save className="h-3 w-3" />}
                 {savingFilters ? 'Guardando…' : filtersSaved ? 'Guardado' : 'Guardar filtros'}
@@ -911,7 +911,7 @@ export function BiReportCanvas({
                 "informe en 0" y no se avisaba en ninguna parte. Va PRIMERO porque,
                 cuando ocurre, los demás avisos son consecuencia de este. */}
         {sinEnlaceCliente && !readonly && (
-          <div className="flex items-start gap-2 rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-[11px] text-red-700 dark:text-red-300">
+          <div className="flex items-start gap-2 rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-xs text-red-700 dark:text-red-300">
             <Info className="h-3.5 w-3.5 mt-0.5 shrink-0" />
             <span>
               Este cliente no está <strong>enlazado con su cliente de Reporting</strong>, así que la
@@ -942,7 +942,7 @@ export function BiReportCanvas({
         {/* Aviso: gasto no atribuible al filtro activo */}
         {/* Filtro de campaña que no matchea nada: causa silenciosa de un informe en 0 */}
         {campaignFilterMatchesNothing && (
-          <div className="flex items-start gap-2 rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-[11px] text-red-700 dark:text-red-300">
+          <div className="flex items-start gap-2 rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-xs text-red-700 dark:text-red-300">
             <Info className="h-3.5 w-3.5 mt-0.5 shrink-0" />
             <span>
               El filtro de campaña <strong>“{campaignFilter}”</strong> no coincide con ninguna
@@ -956,7 +956,7 @@ export function BiReportCanvas({
         )}
 
         {spendNotAttributable && (
-          <div className="flex items-start gap-2 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-[11px] text-amber-700 dark:text-amber-300">
+          <div className="flex items-start gap-2 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs text-amber-700 dark:text-amber-300">
             <Info className="h-3.5 w-3.5 mt-0.5 shrink-0" />
             <span>
               El gasto de anuncios no puede atribuirse a filtros de país, formulario o campo del

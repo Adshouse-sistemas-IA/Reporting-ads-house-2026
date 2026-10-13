@@ -279,7 +279,7 @@ export function ConsolaChat({ conversacionesIniciales, clientes, puedeResponder 
         </div>
         <div className="divide-border max-h-[calc(100vh-320px)] divide-y overflow-y-auto">
           {conversaciones.length === 0 && (
-            <p className="text-muted-foreground/70 px-4 py-6 text-center text-sm">
+            <p className="text-muted-foreground px-4 py-6 text-center text-sm">
               Todavía no hay ninguna.
             </p>
           )}
@@ -297,7 +297,7 @@ export function ConsolaChat({ conversacionesIniciales, clientes, puedeResponder 
                 className="min-w-0 flex-1 text-left"
               >
                 <p className="truncate text-sm">{c.titulo ?? 'Sin título'}</p>
-                <p className="text-muted-foreground/70 text-xs">
+                <p className="text-muted-foreground text-xs">
                   {new Date(c.last_activity_at).toLocaleString('es-CO', {
                     day: '2-digit',
                     month: 'short',
@@ -310,7 +310,7 @@ export function ConsolaChat({ conversacionesIniciales, clientes, puedeResponder 
               <button
                 type="button"
                 onClick={() => eliminar(c.id)}
-                className="text-muted-foreground/50 hover:text-destructive opacity-0 transition-opacity group-hover:opacity-100"
+                className="text-muted-foreground hover:text-destructive opacity-0 transition-opacity group-hover:opacity-100"
                 aria-label="Borrar conversación"
               >
                 <Trash2 className="h-3.5 w-3.5" />
@@ -330,7 +330,7 @@ export function ConsolaChat({ conversacionesIniciales, clientes, puedeResponder 
           )}
 
           {!cargando && burbujas.length === 0 && (
-            <div className="text-muted-foreground/70 flex h-full flex-col items-center justify-center gap-2 text-center text-sm">
+            <div className="text-muted-foreground flex h-full flex-col items-center justify-center gap-2 text-center text-sm">
               <p>Pregúntale por un cliente.</p>
               <p className="text-xs">
                 Por ejemplo: «¿cómo va Goodprop este mes?» o «compárame la última semana».
@@ -343,7 +343,7 @@ export function ConsolaChat({ conversacionesIniciales, clientes, puedeResponder 
               return (
                 <div
                   key={b.id}
-                  className="text-muted-foreground/70 flex items-center gap-2 pl-1 text-xs"
+                  className="text-muted-foreground flex items-center gap-2 pl-1 text-xs"
                 >
                   {b.ok ? (
                     <Check className="h-3 w-3 text-emerald-500" />
@@ -374,7 +374,7 @@ export function ConsolaChat({ conversacionesIniciales, clientes, puedeResponder 
                   {b.texto}
                 </div>
                 {(b.modelo || coste) && (
-                  <p className="text-muted-foreground/50 pl-1 text-[11px]">
+                  <p className="text-muted-foreground pl-1 text-xs">
                     {/* El modelo se muestra a propósito: con una cadena de reserva,
                         un salto silencioso a uno peor explicaría una respuesta mala. */}
                     {b.modelo}
@@ -412,7 +412,7 @@ export function ConsolaChat({ conversacionesIniciales, clientes, puedeResponder 
               </SelectContent>
             </Select>
             {clienteId !== SIN_CLIENTE && (
-              <span className="text-muted-foreground/70 flex items-center gap-1 text-[11px]">
+              <span className="text-muted-foreground flex items-center gap-1 text-xs">
                 <ChevronDown className="h-3 w-3" />
                 Se le pasa el perfil y la estrategia de este cliente
               </span>

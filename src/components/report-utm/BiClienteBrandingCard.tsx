@@ -98,7 +98,7 @@ export function BiClienteBrandingCard({
               // eslint-disable-next-line @next/next/no-img-element
               <img src={logoUrl} alt="Logo" className="max-h-full max-w-full object-contain" />
             ) : (
-              <span className="text-[10px] text-muted-foreground">Sin logo</span>
+              <span className="text-xs text-muted-foreground">Sin logo</span>
             )}
           </div>
           <div className="flex flex-col gap-1.5">
@@ -116,7 +116,7 @@ export function BiClienteBrandingCard({
             {logoUrl && (
               <button
                 onClick={() => setLogoUrl('')}
-                className="inline-flex items-center gap-1 text-[11px] text-muted-foreground hover:text-red-500 transition-colors w-fit"
+                className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-red-500 transition-colors w-fit"
               >
                 <Trash2 className="h-3 w-3" /> Quitar
               </button>
@@ -140,7 +140,7 @@ export function BiClienteBrandingCard({
         <div className="flex gap-2 flex-wrap items-center">
           <button
             onClick={() => setAccent('')}
-            className={`h-6 px-2 rounded-full text-[10px] border transition-all ${accent === '' ? 'border-foreground ring-2 ring-offset-2 ring-offset-card ring-foreground' : 'border-border text-muted-foreground'}`}
+            className={`h-6 px-2 rounded-full text-xs border transition-all ${accent === '' ? 'border-foreground ring-2 ring-offset-2 ring-offset-card ring-foreground' : 'border-border text-muted-foreground'}`}
           >
             Automático
           </button>

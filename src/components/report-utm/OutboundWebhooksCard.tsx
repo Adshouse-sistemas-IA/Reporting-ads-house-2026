@@ -114,7 +114,7 @@ export function OutboundWebhooksCard({
 
       {revealed && (
         <div className="rounded-lg border border-blue-200 dark:border-blue-500/30 bg-blue-50/40 dark:bg-blue-500/5 p-4">
-          <p className="text-[11px] font-semibold uppercase tracking-wider text-blue-700 dark:text-blue-400 mb-2">
+          <p className="text-xs font-semibold uppercase tracking-wider text-blue-700 dark:text-blue-400 mb-2">
             Secret · guardalo ahora
           </p>
           <div className="flex items-center gap-2 rounded-lg border border-blue-200 dark:border-blue-500/20 bg-background px-3 py-2">
@@ -133,7 +133,7 @@ export function OutboundWebhooksCard({
               )}
             </button>
           </div>
-          <p className="mt-2 text-[11px] text-blue-700 dark:text-blue-400">
+          <p className="mt-2 text-xs text-blue-700 dark:text-blue-400">
             El receptor debe verificar HMAC-SHA256 del body con este secret. Header:{' '}
             <code className="font-mono px-1 py-0.5 rounded bg-card/50">X-Rutm-Signature</code>
           </p>
@@ -174,15 +174,13 @@ export function OutboundWebhooksCard({
                     className="rounded text-blue-500 focus:ring-blue-500"
                   />
                   <span className="font-medium text-foreground/90">{e.label}</span>
-                  <code className="ml-auto text-[10px] font-mono text-muted-foreground">
-                    {e.id}
-                  </code>
+                  <code className="ml-auto text-xs font-mono text-muted-foreground">{e.id}</code>
                 </label>
               ))}
             </div>
           </Field>
           {error && (
-            <p className="text-[11px] text-red-600 dark:text-red-400 flex items-center gap-1.5">
+            <p className="text-xs text-red-600 dark:text-red-400 flex items-center gap-1.5">
               <AlertCircle className="h-3.5 w-3.5" />
               {error}
             </p>
@@ -224,7 +222,7 @@ export function OutboundWebhooksCard({
                   <div className="flex items-center gap-2 flex-wrap">
                     <p className="text-sm font-medium text-foreground">{w.nombre}</p>
                     <span
-                      className={`text-[10px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded ${
+                      className={`text-xs font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded ${
                         w.enabled
                           ? 'bg-blue-50 text-blue-700 dark:bg-blue-500/10 dark:text-blue-400'
                           : 'bg-muted text-muted-foreground'
@@ -233,20 +231,18 @@ export function OutboundWebhooksCard({
                       {w.enabled ? 'activo' : 'pausado'}
                     </span>
                   </div>
-                  <p className="text-[11px] font-mono text-muted-foreground mt-0.5 truncate">
-                    {w.url}
-                  </p>
+                  <p className="text-xs font-mono text-muted-foreground mt-0.5 truncate">{w.url}</p>
                   <div className="flex items-center gap-1.5 flex-wrap mt-1.5">
                     {w.event_types.map((t) => (
                       <span
                         key={t}
-                        className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-blue-50 text-blue-700 dark:bg-blue-500/10 dark:text-blue-400"
+                        className="text-xs font-mono px-1.5 py-0.5 rounded bg-blue-50 text-blue-700 dark:bg-blue-500/10 dark:text-blue-400"
                       >
                         {t}
                       </span>
                     ))}
                   </div>
-                  <div className="flex items-center gap-3 mt-2 text-[10px] text-muted-foreground">
+                  <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
                     <span className="text-blue-600 dark:text-blue-400">✓ {w.success_count}</span>
                     <span className="text-red-600 dark:text-red-400">✗ {w.failure_count}</span>
                     {w.last_fired_at && (
@@ -257,7 +253,7 @@ export function OutboundWebhooksCard({
                     )}
                   </div>
                   {w.last_error && (
-                    <p className="text-[10px] text-red-600 dark:text-red-400 mt-1 font-mono truncate">
+                    <p className="text-xs text-red-600 dark:text-red-400 mt-1 font-mono truncate">
                       ⚠ {w.last_error}
                     </p>
                   )}
@@ -298,7 +294,7 @@ export function OutboundWebhooksCard({
 }
 
 const INPUT_CLASS =
-  'w-full px-3 py-2 text-sm rounded-lg bg-background border border-border text-foreground placeholder:text-muted-foreground/70 focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500/40 transition-colors';
+  'w-full px-3 py-2 text-sm rounded-lg bg-background border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500/40 transition-colors';
 
 function Field({
   label,
@@ -311,7 +307,7 @@ function Field({
 }) {
   return (
     <label className="block">
-      <span className="block text-[11px] font-medium text-muted-foreground mb-1">
+      <span className="block text-xs font-medium text-muted-foreground mb-1">
         {label}
         {required && <span className="text-red-500"> *</span>}
       </span>

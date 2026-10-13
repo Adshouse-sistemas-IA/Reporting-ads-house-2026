@@ -59,7 +59,8 @@ import {
   GripVertical,
   Search,
   X,
-  Puzzle,
+  Pencil,
+  Map as MapIcon,
   Type,
   Save,
   Loader2,
@@ -135,6 +136,7 @@ import {
   applyCompoundFilter,
 } from '@/lib/campaign-filter';
 import { enrichOfflineRow } from '@/lib/offline-filter';
+import type { VistaPreviaEditor } from './EditorBloques';
 import type { TabCampaignFilter } from '@/lib/layout-types';
 
 /**
@@ -268,7 +270,7 @@ function SortableTab({
         <button
           {...attributes}
           {...listeners}
-          className="p-1 text-muted-foreground/70 hover:text-muted-foreground cursor-grab active:cursor-grabbing"
+          className="p-1 text-muted-foreground hover:text-muted-foreground cursor-grab active:cursor-grabbing"
           title="Arrastrar para reordenar"
         >
           <GripVertical className="w-3.5 h-3.5" />
@@ -280,14 +282,14 @@ function SortableTab({
       >
         {tab.nombre}
         <span
-          className={`text-[10px] px-1.5 py-0.5 rounded font-mono tracking-wider transition ${isActive ? 'bg-blue-500/20 text-blue-500 dark:text-blue-300 border border-blue-500/20' : 'bg-muted/80 text-muted-foreground/50'}`}
+          className={`text-xs px-1.5 py-0.5 rounded font-mono tracking-wider transition ${isActive ? 'bg-blue-500/20 text-blue-500 dark:text-blue-300 border border-blue-500/20' : 'bg-muted/80 text-muted-foreground'}`}
           title={`Filtro de campaña: ${tabFilterLabel(tab.keyword_meta)}`}
         >
           {tabFilterLabel(tab.keyword_meta)}
         </span>
         {hasOverride && (
           <span
-            className="text-[9px] text-indigo-600 dark:text-indigo-400 font-bold"
+            className="text-xs text-indigo-600 dark:text-indigo-400 font-bold"
             title="Vista personalizada"
           >
             ✦
@@ -300,7 +302,7 @@ function SortableTab({
             e.stopPropagation();
             onEdit();
           }}
-          className={`absolute right-1 p-1 text-muted-foreground/70 hover:text-foreground rounded bg-card shadow border border-border opacity-0 group-hover:opacity-100 transition ${isActive ? 'opacity-100' : ''}`}
+          className={`absolute right-1 p-1 text-muted-foreground hover:text-foreground rounded bg-card shadow border border-border opacity-0 group-hover:opacity-100 transition ${isActive ? 'opacity-100' : ''}`}
         >
           <Edit2 className="w-3 h-3" />
         </button>
@@ -348,7 +350,7 @@ function ExtrasPanel({ filteredMetrics }: { filteredMetrics: any[] }) {
           <CardTitle className="text-foreground text-base flex items-center gap-2">
             <span className="text-orange-600 dark:text-orange-400">⚡</span>
             Productos Extras
-            <span className="text-xs font-normal text-muted-foreground/70">
+            <span className="text-xs font-normal text-muted-foreground">
               (no asignados a ningún funnel)
             </span>
           </CardTitle>
@@ -1433,6 +1435,75 @@ function DynamicDashboard({
     data.campaignGroups,
   ]);
 
+  // Vista previa del editor de vista: el mismo cálculo que las tarjetas y la
+  // tabla, aplicado a lo que se está editando antes de guardarlo.
+  const vistaPreviaEditor = useMemo<VistaPreviaEditor>(() => {
+    const filasDe = (
+      base: any[],
+      def: Pick<CardDef, 'campaignFilter' | 'sheetFilter' | 'account_id'>
+    ) => {
+      let rows = !def.campaignFilter
+        ? base
+        : base.map((m: any) =>
+            applyCompoundFilter(m, effectiveKeyword, def.campaignFilter, data.campaignGroups)
+          );
+      if (def.sheetFilter) rows = rows.map((r: any) => enrichOfflineRow(r, def.sheetFilter));
+      if (def.account_id) {
+        rows = rows.map((r: any) =>
+          filterRowByTikTokAccount(r, def.account_id, effectiveKeyword, data.campaignGroups)
+        );
+      }
+      return rows;
+    };
+    const total = (formula: string, rows: any[]) =>
+      formula.trim()
+        ? aggregateFormula(
+            formula,
+            rows,
+            varContext,
+            sourceMapping,
+            platformSet,
+            layoutCustomMetrics
+          )
+        : null;
+    return {
+      valor: (def) => ({
+        actual: total(def.formula, filasDe(filteredMetrics, def as CardDef)),
+        anterior:
+          prevFilteredMetrics.length > 0
+            ? total(def.formula, filasDe(prevFilteredMetrics, def as CardDef))
+            : null,
+      }),
+      filas: (def, n) =>
+        [...filasDe(filteredMetrics, def as CardDef)]
+          .sort((a: any, b: any) => String(b.fecha ?? '').localeCompare(String(a.fecha ?? '')))
+          .slice(0, n)
+          .map((row: any) => ({
+            fecha: safeFmt(row.fecha, 'dd MMM'),
+            v:
+              def.formula === 'fecha' || !def.formula.trim()
+                ? null
+                : evaluateFormula(
+                    def.formula,
+                    row,
+                    varContext,
+                    sourceMapping,
+                    platformSet,
+                    layoutCustomMetrics
+                  ),
+          })),
+    };
+  }, [
+    filteredMetrics,
+    prevFilteredMetrics,
+    effectiveKeyword,
+    varContext,
+    sourceMapping,
+    platformSet,
+    layoutCustomMetrics,
+    data.campaignGroups,
+  ]);
+
   // Determine formulas for Gasto and Leads based on visible columns
   const { gastoFormula, leadsFormula } = useMemo(() => {
     const gastoCol = visibleCols.find((c: ColDef) => c.label.toLowerCase().includes('gasto'));
@@ -1513,84 +1584,116 @@ function DynamicDashboard({
     const rem = varContext.presupuesto_restante ?? 0;
     const dailyBudget = varContext.presupuesto_diario_sugerido ?? 0;
 
+    // Un solo panel de ritmo: cuánto se gastó frente a cuánto se debería haber
+    // gastado a esta altura del rango (reparto lineal del presupuesto).
+    const diasTotales = varContext.dias_totales ?? 0;
+    const diasTranscurridos = varContext.dias_transcurridos ?? 0;
+    const gastado = pres > 0 ? pres - rem : 0;
+    const pctGastado = pres > 0 ? (gastado / pres) * 100 : 0;
+    const pctIdeal = diasTotales > 0 ? (diasTranscurridos / diasTotales) * 100 : null;
+    const desvio = pctIdeal !== null ? pctGastado - pctIdeal : 0;
+    const ritmo =
+      pctIdeal === null || pres <= 0
+        ? null
+        : Math.abs(desvio) <= 5
+          ? { texto: 'En ritmo', clase: 'bg-good-soft text-good' }
+          : desvio > 0
+            ? { texto: 'Gastando rápido', clase: 'bg-warn-soft text-warn' }
+            : { texto: 'Gastando lento', clase: 'bg-warn-soft text-warn' };
+
     budgetCards = (
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mt-2 mb-2">
-        <Card className="bg-card border-border border-l-4 border-l-blue-500 shadow-lg">
-          <CardContent className="py-3 px-4 flex items-center justify-between">
-            <div>
-              <p className="text-xs text-muted-foreground font-medium mb-1">Rango de Captación</p>
-              <p className="text-sm text-foreground font-semibold">
-                {fechaInicioStr} - {fechaFinStr}
-              </p>
-              {diasFueraCaptacion > 0 && (
-                <p
-                  className="text-[11px] text-muted-foreground mt-1"
-                  title="Las cifras siguen al calendario. El rango de captación solo se usa para el presupuesto y los días faltantes."
+      <Card className="bg-card border-border shadow-none gap-0 py-0">
+        <CardContent className="p-4 grid gap-4 md:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)] md:items-center">
+          <div className="grid gap-2.5 min-w-0">
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+              <p className="text-sm font-semibold text-foreground">Presupuesto de la captación</p>
+              <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                <CalendarDays className="w-3.5 h-3.5" />
+                {fechaInicioStr} – {fechaFinStr}
+              </span>
+              {ritmo && !fetchingSpend && (
+                <span
+                  className={`ml-auto rounded-full px-2.5 py-0.5 text-xs font-semibold ${ritmo.clase}`}
                 >
-                  El calendario incluye {diasFueraCaptacion}{' '}
-                  {diasFueraCaptacion === 1 ? 'día' : 'días'} fuera de la captación
-                </p>
+                  {ritmo.texto}
+                </span>
               )}
             </div>
-            <CalendarDays className="w-7 h-7 text-blue-500/50" />
-          </CardContent>
-        </Card>
-
-        {daysLeft !== null && (
-          <Card className="bg-card border-border border-l-4 border-l-amber-500 shadow-lg">
-            <CardContent className="py-3 px-4 flex items-center justify-between">
-              <div>
-                <p className="text-xs text-muted-foreground font-medium mb-1">Días Faltantes</p>
-                <p className="text-lg md:text-xl font-bold text-amber-600 dark:text-amber-400 font-mono">
-                  {daysLeft} días
-                </p>
-              </div>
-              <Timer className="w-7 h-7 text-amber-500/50" />
-            </CardContent>
-          </Card>
-        )}
-
-        {pres > 0 && (
-          <Card className="bg-card border-border border-l-4 border-l-emerald-500 shadow-lg">
-            <CardContent className="py-3 px-4 flex items-center justify-between">
-              <div>
-                <p className="text-xs text-muted-foreground font-medium mb-1">
-                  Presupuesto Restante
-                </p>
-                {fetchingSpend ? (
-                  <p className="text-sm text-muted-foreground/70">Calculando...</p>
-                ) : (
-                  <p className="text-lg md:text-xl font-bold text-emerald-600 dark:text-emerald-400 font-mono">
-                    {formatValue(rem, { prefix: '$', decimals: 0, moneda: monedaReporte })}
-                  </p>
-                )}
-              </div>
-              <Wallet className="w-7 h-7 text-emerald-500/50" />
-            </CardContent>
-          </Card>
-        )}
-
-        {pres > 0 && daysLeft !== null && (
-          <Card className="bg-card border-border border-l-4 border-l-indigo-500 shadow-lg">
-            <CardContent className="py-3 px-4 flex items-center justify-between">
-              <div>
-                <p className="text-xs text-muted-foreground font-medium mb-1">
-                  Prep. Diario Sugerido
-                </p>
-                {fetchingSpend ? (
-                  <p className="text-sm text-muted-foreground/70">Calculando...</p>
-                ) : (
-                  <p className="text-lg md:text-xl font-bold text-indigo-600 dark:text-indigo-400 font-mono">
-                    {formatValue(dailyBudget, { prefix: '$', decimals: 0, moneda: monedaReporte })}
-                    /día
-                  </p>
-                )}
-              </div>
-              <BadgeDollarSign className="w-7 h-7 text-indigo-500/50" />
-            </CardContent>
-          </Card>
-        )}
-      </div>
+            {pres > 0 ? (
+              <>
+                <div
+                  className="relative h-2.5 rounded-full bg-muted"
+                  role="img"
+                  aria-label={`Gastado ${pctGastado.toFixed(0)}% del presupuesto${pctIdeal !== null ? `; lo esperado hoy es ${pctIdeal.toFixed(0)}%` : ''}`}
+                >
+                  <div
+                    className="absolute inset-y-0 left-0 rounded-full bg-primary dark:bg-brand-blue-light transition-all"
+                    style={{ width: `${Math.min(100, Math.max(0, pctGastado))}%` }}
+                  />
+                  {pctIdeal !== null && (
+                    <div
+                      className="absolute -top-1 -bottom-1 w-0.5 rounded bg-foreground"
+                      style={{ left: `${Math.min(100, pctIdeal)}%` }}
+                      title="Dónde deberías ir hoy"
+                    />
+                  )}
+                </div>
+                <div className="flex justify-between gap-3 text-xs text-muted-foreground tabular-nums">
+                  <span>
+                    {fetchingSpend
+                      ? 'Calculando…'
+                      : `${formatValue(gastado, { prefix: '$', decimals: 0, moneda: monedaReporte })} gastado (${pctGastado.toFixed(0)}%) de ${formatValue(pres, { prefix: '$', decimals: 0, moneda: monedaReporte })}`}
+                  </span>
+                  {pctIdeal !== null && <span>Esperado hoy: {pctIdeal.toFixed(0)}%</span>}
+                </div>
+              </>
+            ) : (
+              <p className="text-xs text-muted-foreground">
+                Sin presupuesto objetivo en esta pestaña.
+              </p>
+            )}
+            {diasFueraCaptacion > 0 && (
+              <p
+                className="text-xs text-muted-foreground"
+                title="Las cifras siguen al calendario. El rango de captación solo se usa para el presupuesto y los días faltantes."
+              >
+                El calendario incluye {diasFueraCaptacion}{' '}
+                {diasFueraCaptacion === 1 ? 'día' : 'días'} fuera de la captación
+              </p>
+            )}
+          </div>
+          <div className="grid grid-cols-3 gap-2">
+            <div className="rounded-lg bg-muted/60 px-3 py-2 min-w-0">
+              <p className="flex items-center gap-1 text-xs text-muted-foreground">
+                <Timer className="w-3.5 h-3.5" /> Faltan
+              </p>
+              <p className="text-base font-semibold tabular-nums">
+                {daysLeft !== null ? `${daysLeft} ${daysLeft === 1 ? 'día' : 'días'}` : '—'}
+              </p>
+            </div>
+            <div className="rounded-lg bg-muted/60 px-3 py-2 min-w-0">
+              <p className="flex items-center gap-1 text-xs text-muted-foreground">
+                <Wallet className="w-3.5 h-3.5" /> Queda
+              </p>
+              <p className="text-base font-semibold tabular-nums truncate">
+                {pres > 0 && !fetchingSpend
+                  ? formatValue(rem, { prefix: '$', decimals: 0, moneda: monedaReporte })
+                  : '—'}
+              </p>
+            </div>
+            <div className="rounded-lg bg-muted/60 px-3 py-2 min-w-0">
+              <p className="flex items-center gap-1 text-xs text-muted-foreground">
+                <BadgeDollarSign className="w-3.5 h-3.5" /> Diario sugerido
+              </p>
+              <p className="text-base font-semibold tabular-nums truncate">
+                {pres > 0 && daysLeft !== null && !fetchingSpend
+                  ? `${formatValue(dailyBudget, { prefix: '$', decimals: 0, moneda: monedaReporte })}/día`
+                  : '—'}
+              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
     );
   }
 
@@ -1625,7 +1728,7 @@ function DynamicDashboard({
             >
               {tab.nombre}
               {tab.keyword_meta && (
-                <span className="text-[10px] bg-muted/80 px-1.5 py-0.5 rounded text-muted-foreground font-mono tracking-wider">
+                <span className="text-xs bg-muted/80 px-1.5 py-0.5 rounded text-muted-foreground font-mono tracking-wider">
                   {tabFilterLabel(tab.keyword_meta)}
                 </span>
               )}
@@ -1709,7 +1812,7 @@ function DynamicDashboard({
             >
               <Archive className="w-3.5 h-3.5" />
               {archivedCount > 0 && (
-                <span className="absolute -top-1.5 -right-1.5 text-[9px] bg-indigo-500 text-white rounded-full w-4 h-4 flex items-center justify-center font-bold">
+                <span className="absolute -top-1.5 -right-1.5 text-[10px] bg-indigo-500 text-white rounded-full w-4 h-4 flex items-center justify-center font-bold">
                   {archivedCount}
                 </span>
               )}
@@ -1718,9 +1821,10 @@ function DynamicDashboard({
           {/* Pestaña fija de Roadmap */}
           <button
             onClick={() => setActiveTabId('soporte')}
-            className={`px-4 py-2 text-sm font-medium rounded-t-lg transition whitespace-nowrap border-b-2 flex items-center gap-1.5 ${activeTabId === 'soporte' ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400 bg-indigo-500/10' : 'border-transparent text-muted-foreground hover:text-foreground hover:bg-accent'}`}
+            className={`ml-auto px-4 py-2 text-sm font-medium rounded-t-lg transition whitespace-nowrap border-b-2 flex items-center gap-1.5 ${activeTabId === 'soporte' ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400 bg-indigo-500/10' : 'border-transparent text-muted-foreground hover:text-foreground hover:bg-accent'}`}
           >
-            🗺️ Roadmap
+            <MapIcon className="w-4 h-4" />
+            Roadmap
           </button>
         </div>
       )}
@@ -1735,28 +1839,32 @@ function DynamicDashboard({
       {/* Toolbar + Dashboard Content */}
       {activeTabId !== 'soporte' && (
         <>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="flex items-center gap-2 text-xs text-indigo-600 dark:text-indigo-400 bg-indigo-500/5 border border-indigo-500/20 rounded-lg px-3 py-1.5">
-                <LayoutDashboard className="w-3.5 h-3.5" />
-                <span>
-                  <strong>{activeLayout.nombre}</strong>
-                  {layoutIsCustomized ? ' — Personalizada' : ' — Plantilla Base'}
-                </span>
-              </div>
+          {/* Lectura primero: la plantilla y las herramientas de edición solo
+              aparecen con «Editar vista». */}
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="flex flex-wrap items-center gap-3">
+              {isPuzzleMode && (
+                <div className="flex items-center gap-2 text-xs text-indigo-600 dark:text-indigo-400 bg-indigo-500/5 border border-indigo-500/20 rounded-lg px-3 py-1.5">
+                  <LayoutDashboard className="w-3.5 h-3.5" />
+                  <span>
+                    <strong>{activeLayout.nombre}</strong>
+                    {layoutIsCustomized ? ' — Personalizada' : ' — Plantilla base'}
+                  </span>
+                </div>
+              )}
 
               <div className="relative">
-                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground/70 pointer-events-none" />
+                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground pointer-events-none" />
                 <Input
                   placeholder="Buscar campaña..."
                   value={keywordFilter}
                   onChange={(e) => setKeywordFilter(e.target.value)}
-                  className="h-8 pl-8 text-xs w-44 md:w-64 bg-card border-border text-foreground placeholder:text-muted-foreground/70"
+                  className="h-8 pl-8 text-xs w-44 md:w-64 bg-card border-border text-foreground placeholder:text-muted-foreground"
                 />
                 {keywordFilter && (
                   <button
                     onClick={() => setKeywordFilter('')}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground/70 hover:text-foreground/90"
+                    className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground/90"
                   >
                     <X className="h-3 w-3" />
                   </button>
@@ -1764,8 +1872,8 @@ function DynamicDashboard({
               </div>
             </div>
             {!isPublic && (
-              <div className="flex items-center gap-2">
-                {isTeam && (
+              <div className="flex flex-wrap items-center gap-2">
+                {isTeam && isPuzzleMode && (
                   <Popover open={addMenuOpen} onOpenChange={setAddMenuOpen}>
                     <PopoverTrigger asChild>
                       <Button
@@ -1821,7 +1929,7 @@ function DynamicDashboard({
                           onClick={() => handleAddNewBlock(type)}
                           className="w-full flex items-center gap-2.5 px-3 py-2 text-xs text-foreground/90 hover:bg-accent hover:text-foreground rounded transition"
                         >
-                          <span className="text-muted-foreground/70">{icon}</span>
+                          <span className="text-muted-foreground">{icon}</span>
                           {label}
                         </button>
                       ))}
@@ -1832,10 +1940,14 @@ function DynamicDashboard({
                   size="sm"
                   variant="outline"
                   onClick={() => setIsPuzzleMode(!isPuzzleMode)}
-                  className={`gap-1.5 text-xs transition ${isPuzzleMode ? 'border-amber-500/50 bg-amber-500/10 text-amber-600 dark:text-amber-400 hover:bg-amber-500/20' : 'border-border text-muted-foreground hover:text-indigo-300 hover:bg-indigo-500/5'}`}
+                  className={`gap-1.5 text-xs transition ${isPuzzleMode ? 'border-amber-500/50 bg-amber-500/10 text-amber-600 dark:text-amber-400 hover:bg-amber-500/20' : 'border-border text-foreground hover:bg-accent'}`}
                 >
-                  <Puzzle className="w-3.5 h-3.5" />
-                  {isPuzzleMode ? 'Salir Modo Edición' : 'Modo Rompecabezas'}
+                  {isPuzzleMode ? (
+                    <X className="w-3.5 h-3.5" />
+                  ) : (
+                    <Pencil className="w-3.5 h-3.5" />
+                  )}
+                  {isPuzzleMode ? 'Salir de edición' : 'Editar vista'}
                 </Button>
 
                 {isPuzzleMode && (
@@ -1860,19 +1972,19 @@ function DynamicDashboard({
                       size="sm"
                       onClick={handleTogglePuzzleMode}
                       disabled={isSavingLayout}
-                      className="gap-1.5 text-xs bg-indigo-600 hover:bg-indigo-700 text-white border-transparent shadow-[0_0_15px_rgba(79,70,229,0.4)] transition-all animate-in zoom-in-95 duration-200"
+                      className="gap-1.5 text-xs bg-primary hover:bg-primary/90 text-primary-foreground border-transparent transition-all animate-in zoom-in-95 duration-200"
                     >
                       {isSavingLayout ? (
                         <Loader2 className="w-3.5 h-3.5 animate-spin" />
                       ) : (
                         <Save className="w-3.5 h-3.5" />
                       )}
-                      {isSavingLayout ? 'Guardando...' : 'Guardar Visualización'}
+                      {isSavingLayout ? 'Guardando…' : 'Guardar vista'}
                     </Button>
                   </>
                 )}
 
-                {activeTabId === 'general' ? (
+                {!isPuzzleMode ? null : activeTabId === 'general' ? (
                   <LayoutConfigButton
                     onClick={() => setShowModal(true)}
                     isCustomized={layoutIsCustomized}
@@ -1885,7 +1997,7 @@ function DynamicDashboard({
                     className="gap-1.5 border-border text-muted-foreground hover:text-indigo-300 hover:border-indigo-500/40 hover:bg-indigo-500/5 text-xs transition"
                   >
                     <Settings2 className="w-3.5 h-3.5" />
-                    Configurar layout
+                    Configurar columnas
                   </Button>
                 )}
               </div>
@@ -2098,7 +2210,7 @@ function DynamicDashboard({
                                               onClick={() => setKeywordFilter(group.id)}
                                               className={`h-7 text-xs ${keywordFilter === group.id ? 'bg-emerald-600 text-white border-transparent hover:bg-emerald-700' : 'border-border bg-background text-muted-foreground hover:text-foreground'}`}
                                             >
-                                              📊 {group.nombre}
+                                              {group.nombre}
                                             </Button>
                                           ))}
                                         </>
@@ -2125,7 +2237,7 @@ function DynamicDashboard({
                                     </div>
                                   </>
                                 ) : activeTabObj ? (
-                                  <div className="text-xs text-muted-foreground/70 bg-background px-3 py-1.5 rounded-md border border-border">
+                                  <div className="text-xs text-muted-foreground bg-background px-3 py-1.5 rounded-md border border-border">
                                     Filtro:{' '}
                                     <span className="font-mono text-foreground/90">
                                       &quot;{tabFilterLabel(activeTabObj.keyword_meta)}&quot;
@@ -2172,7 +2284,7 @@ function DynamicDashboard({
                                       : 'text-foreground';
                                     return (
                                       <div key={col.id} className="flex flex-col min-w-0">
-                                        <span className="text-[10px] text-muted-foreground/60 leading-none mb-0.5 truncate">
+                                        <span className="text-xs text-muted-foreground leading-none mb-0.5 truncate">
                                           {col.label}
                                         </span>
                                         <span
@@ -2231,7 +2343,7 @@ function DynamicDashboard({
                                         <TableHead
                                           key={i}
                                           colSpan={g.span}
-                                          className={`py-0 text-center text-[10px] font-semibold uppercase tracking-widest ${g.label ? 'text-muted-foreground/60' : ''} ${i > 0 && g.label ? 'border-l border-border/50' : ''}`}
+                                          className={`py-0 text-center text-xs font-semibold uppercase tracking-widest ${g.label ? 'text-muted-foreground' : ''} ${i > 0 && g.label ? 'border-l border-border/50' : ''}`}
                                         >
                                           {g.label}
                                         </TableHead>
@@ -2300,7 +2412,7 @@ function DynamicDashboard({
                                     daysInWeek.push(
                                       <TableRow
                                         key={dayStr}
-                                        className={`border-border transition-colors hover:bg-accent/60 ${isWeekend ? 'bg-muted/30 text-muted-foreground/60' : 'text-foreground'}`}
+                                        className={`border-border transition-colors hover:bg-accent/60 ${isWeekend ? 'bg-muted/30 text-muted-foreground' : 'text-foreground'}`}
                                       >
                                         {visibleCols.map((col: ColDef) => {
                                           if (col.formula === 'fecha') {
@@ -2481,7 +2593,7 @@ function DynamicDashboard({
                                   <TableRow>
                                     <TableCell
                                       colSpan={visibleCols.length}
-                                      className="text-center p-8 text-muted-foreground/70"
+                                      className="text-center p-8 text-muted-foreground"
                                     >
                                       No hay datos reportados para este rango.
                                     </TableCell>
@@ -2591,6 +2703,7 @@ function DynamicDashboard({
           }}
           tabId={activeTabId}
           tiktokAccounts={tiktokAccounts}
+          vistaPrevia={vistaPreviaEditor}
         />
       )}
       {quickEditTarget && (
@@ -2920,7 +3033,7 @@ function AvisoTasasDashboard({ aviso }: { aviso: AvisoTasas | null }) {
   const texto = textoAvisoTasas(aviso);
   if (!texto) return null;
   return (
-    <p className="mb-3 flex items-start gap-1.5 text-[11px] leading-snug text-muted-foreground">
+    <p className="mb-3 flex items-start gap-1.5 text-xs leading-snug text-muted-foreground">
       <Coins className="h-3 w-3 shrink-0 mt-[1px]" />
       <span>{texto}</span>
     </p>

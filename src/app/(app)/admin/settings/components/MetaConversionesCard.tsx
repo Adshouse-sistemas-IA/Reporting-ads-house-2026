@@ -135,7 +135,7 @@ export function MetaConversionesCard({ clienteId, habilitado }: Props) {
       <div className="flex flex-wrap justify-between items-center gap-3 bg-muted/50 p-3 rounded-lg border border-border">
         <div className="min-w-0">
           <h4 className="text-sm font-medium text-foreground">Conversiones Personalizadas</h4>
-          <p className="text-xs text-muted-foreground/70 mt-1">
+          <p className="text-xs text-muted-foreground mt-1">
             Conversiones personalizadas y eventos personalizados del píxel con actividad en los
             últimos {DIAS_ANTIGUA} días. Marca cuáles cuentan como resultado del cliente.
           </p>
@@ -253,7 +253,7 @@ export function MetaConversionesCard({ clienteId, habilitado }: Props) {
                           );
                         }}
                       />
-                      <div className="mt-1 flex items-center gap-1.5 text-[10px] text-muted-foreground">
+                      <div className="mt-1 flex items-center gap-1.5 text-xs text-muted-foreground">
                         <span
                           className={`px-1.5 py-px rounded border ${f.origen === 'cc' ? 'border-sky-500/40 text-sky-700 dark:text-sky-300' : 'border-violet-500/40 text-violet-700 dark:text-violet-300'}`}
                           title={

@@ -293,7 +293,7 @@ export function TableWidget({ title, config, filters, calculatedFields = [], h =
           <p className="text-sm font-semibold text-foreground truncate" title={title}>
             {title}
           </p>
-          <p className="text-[10px] text-muted-foreground mt-0.5 truncate">Por {dimLabel}</p>
+          <p className="text-xs text-muted-foreground mt-0.5 truncate">Por {dimLabel}</p>
           {/* Va en la cabecera y no al pie: en una tabla larga el
                         motivo tiene que verse sin hacer scroll hasta el final. */}
           {!loading && !error && (
@@ -305,7 +305,7 @@ export function TableWidget({ title, config, filters, calculatedFields = [], h =
           )}
         </div>
         {(config.value_filters?.length ?? 0) > 0 && !loading && !error && (
-          <span className="shrink-0 text-[10px] font-mono text-muted-foreground bg-muted/60 px-2 py-1 rounded-md">
+          <span className="shrink-0 text-xs font-mono text-muted-foreground bg-muted/60 px-2 py-1 rounded-md">
             {filteredRows.length} de {rows.length} filas
           </span>
         )}
@@ -325,7 +325,7 @@ export function TableWidget({ title, config, filters, calculatedFields = [], h =
         <div className="overflow-auto" style={{ maxHeight: TABLE_MAX_H[h] ?? TABLE_MAX_H[1] }}>
           <table className="w-full">
             <thead className="bg-muted/60 sticky top-0">
-              <tr className="text-left text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+              <tr className="text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                 <th className="px-5 py-3">{dimLabel}</th>
                 {colKeys.map((key) => (
                   <th
@@ -370,7 +370,7 @@ export function TableWidget({ title, config, filters, calculatedFields = [], h =
                     return (
                       <td
                         key={key}
-                        className={`px-5 py-2.5 text-right text-xs font-mono tabular-nums text-foreground/90 ${cellColor(key, v)}`}
+                        className={`px-5 py-2.5 text-right text-xs tabular-nums text-foreground/90 ${cellColor(key, v)}`}
                       >
                         {fmtVal(
                           v,
@@ -390,10 +390,7 @@ export function TableWidget({ title, config, filters, calculatedFields = [], h =
                 <tr className="text-xs font-semibold">
                   <td className="px-5 py-2.5 text-foreground">{rotuloTotal}</td>
                   {colKeys.map((key) => (
-                    <td
-                      key={key}
-                      className="px-5 py-2.5 text-right font-mono tabular-nums text-foreground"
-                    >
+                    <td key={key} className="px-5 py-2.5 text-right tabular-nums text-foreground">
                       {key in totals
                         ? fmtVal(
                             totals[key],

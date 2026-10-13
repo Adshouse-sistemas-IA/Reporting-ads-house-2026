@@ -165,7 +165,7 @@ export default function SaludFuentesPage() {
                     <li key={i} className="text-sm">
                       <div className="flex flex-wrap items-baseline gap-x-2">
                         <span
-                          className={`text-[11px] px-1.5 py-0.5 rounded ${ESTILO[h.gravedad].chip}`}
+                          className={`text-xs px-1.5 py-0.5 rounded ${ESTILO[h.gravedad].chip}`}
                         >
                           {h.ambito}
                         </span>

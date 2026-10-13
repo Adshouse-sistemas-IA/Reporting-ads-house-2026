@@ -188,7 +188,7 @@ export function BiCalcFieldsModal({
         <div className="p-5 max-h-[80vh] overflow-y-auto">
           {/* Cómo se usan: sin esto no es evidente dónde aparecen luego. */}
           <div className="mb-4 rounded-xl border border-emerald-500/30 bg-emerald-500/5 px-4 py-3">
-            <p className="text-[11px] text-emerald-700 dark:text-emerald-300 leading-relaxed">
+            <p className="text-xs text-emerald-700 dark:text-emerald-300 leading-relaxed">
               <strong>Cómo usarlos:</strong> un campo calculado es una métrica tuya, guardada en
               este informe. Al crearlo aparece como <strong>∑ nombre</strong> en el selector de
               métrica de cualquier widget (scorecard, gráfica o columna de tabla). Se recalcula solo
@@ -199,11 +199,11 @@ export function BiCalcFieldsModal({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5 items-start">
             {/* Lista existente */}
             <div className="space-y-2">
-              <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+              <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                 Tus campos ({fields.length})
               </p>
               {fields.length === 0 ? (
-                <p className="text-[11px] text-muted-foreground rounded-lg border border-dashed border-border px-3 py-4 text-center">
+                <p className="text-xs text-muted-foreground rounded-lg border border-dashed border-border px-3 py-4 text-center">
                   Aún no has creado ninguno. Crea el primero con el formulario de la derecha.
                 </p>
               ) : (
@@ -219,12 +219,12 @@ export function BiCalcFieldsModal({
                     <div className="min-w-0">
                       <p className="text-xs font-semibold text-foreground truncate">
                         {f.name}
-                        <span className="ml-1.5 font-normal text-[10px] text-muted-foreground">
+                        <span className="ml-1.5 font-normal text-xs text-muted-foreground">
                           {FORMAT_LABEL[(f.format ?? 'number') as CalcFormat]}
                           {f.decimals !== undefined ? ` · ${f.decimals} dec` : ''}
                         </span>
                       </p>
-                      <p className="text-[10px] font-mono text-muted-foreground truncate">
+                      <p className="text-xs font-mono text-muted-foreground truncate">
                         {f.expression}
                       </p>
                     </div>
@@ -262,12 +262,12 @@ export function BiCalcFieldsModal({
             >
               {editingId && (
                 <div className="flex items-center justify-between">
-                  <p className="text-[11px] font-medium text-emerald-600 dark:text-emerald-400">
+                  <p className="text-xs font-medium text-emerald-600 dark:text-emerald-400">
                     Editando campo
                   </p>
                   <button
                     onClick={resetForm}
-                    className="text-[10px] text-muted-foreground hover:text-foreground"
+                    className="text-xs text-muted-foreground hover:text-foreground"
                   >
                     Cancelar edición
                   </button>
@@ -275,7 +275,7 @@ export function BiCalcFieldsModal({
               )}
               <div className="grid grid-cols-3 gap-2">
                 <div>
-                  <label className="block text-[10px] font-medium text-muted-foreground mb-1">
+                  <label className="block text-xs font-medium text-muted-foreground mb-1">
                     Nombre
                   </label>
                   <input
@@ -287,7 +287,7 @@ export function BiCalcFieldsModal({
                   />
                 </div>
                 <div>
-                  <label className="block text-[10px] font-medium text-muted-foreground mb-1">
+                  <label className="block text-xs font-medium text-muted-foreground mb-1">
                     Formato
                   </label>
                   <select
@@ -303,7 +303,7 @@ export function BiCalcFieldsModal({
                   </select>
                 </div>
                 <div>
-                  <label className="block text-[10px] font-medium text-muted-foreground mb-1">
+                  <label className="block text-xs font-medium text-muted-foreground mb-1">
                     Decimales
                   </label>
                   <input
@@ -318,15 +318,15 @@ export function BiCalcFieldsModal({
                 </div>
               </div>
               {!validName && name && (
-                <p className="text-[10px] text-red-500">
+                <p className="text-xs text-red-500">
                   El nombre solo admite letras, números y guion bajo, y no puede empezar por número.
                 </p>
               )}
               {nameTaken && (
-                <p className="text-[10px] text-red-500">Ya existe un campo con ese nombre.</p>
+                <p className="text-xs text-red-500">Ya existe un campo con ese nombre.</p>
               )}
               <div>
-                <label className="block text-[10px] font-medium text-muted-foreground mb-1">
+                <label className="block text-xs font-medium text-muted-foreground mb-1">
                   Expresión
                 </label>
                 <BiFormulaInput
@@ -341,7 +341,7 @@ export function BiCalcFieldsModal({
                   customConversions={customConversions}
                 />
                 <div className="flex items-center justify-between mt-1.5 gap-2">
-                  <p className="text-[10px] text-muted-foreground min-w-0 truncate">
+                  <p className="text-xs text-muted-foreground min-w-0 truncate">
                     {sampleValue === null && expr ? (
                       <span className="text-red-500">Expresión inválida</span>
                     ) : clienteId ? (
@@ -373,7 +373,7 @@ export function BiCalcFieldsModal({
                   <button
                     onClick={submit}
                     disabled={!canSubmit}
-                    className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] font-medium text-white nav-active-emerald disabled:opacity-40 shrink-0"
+                    className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium text-white nav-active-emerald disabled:opacity-40 shrink-0"
                   >
                     {editingId ? <Check className="h-3 w-3" /> : <Plus className="h-3 w-3" />}
                     {editingId ? 'Guardar cambios' : 'Agregar'}

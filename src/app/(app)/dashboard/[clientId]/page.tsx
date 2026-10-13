@@ -92,9 +92,9 @@ export default async function DashboardPage(props: {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-3 mb-1">
-            <h2 className="text-2xl font-bold tracking-tight text-foreground">
+            <h1 className="text-2xl font-semibold tracking-tight text-foreground">
               {dashboardData?.cliente?.nombre ?? 'Dashboard'}
-            </h2>
+            </h1>
             <PublicLinkButton
               clienteId={clientId}
               tabs={dashboardData?.tabs || []}
@@ -108,16 +108,15 @@ export default async function DashboardPage(props: {
             {informesClienteId && (
               <Link
                 href={`/informes?cliente=${informesClienteId}`}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border border-emerald-500/30 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-500/20 transition-colors"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border border-border bg-card text-foreground hover:bg-accent transition-colors"
               >
                 <PieChart className="h-3.5 w-3.5" />
-                Ir a los Informes
+                Informes
               </Link>
             )}
           </div>
-          <p className="text-sm text-muted-foreground font-medium">Embudo de Ventas V2</p>
-          <p className="text-muted-foreground text-sm">
-            Datos consolidados de Meta, Hotmart y Google Analytics 4.
+          <p className="text-sm text-muted-foreground">
+            Embudo de ventas · Meta, Hotmart y Google Analytics 4
           </p>
         </div>
         <DateRangeSelector />

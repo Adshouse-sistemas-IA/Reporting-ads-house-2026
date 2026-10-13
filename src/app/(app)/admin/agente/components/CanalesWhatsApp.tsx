@@ -167,7 +167,7 @@ export function CanalesWhatsApp({
         </CardHeader>
         <CardContent>
           {grupos.length === 0 ? (
-            <p className="text-muted-foreground/70 py-6 text-center text-sm">
+            <p className="text-muted-foreground py-6 text-center text-sm">
               Ningún grupo todavía. Añade el bot a uno y escribe cualquier cosa.
             </p>
           ) : (
@@ -187,9 +187,7 @@ export function CanalesWhatsApp({
                   <TableRow key={c.id} className="border-border hover:bg-muted/10 border-b">
                     <TableCell>
                       <p className="text-sm font-medium">{c.nombre ?? 'Grupo sin nombre'}</p>
-                      <p className="text-muted-foreground/50 font-mono text-[10px]">
-                        {c.external_id}
-                      </p>
+                      <p className="text-muted-foreground font-mono text-xs">{c.external_id}</p>
                     </TableCell>
                     <TableCell>
                       <Select
@@ -252,7 +250,7 @@ export function CanalesWhatsApp({
             </Table>
           )}
 
-          <div className="text-muted-foreground/70 mt-3 flex items-start gap-2 text-xs">
+          <div className="text-muted-foreground mt-3 flex items-start gap-2 text-xs">
             <Info className="mt-0.5 h-3.5 w-3.5 shrink-0" />
             <p>
               El <strong>techo</strong> limita lo que se puede pedir desde ese grupo, aunque quien
@@ -347,7 +345,7 @@ export function CanalesWhatsApp({
                     <TableRow key={c.id} className="border-border hover:bg-muted/10 border-b">
                       <TableCell>
                         <p className="text-sm font-medium">{c.display_name ?? '—'}</p>
-                        <p className="text-muted-foreground/70 text-xs">rol: {c.rol_app}</p>
+                        <p className="text-muted-foreground text-xs">rol: {c.rol_app}</p>
                       </TableCell>
                       <TableCell>
                         <Select value={c.level} onValueChange={(v) => void cambiarNivel(c, v)}>
@@ -371,13 +369,13 @@ export function CanalesWhatsApp({
                           variant="outline"
                           className={
                             recortado
-                              ? 'border-amber-500/20 bg-amber-500/10 py-0.5 text-[10px] text-amber-500'
-                              : 'border-emerald-500/20 bg-emerald-500/10 py-0.5 text-[10px] text-emerald-500'
+                              ? 'border-amber-500/20 bg-amber-500/10 py-0.5 text-xs text-amber-500'
+                              : 'border-emerald-500/20 bg-emerald-500/10 py-0.5 text-xs text-emerald-500'
                           }
                         >
                           {c.nivel_efectivo}
                         </Badge>
-                        <p className="text-muted-foreground/70 mt-0.5 text-[10px]">
+                        <p className="text-muted-foreground mt-0.5 text-xs">
                           {recortado
                             ? `su rol "${c.rol_app}" lo limita`
                             : DESCRIPCION_NIVEL[c.nivel_efectivo]}
@@ -393,7 +391,7 @@ export function CanalesWhatsApp({
                             {c.identidades.map((i) => (
                               <span
                                 key={i.id}
-                                className="bg-muted/50 text-muted-foreground/70 rounded px-1.5 py-0.5 font-mono text-[10px]"
+                                className="bg-muted/50 text-muted-foreground rounded px-1.5 py-0.5 font-mono text-xs"
                               >
                                 {i.kind === 'lid' ? 'grupo' : 'privado'}
                               </span>
@@ -438,7 +436,7 @@ export function CanalesWhatsApp({
           </div>
         </CardHeader>
         <CardContent>
-          <div className="text-muted-foreground/70 mb-3 flex items-start gap-2 text-xs">
+          <div className="text-muted-foreground mb-3 flex items-start gap-2 text-xs">
             <Info className="mt-0.5 h-3.5 w-3.5 shrink-0" />
             <p>
               Para rellenar esta lista: activa <strong>Aprender</strong> en el grupo, pide que cada
@@ -448,7 +446,7 @@ export function CanalesWhatsApp({
           </div>
 
           {remitentes.length === 0 ? (
-            <p className="text-muted-foreground/70 py-6 text-center text-sm">
+            <p className="text-muted-foreground py-6 text-center text-sm">
               Nada pendiente de vincular.
             </p>
           ) : (
@@ -465,12 +463,12 @@ export function CanalesWhatsApp({
                   <TableRow key={r.id} className="border-border hover:bg-muted/10 border-b">
                     <TableCell>
                       <p className="text-sm font-medium">{r.push_name ?? 'Sin nombre'}</p>
-                      <p className="text-muted-foreground/70 text-xs">
+                      <p className="text-muted-foreground text-xs">
                         {new Date(r.last_seen_at).toLocaleString('es-CO')}
                       </p>
                     </TableCell>
                     <TableCell>
-                      <p className="text-muted-foreground/50 font-mono text-[10px]">
+                      <p className="text-muted-foreground font-mono text-xs">
                         {r.lid ?? r.participant_pn}
                       </p>
                     </TableCell>
@@ -515,9 +513,7 @@ export function CanalesWhatsApp({
                 <div key={c.id} className="flex items-center justify-between py-2.5">
                   <div>
                     <p className="text-sm">{c.nombre ?? c.external_id.split('@')[0]}</p>
-                    <p className="text-muted-foreground/50 font-mono text-[10px]">
-                      {c.external_id}
-                    </p>
+                    <p className="text-muted-foreground font-mono text-xs">{c.external_id}</p>
                   </div>
                   <Switch
                     checked={c.is_active}
@@ -545,13 +541,13 @@ export function CanalesWhatsApp({
               const p = politica[tier] as { primary?: string; fallbacks?: string[] } | undefined;
               return (
                 <div key={tier} className="flex items-start gap-3">
-                  <Badge variant="outline" className="w-16 justify-center py-0.5 text-[10px]">
+                  <Badge variant="outline" className="w-16 justify-center py-0.5 text-xs">
                     {tier}
                   </Badge>
                   <div className="min-w-0">
                     <p className="font-mono text-xs">{p?.primary ?? '—'}</p>
                     {p?.fallbacks && p.fallbacks.length > 0 && (
-                      <p className="text-muted-foreground/50 font-mono text-[10px]">
+                      <p className="text-muted-foreground font-mono text-xs">
                         reserva: {p.fallbacks.join(', ')}
                       </p>
                     )}
@@ -560,7 +556,7 @@ export function CanalesWhatsApp({
               );
             })}
           </div>
-          <p className="text-muted-foreground/70 mt-3 text-xs">
+          <p className="text-muted-foreground mt-3 text-xs">
             El tier <code>nano</code> nunca recibe herramientas: los modelos gratuitos rotan sin
             aviso y su soporte de llamadas a función es irregular. Para redactar y resumir van bien,
             y es donde ahorran de verdad.

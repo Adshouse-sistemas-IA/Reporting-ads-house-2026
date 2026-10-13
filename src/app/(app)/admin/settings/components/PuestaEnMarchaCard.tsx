@@ -90,7 +90,7 @@ export function PuestaEnMarchaCard({
                   >
                     {p.titulo}
                     {!p.opcional && (
-                      <span className="ml-2 text-[10px] font-semibold uppercase tracking-wider text-amber-600 dark:text-amber-400">
+                      <span className="ml-2 text-xs font-semibold uppercase tracking-wider text-amber-600 dark:text-amber-400">
                         Imprescindible
                       </span>
                     )}
@@ -151,7 +151,7 @@ function Icono({ estado }: { estado: PasoPuestaEnMarcha['estado'] }) {
     );
   }
   if (estado === 'omitido') {
-    return <MinusCircle className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground/60" />;
+    return <MinusCircle className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />;
   }
   return <Circle className="mt-0.5 h-4 w-4 shrink-0 text-amber-600 dark:text-amber-400" />;
 }

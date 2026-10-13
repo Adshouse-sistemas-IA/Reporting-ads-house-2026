@@ -80,7 +80,7 @@ export function BiClienteGoalsCard({ clienteId, initialGoals = {} }: Props) {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
         {FIELDS.map((f) => (
           <div key={f.key}>
-            <label className="block text-[10px] font-medium text-muted-foreground mb-1">
+            <label className="block text-xs font-medium text-muted-foreground mb-1">
               {f.label}
             </label>
             <div className="flex items-center gap-1">
@@ -99,7 +99,7 @@ export function BiClienteGoalsCard({ clienteId, initialGoals = {} }: Props) {
               />
               {f.suffix && <span className="text-xs text-muted-foreground">{f.suffix}</span>}
             </div>
-            <p className="text-[10px] text-muted-foreground/70 mt-1">{f.hint}</p>
+            <p className="text-xs text-muted-foreground mt-1">{f.hint}</p>
           </div>
         ))}
       </div>

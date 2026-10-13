@@ -116,7 +116,7 @@ export function NotificacionesClient({
     <div className="space-y-6">
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">
+          <h1 className="text-2xl font-semibold tracking-tight flex items-center gap-2">
             <Bell className="h-6 w-6" />
             Notificaciones
           </h1>
@@ -206,7 +206,7 @@ export function NotificacionesClient({
                   <span className="flex-1 min-w-0">
                     <span className="flex items-center gap-2 flex-wrap">
                       <span className="text-sm font-medium">{notif.title}</span>
-                      <span className="text-[11px] px-1.5 py-0.5 rounded bg-muted text-muted-foreground">
+                      <span className="text-xs px-1.5 py-0.5 rounded bg-muted text-muted-foreground">
                         {IN_APP_NOTIFICATION_TYPE_LABELS[notif.type] ?? notif.type}
                       </span>
                     </span>
@@ -215,7 +215,7 @@ export function NotificacionesClient({
                         {notif.message}
                       </span>
                     )}
-                    <span className="block text-[11px] text-muted-foreground/70 mt-1">
+                    <span className="block text-xs text-muted-foreground mt-1">
                       {formatDistanceToNow(new Date(notif.created_at), {
                         addSuffix: true,
                         locale: es,

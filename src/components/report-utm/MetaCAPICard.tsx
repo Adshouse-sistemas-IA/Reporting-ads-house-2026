@@ -112,7 +112,7 @@ export function MetaCAPICard({
           <span className="block text-xs font-medium text-muted-foreground mb-1">
             Access Token{' '}
             {isConfigured && (
-              <span className="text-muted-foreground/60">(dejá vacío para mantener el actual)</span>
+              <span className="text-muted-foreground">(dejá vacío para mantener el actual)</span>
             )}
           </span>
           <div className="flex items-center gap-2">
@@ -137,7 +137,7 @@ export function MetaCAPICard({
         <label className="block">
           <span className="block text-xs font-medium text-muted-foreground mb-1">
             Test Event Code{' '}
-            <span className="text-muted-foreground/60">(opcional · solo para pruebas)</span>
+            <span className="text-muted-foreground">(opcional · solo para pruebas)</span>
           </span>
           <input
             type="text"

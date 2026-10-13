@@ -261,7 +261,7 @@ export function BiScheduleModal({ reportId, initial, onSaved, onClose }: Props) 
               </div>
             </div>
 
-            <p className="-mt-2 mb-4 text-[11px] text-emerald-700 dark:text-emerald-400">
+            <p className="-mt-2 mb-4 text-xs text-emerald-700 dark:text-emerald-400">
               {describeSchedule({ frequency, day_of_week: dayOfWeek, day_of_month: dayOfMonth })}.
               Cada envío reporta el último período completo.
             </p>
@@ -281,7 +281,7 @@ export function BiScheduleModal({ reportId, initial, onSaved, onClose }: Props) 
                 <MessageCircle className="h-3.5 w-3.5 text-emerald-600" />
                 <span className="text-sm text-foreground">
                   WhatsApp{' '}
-                  <span className="text-[11px] text-muted-foreground">(al grupo del cliente)</span>
+                  <span className="text-xs text-muted-foreground">(al grupo del cliente)</span>
                 </span>
               </label>
               <label className="flex items-center gap-2 cursor-pointer">
@@ -327,7 +327,7 @@ export function BiScheduleModal({ reportId, initial, onSaved, onClose }: Props) 
                 </div>
                 <button
                   onClick={() => setEmails((prev) => [...prev, ''])}
-                  className="mt-1.5 flex items-center gap-1 text-[11px] font-medium text-emerald-600 dark:text-emerald-400 hover:underline"
+                  className="mt-1.5 flex items-center gap-1 text-xs font-medium text-emerald-600 dark:text-emerald-400 hover:underline"
                 >
                   <Plus className="h-3 w-3" /> Agregar email
                 </button>
@@ -335,7 +335,7 @@ export function BiScheduleModal({ reportId, initial, onSaved, onClose }: Props) 
             )}
           </div>
 
-          <p className="text-[11px] text-muted-foreground">
+          <p className="text-xs text-muted-foreground">
             Cada entrega genera un <strong>link propio con el período congelado</strong> (ej.
             &ldquo;Semana 2 de Julio 2026&rdquo;), de modo que el cliente siempre puede volver a
             consultarla. WhatsApp usa el grupo configurado del cliente; Email requiere{' '}
@@ -352,7 +352,7 @@ export function BiScheduleModal({ reportId, initial, onSaved, onClose }: Props) 
               <button
                 onClick={handleSendNow}
                 disabled={sendingNow}
-                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] font-medium border border-border text-foreground hover:bg-accent disabled:opacity-50 transition-colors"
+                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium border border-border text-foreground hover:bg-accent disabled:opacity-50 transition-colors"
               >
                 {sendingNow ? (
                   <Loader2 className="h-3 w-3 animate-spin" />
@@ -364,9 +364,9 @@ export function BiScheduleModal({ reportId, initial, onSaved, onClose }: Props) 
             </div>
 
             {deliveries === null ? (
-              <p className="text-[11px] text-muted-foreground py-2">Cargando…</p>
+              <p className="text-xs text-muted-foreground py-2">Cargando…</p>
             ) : deliveries.length === 0 ? (
-              <p className="text-[11px] text-muted-foreground py-2 italic">
+              <p className="text-xs text-muted-foreground py-2 italic">
                 Aún no hay entregas. Usa &ldquo;Enviar ahora&rdquo; o espera al envío programado.
               </p>
             ) : (
@@ -380,7 +380,7 @@ export function BiScheduleModal({ reportId, initial, onSaved, onClose }: Props) 
                       <p className="text-xs font-medium text-foreground truncate">
                         {d.period_label}
                       </p>
-                      <p className="text-[10px] text-muted-foreground">
+                      <p className="text-xs text-muted-foreground">
                         {d.date_from} → {d.date_to} · enviado{' '}
                         {new Date(d.sent_at).toLocaleDateString('es-CO')}
                       </p>

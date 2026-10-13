@@ -119,7 +119,7 @@ export function BiWidgetCard({
       {hasWidgetFilter && (
         <div
           title={`Filtro del widget: ${describeWidgetFilter(widgetFilter!)}`}
-          className="absolute top-2 left-2 z-10 flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 text-[9px] font-semibold shadow-sm pointer-events-auto"
+          className="absolute top-2 left-2 z-10 flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 text-xs font-semibold shadow-sm pointer-events-auto"
         >
           <Filter className="h-2.5 w-2.5" />
           Filtrado
@@ -157,7 +157,7 @@ export function BiWidgetCard({
                 onDelete?.(widget.id);
                 setConfirming(false);
               }}
-              className="px-2 py-1 rounded-lg bg-red-500 text-white text-[10px] font-medium shadow-sm"
+              className="px-2 py-1 rounded-lg bg-red-500 text-white text-xs font-medium shadow-sm"
             >
               Eliminar
             </button>
@@ -166,7 +166,7 @@ export function BiWidgetCard({
             {...attributes}
             {...listeners}
             title="Arrastrar para reordenar"
-            className="p-1.5 rounded-lg bg-card border border-border text-muted-foreground/60 hover:text-foreground cursor-grab active:cursor-grabbing shadow-sm touch-none"
+            className="p-1.5 rounded-lg bg-card border border-border text-muted-foreground hover:text-foreground cursor-grab active:cursor-grabbing shadow-sm touch-none"
           >
             <GripVertical className="h-3.5 w-3.5" />
           </button>

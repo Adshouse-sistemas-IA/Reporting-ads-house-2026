@@ -80,10 +80,10 @@ export default function NuevoInformePage() {
           <ArrowLeft className="h-4 w-4" />
         </Link>
         <div>
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-emerald-500 dark:text-emerald-400">
+          <p className="text-xs font-semibold uppercase tracking-widest text-emerald-500 dark:text-emerald-400">
             BI Builder
           </p>
-          <h1 className="text-2xl font-bold tracking-tight text-foreground">Nuevo informe</h1>
+          <h1 className="text-2xl font-semibold tracking-tight text-foreground">Nuevo informe</h1>
         </div>
       </div>
 
@@ -104,7 +104,7 @@ export default function NuevoInformePage() {
         </div>
         <div>
           <label className="block text-xs font-medium text-muted-foreground mb-1">
-            Cliente <span className="text-muted-foreground/50">(opcional)</span>
+            Cliente <span className="text-muted-foreground">(opcional)</span>
           </label>
           <select
             value={clienteId}
@@ -118,14 +118,14 @@ export default function NuevoInformePage() {
               </option>
             ))}
           </select>
-          <p className="text-[10px] text-muted-foreground mt-1">
+          <p className="text-xs text-muted-foreground mt-1">
             Si eliges un cliente, el informe quedará fijo a ese cliente (no se podrá cambiar al
             verlo).
           </p>
         </div>
         <div>
           <label className="block text-xs font-medium text-muted-foreground mb-1">
-            Campaña <span className="text-muted-foreground/50">(opcional)</span>
+            Campaña <span className="text-muted-foreground">(opcional)</span>
           </label>
           <input
             type="text"
@@ -134,13 +134,13 @@ export default function NuevoInformePage() {
             placeholder="ej. Lanzamiento Verano"
             className="w-full px-3 py-2.5 text-sm rounded-xl bg-muted border border-border text-foreground focus:outline-none focus:ring-2 focus:ring-emerald-500/40"
           />
-          <p className="text-[10px] text-muted-foreground mt-1">
+          <p className="text-xs text-muted-foreground mt-1">
             Ancla el informe a una campaña (filtra leads, ventas y gasto por ese nombre de campaña).
           </p>
         </div>
         <div>
           <label className="block text-xs font-medium text-muted-foreground mb-1">
-            Partir de una plantilla <span className="text-muted-foreground/50">(opcional)</span>
+            Partir de una plantilla <span className="text-muted-foreground">(opcional)</span>
           </label>
           <select
             value={templateId}
@@ -154,14 +154,14 @@ export default function NuevoInformePage() {
               </option>
             ))}
           </select>
-          <p className="text-[10px] text-muted-foreground mt-1">
+          <p className="text-xs text-muted-foreground mt-1">
             Copia los widgets y campos calculados de la plantilla; el cliente y las fechas son los
             de este informe.
           </p>
         </div>
         <div>
           <label className="block text-xs font-medium text-muted-foreground mb-1">
-            Descripción <span className="text-muted-foreground/50">(opcional)</span>
+            Descripción <span className="text-muted-foreground">(opcional)</span>
           </label>
           <textarea
             value={desc}

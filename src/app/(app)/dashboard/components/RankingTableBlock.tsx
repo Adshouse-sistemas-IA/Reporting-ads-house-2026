@@ -272,20 +272,20 @@ export function RankingTableBlock({
               <p className="text-sm text-foreground/90 font-medium">
                 No hay datos de {dimLabel} para este rango de fechas
               </p>
-              <p className="text-xs text-muted-foreground/70 max-w-xs">
+              <p className="text-xs text-muted-foreground max-w-xs">
                 El desglose por {dimLabel} requiere sincronizar el rango seleccionado. Usa el botón{' '}
                 <span className="text-blue-600 dark:text-blue-400 font-medium">
                   Sincronizar Datos
                 </span>{' '}
                 en la parte superior del dashboard para cargar los datos.
               </p>
-              <div className="mt-1 text-[11px] text-muted-foreground/70 bg-muted/60 rounded-lg px-3 py-1.5">
+              <div className="mt-1 text-xs text-muted-foreground bg-muted/60 rounded-lg px-3 py-1.5">
                 {totalDays} día{totalDays !== 1 ? 's' : ''} en el rango · {daysNeedingSync} con
                 gasto sin sincronizar
               </div>
             </>
           ) : (
-            <p className="text-sm text-muted-foreground/70">Sin datos para este rango de fechas</p>
+            <p className="text-sm text-muted-foreground">Sin datos para este rango de fechas</p>
           )}
         </div>
       </div>
@@ -338,7 +338,7 @@ export function RankingTableBlock({
                 >
                   {consolidateModal.name}
                 </p>
-                <p className="text-muted-foreground/70 text-[11px] mt-0.5">
+                <p className="text-muted-foreground text-xs mt-0.5">
                   Suma de{' '}
                   <span className="text-indigo-600 dark:text-indigo-300 font-semibold">
                     {consolidateModal.count}
@@ -348,7 +348,7 @@ export function RankingTableBlock({
               </div>
               <button
                 onClick={() => setConsolidateModal(null)}
-                className="text-muted-foreground/70 hover:text-foreground transition mt-0.5"
+                className="text-muted-foreground hover:text-foreground transition mt-0.5"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -383,7 +383,7 @@ export function RankingTableBlock({
             def.dimension === 'tiktok_adgroups') &&
             daysNeedingSync > 0 && (
               <span
-                className="text-[10px] text-amber-600 dark:text-amber-400/80 bg-amber-500/10 border border-amber-500/20 rounded px-2 py-0.5 cursor-help"
+                className="text-xs text-amber-600 dark:text-amber-400/80 bg-amber-500/10 border border-amber-500/20 rounded px-2 py-0.5 cursor-help"
                 title={`${daysNeedingSync} día(s) tuvieron gasto pero no tienen desglose. Sincroniza para completar.`}
               >
                 ⚠ {daysNeedingSync} día{daysNeedingSync !== 1 ? 's' : ''} sin sincronizar ·
@@ -399,7 +399,7 @@ export function RankingTableBlock({
               {def.showRank !== false && (
                 <th
                   style={{ width: colWidths['rank'] || undefined, position: 'relative' }}
-                  className="px-3 py-2 text-left text-muted-foreground/70 font-medium"
+                  className="px-3 py-2 text-left text-muted-foreground font-medium"
                 >
                   #
                   <div
@@ -412,7 +412,7 @@ export function RankingTableBlock({
               {def.dimension === 'ads' && (
                 <th
                   style={{ width: colWidths['thumb'] || 96, minWidth: 96, position: 'relative' }}
-                  className="px-3 py-2 text-left text-muted-foreground/70 font-medium"
+                  className="px-3 py-2 text-left text-muted-foreground font-medium"
                 >
                   <div
                     onMouseDown={(e) => startColResize('thumb', e)}
@@ -423,7 +423,7 @@ export function RankingTableBlock({
               )}
               <th
                 style={{ width: colWidths['name'] || undefined, position: 'relative' }}
-                className="px-3 py-2 text-left text-muted-foreground/70 font-medium"
+                className="px-3 py-2 text-left text-muted-foreground font-medium"
               >
                 Nombre
                 <div
@@ -436,7 +436,7 @@ export function RankingTableBlock({
                 <th
                   key={col.label}
                   style={{ width: colWidths[`col_${i}`] || undefined, position: 'relative' }}
-                  className="px-3 py-2 text-right text-muted-foreground/70 font-medium cursor-pointer select-none hover:text-foreground/90 transition-colors"
+                  className="px-3 py-2 text-right text-muted-foreground font-medium cursor-pointer select-none hover:text-foreground/90 transition-colors"
                   onClick={() => handleSortClick(i)}
                 >
                   <span className="inline-flex items-center justify-end gap-1">
@@ -467,9 +467,7 @@ export function RankingTableBlock({
                 className="border-b border-border hover:bg-accent transition"
               >
                 {def.showRank !== false && (
-                  <td className="px-3 py-2 text-muted-foreground/70 font-mono text-[10px]">
-                    #{idx + 1}
-                  </td>
+                  <td className="px-3 py-2 text-muted-foreground font-mono text-xs">#{idx + 1}</td>
                 )}
                 {def.dimension === 'ads' && (
                   <td className="px-2 py-1.5" style={{ minWidth: 96 }}>
@@ -510,7 +508,7 @@ export function RankingTableBlock({
                       <button
                         onClick={() => openConsolidate(row._name)}
                         title={`Consolidar ${nameCount[row._name]} anuncios con este nombre`}
-                        className="flex-shrink-0 flex items-center gap-0.5 text-[10px] text-amber-600 dark:text-amber-400/70 hover:text-amber-300 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/20 rounded px-1 py-0.5 transition"
+                        className="flex-shrink-0 flex items-center gap-0.5 text-xs text-amber-600 dark:text-amber-400/70 hover:text-amber-300 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/20 rounded px-1 py-0.5 transition"
                       >
                         <Layers className="w-2.5 h-2.5" />
                         <span>{nameCount[row._name]}</span>
@@ -524,7 +522,7 @@ export function RankingTableBlock({
                         }
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex-shrink-0 text-muted-foreground/70 hover:text-blue-400 transition"
+                        className="flex-shrink-0 text-muted-foreground hover:text-blue-400 transition"
                         title={
                           adInfoMap[row._id]?.previewUrl
                             ? 'Ver preview del anuncio'
@@ -541,7 +539,7 @@ export function RankingTableBlock({
                     return (
                       <td
                         key={col.label}
-                        className="px-3 py-2 text-right font-mono text-muted-foreground/50"
+                        className="px-3 py-2 text-right font-mono text-muted-foreground"
                         title={MOTIVO_NO_APLICA}
                       >
                         n/a
@@ -585,7 +583,7 @@ export function RankingTableBlock({
       {/* Pies informativos: un total que no cuadra con la suma de la tabla
                 parece un fallo si nadie lo explica. */}
       {columnasNoAplican.size > 0 && (
-        <p className="px-3 pb-2 text-[11px] text-muted-foreground/70">
+        <p className="px-3 pb-2 text-xs text-muted-foreground">
           {columnasNoAplican.size === 1
             ? 'Una columna mide'
             : `${columnasNoAplican.size} columnas miden`}{' '}
@@ -594,7 +592,7 @@ export function RankingTableBlock({
         </p>
       )}
       {(fueraDeTabla.sinCampana > 0 || fueraDeTabla.fueraDeTabla > 0) && (
-        <p className="px-3 pb-2 text-[11px] text-muted-foreground/70">
+        <p className="px-3 pb-2 text-xs text-muted-foreground">
           {fueraDeTabla.sinCampana + fueraDeTabla.fueraDeTabla} contactos no aparecen en esta tabla
           {fueraDeTabla.sinCampana > 0 && `: ${fueraDeTabla.sinCampana} sin campaña identificada`}
           {fueraDeTabla.fueraDeTabla > 0 &&

@@ -7,7 +7,7 @@ import { createClient } from '@/utils/supabase/client';
 import { ThemeToggle } from '@/components/theme/ThemeToggle';
 import { APP_VERSION } from '@/lib/version';
 import {
-  Users,
+  LayoutTemplate,
   BarChart3,
   LogOut,
   Settings,
@@ -53,7 +53,7 @@ function NavSection({
   if (items.length === 0) return null;
   return (
     <div>
-      <p className="px-3 text-[10px] font-semibold text-muted-foreground/70 uppercase tracking-widest mb-2">
+      <p className="px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1.5">
         {title}
       </p>
       <div className="space-y-0.5">
@@ -65,20 +65,18 @@ function NavSection({
               href={item.href}
               onClick={onNavigate}
               className={`
-                group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg
-                transition-all duration-200 cursor-pointer
-                ${active ? `text-white ${accent}` : 'text-muted-foreground hover:text-foreground hover:bg-accent'}
+                group flex items-center px-3 py-2 text-sm font-medium rounded-lg
+                transition-colors duration-150 cursor-pointer
+                ${active ? accent : 'text-muted-foreground hover:text-foreground hover:bg-accent'}
               `}
             >
               <item.icon
                 className={`
-                  mr-3 flex-shrink-0 h-4.5 w-4.5 transition-transform duration-200
-                  group-hover:scale-110
-                  ${active ? 'text-white' : 'text-muted-foreground/80 group-hover:text-foreground'}
+                  mr-3 flex-shrink-0 h-4 w-4
+                  ${active ? 'text-current' : 'text-muted-foreground group-hover:text-foreground'}
                 `}
               />
               <span className="flex-1">{item.name}</span>
-              {active && <div className="w-1.5 h-1.5 rounded-full bg-white/70 animate-pulse" />}
             </Link>
           );
         })}
@@ -160,7 +158,7 @@ export function AppSidebar({
   const puedeUsarAgente = hasAdminAccess || isTrafficker;
 
   const navigation = [
-    { name: 'General Overview', href: '/dashboard', icon: LayoutDashboard },
+    { name: 'Resumen general', href: '/dashboard', icon: LayoutDashboard },
     { name: 'Notificaciones', href: '/notificaciones', icon: Bell },
   ];
 
@@ -171,20 +169,20 @@ export function AppSidebar({
     { name: 'Leads', href: '/leads', icon: UserCheck, show: puedeUsarAgente },
     { name: 'Ventas', href: '/ventas', icon: ShoppingBag, show: puedeUsarAgente },
     { name: 'Informes', href: '/informes', icon: PieChart, show: puedeUsarAgente },
-    { name: 'Cruce de Campañas', href: '/cruce-campanas', icon: Link2, show: puedeUsarAgente },
+    { name: 'Cruce de campañas', href: '/cruce-campanas', icon: Link2, show: puedeUsarAgente },
   ].filter((item) => item.show);
 
   const settingsNavigation = [
     { name: 'Agente', href: '/admin/agente', icon: Bot, show: puedeUsarAgente },
-    { name: 'Ajustes de Sistema', href: '/admin/settings', icon: Settings, show: true },
-    { name: 'Constructor de Layouts', href: '/admin/layouts', icon: Users, show: true },
+    { name: 'Clientes y conexiones', href: '/admin/settings', icon: Settings, show: true },
+    { name: 'Constructor de vistas', href: '/admin/layouts', icon: LayoutTemplate, show: true },
     {
-      name: 'Configuración y Alertas',
+      name: 'Alertas y configuración',
       href: '/admin/configuracion',
       icon: Sliders,
       show: hasAdminAccess,
     },
-    { name: 'Salud de Fuentes', href: '/admin/salud', icon: Activity, show: hasAdminAccess },
+    { name: 'Salud de fuentes', href: '/admin/salud', icon: Activity, show: hasAdminAccess },
   ].filter((item) => item.show);
 
   const isActive = (path: string) => pathname?.startsWith(path);
@@ -235,7 +233,7 @@ export function AppSidebar({
             </div>
             <div className="flex flex-col leading-tight default-logo-element">
               <span className="text-base font-bold tracking-tight text-foreground">{appName}</span>
-              <span className="text-[10px] font-medium text-muted-foreground tracking-wide uppercase">
+              <span className="text-xs font-medium text-muted-foreground tracking-wide uppercase">
                 {appTag}
               </span>
             </div>
@@ -255,7 +253,7 @@ export function AppSidebar({
         {/* Navigation */}
         <nav className="flex-1 space-y-6 px-3 py-6 overflow-y-auto custom-scrollbar">
           <NavSection
-            title="Dashboard"
+            title="Inicio"
             items={navigation}
             accent="nav-active-red"
             pathname={pathname}
@@ -269,7 +267,7 @@ export function AppSidebar({
             onNavigate={() => setIsOpen(false)}
           />
           <NavSection
-            title="Configuración"
+            title="Administración"
             items={settingsNavigation}
             accent="nav-active-blue"
             pathname={pathname}
@@ -282,22 +280,22 @@ export function AppSidebar({
           <Link
             href="/soporte"
             onClick={() => setIsOpen(false)}
-            className={`flex items-center gap-3 rounded-xl border px-3 py-2.5 text-sm font-semibold transition-all duration-200
+            className={`flex items-center gap-3 rounded-lg border px-3 py-2 text-sm font-medium transition-colors duration-150
                             ${
                               isActive('/soporte')
-                                ? 'border-transparent nav-active-blue text-white'
-                                : 'border-brand-blue/30 bg-brand-blue/10 text-brand-blue dark:text-brand-blue-light hover:bg-brand-blue/15 hover:border-brand-blue/40'
+                                ? 'border-transparent nav-active-blue'
+                                : 'border-border text-muted-foreground hover:text-foreground hover:bg-accent'
                             }`}
           >
             <Map className="h-4 w-4 flex-shrink-0" />
-            <span className="flex-1 leading-tight">Roadmap</span>
+            <span className="flex-1 leading-tight">Roadmap y soporte</span>
           </Link>
         </div>
 
         {/* Role badge + Logout */}
         <div className="p-3 border-t border-sidebar-border space-y-2">
           <div className="flex items-center justify-between px-3">
-            <span className="text-[10px] font-semibold text-muted-foreground/70 uppercase tracking-widest">
+            <span className="text-xs font-semibold text-muted-foreground uppercase tracking-widest">
               Tema
             </span>
             <ThemeToggle />
@@ -310,7 +308,7 @@ export function AppSidebar({
                   role === 'superadmin'
                     ? 'text-amber-500 dark:text-amber-400'
                     : role === 'admin'
-                      ? 'text-purple-500 dark:text-purple-400'
+                      ? 'text-brand-blue dark:text-brand-blue-light'
                       : role === 'trafficker'
                         ? 'text-blue-500 dark:text-blue-400'
                         : 'text-muted-foreground'
@@ -340,7 +338,7 @@ export function AppSidebar({
               Cerrar Sesión
             </button>
           </form>
-          <p className="px-3 pt-1 text-center text-[10px] font-medium text-muted-foreground/50 tracking-wide">
+          <p className="px-3 pt-1 text-center text-xs font-medium text-muted-foreground tracking-wide">
             Ad House Reporting · v{APP_VERSION}
           </p>
         </div>

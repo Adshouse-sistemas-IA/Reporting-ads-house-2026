@@ -40,7 +40,7 @@ export function AttributionBadge({ method }: { method: string | null }) {
   return (
     <span
       title={c.title}
-      className={`inline-flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded ${c.cls}`}
+      className={`inline-flex items-center gap-1 text-xs font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded ${c.cls}`}
     >
       <Icon className="h-3 w-3" />
       {c.label}

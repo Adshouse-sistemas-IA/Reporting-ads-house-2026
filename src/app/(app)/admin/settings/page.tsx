@@ -44,7 +44,7 @@ export default async function AdminClientesPage() {
       {!clientes || clientes.length === 0 ? (
         <Card className="bg-card border-border flex flex-col items-center justify-center p-12 text-center">
           <div className="bg-muted p-4 rounded-full mb-4">
-            <AtSign className="h-8 w-8 text-muted-foreground/70" />
+            <AtSign className="h-8 w-8 text-muted-foreground" />
           </div>
           <CardTitle className="text-xl">Sin clientes registrados</CardTitle>
           <p className="text-muted-foreground mt-2 max-w-sm mb-6">

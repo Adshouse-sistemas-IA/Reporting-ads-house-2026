@@ -183,7 +183,7 @@ export function PreguntaPicker({ clienteId, def, onChange }: Props) {
     <div className="space-y-3">
       {delCatalogo.length > 0 && (
         <div className="space-y-1">
-          <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wide">
+          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
             Del catálogo
           </p>
           {delCatalogo.map((s) => (
@@ -210,12 +210,12 @@ export function PreguntaPicker({ clienteId, def, onChange }: Props) {
                     {s.nombre}
                   </span>
                   {s.inactivo && (
-                    <span className="shrink-0 text-[10px] px-1.5 py-px rounded bg-amber-500/15 text-amber-700 dark:text-amber-400">
+                    <span className="shrink-0 text-xs px-1.5 py-px rounded bg-amber-500/15 text-amber-700 dark:text-amber-400">
                       inactivo
                     </span>
                   )}
                 </span>
-                <span className="block text-[11px] text-muted-foreground/70">
+                <span className="block text-xs text-muted-foreground">
                   {s.inactivo
                     ? // Un campo inactivo no se carga, así que el bloque no pinta
                       // nada. Decirlo aquí evita el viaje al dashboard a mirar
@@ -233,10 +233,10 @@ export function PreguntaPicker({ clienteId, def, onChange }: Props) {
 
       {detectadas.length > 0 && (
         <div className="space-y-1">
-          <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wide">
+          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
             Detectadas en los formularios
           </p>
-          <p className="text-[11px] text-muted-foreground/70">
+          <p className="text-xs text-muted-foreground">
             Marca varias si son la misma pregunta escrita de formas distintas.
           </p>
           {detectadas.map((s) => (
@@ -261,12 +261,12 @@ export function PreguntaPicker({ clienteId, def, onChange }: Props) {
                 <span className="block text-xs text-foreground truncate" title={s.nombre}>
                   {s.nombre}
                 </span>
-                <span className="block text-[11px] text-muted-foreground/70">
+                <span className="block text-xs text-muted-foreground">
                   {nf.format(s.leads)} leads · {s.distintos} respuestas
                   {s.formularios.length > 0 && ` · ${s.formularios.slice(0, 2).join(', ')}`}
                 </span>
                 {s.valores.length > 0 && (
-                  <span className="block text-[11px] text-muted-foreground/50 truncate">
+                  <span className="block text-xs text-muted-foreground truncate">
                     {s.valores.slice(0, 4).join(' · ')}
                   </span>
                 )}
@@ -292,7 +292,7 @@ export function PreguntaPicker({ clienteId, def, onChange }: Props) {
         </button>
       )}
       {def.origen === 'auto' && (def.clavesOrigen ?? []).length > 0 && (
-        <p className="text-[11px] text-muted-foreground/70">
+        <p className="text-xs text-muted-foreground">
           Guardarla permite renombrarla, agrupar respuestas equivalentes y ordenarlas de menor a
           mayor desde la ficha del cliente.
         </p>

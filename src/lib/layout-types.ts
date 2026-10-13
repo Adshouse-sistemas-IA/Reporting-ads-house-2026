@@ -104,6 +104,8 @@ export interface CardDef {
   threshold?: CardThreshold; // Para variant='threshold': colores automáticos por umbral
   targetFormula?: string; // Para variant='progress': fórmula del valor objetivo
   targetLabel?: string; // Etiqueta del objetivo en la barra de progreso
+  /** Si subir es bueno. Sin declarar se infiere (`lib/polaridad-metrica.ts`). */
+  mejorSi?: 'sube' | 'baja' | 'neutro';
 }
 
 export type ChartType =

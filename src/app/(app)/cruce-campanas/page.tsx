@@ -340,10 +340,10 @@ export default function CruceCampanasPage() {
   return (
     <div className="space-y-6">
       <div>
-        <p className="text-[10px] font-semibold uppercase tracking-widest text-emerald-500 dark:text-emerald-400">
+        <p className="text-xs font-semibold uppercase tracking-widest text-emerald-500 dark:text-emerald-400">
           Report-UTM · Datos
         </p>
-        <h1 className="text-3xl font-bold tracking-tight text-foreground mt-1 flex items-center gap-2">
+        <h1 className="text-2xl font-semibold tracking-tight text-foreground mt-1 flex items-center gap-2">
           <Link2 className="h-6 w-6 text-emerald-500" />
           Cruce Leads × Campañas
         </h1>
@@ -357,9 +357,7 @@ export default function CruceCampanasPage() {
       {/* Filtros */}
       <div className="rounded-2xl border border-border bg-card p-4 grid grid-cols-1 sm:grid-cols-4 gap-3">
         <div>
-          <label className="block text-[10px] font-medium text-muted-foreground mb-1">
-            Cliente
-          </label>
+          <label className="block text-xs font-medium text-muted-foreground mb-1">Cliente</label>
           <select
             value={clienteId}
             onChange={(e) => setClienteId(e.target.value)}
@@ -373,7 +371,7 @@ export default function CruceCampanasPage() {
           </select>
         </div>
         <div>
-          <label className="block text-[10px] font-medium text-muted-foreground mb-1">Desde</label>
+          <label className="block text-xs font-medium text-muted-foreground mb-1">Desde</label>
           <input
             type="date"
             value={dateFrom}
@@ -382,7 +380,7 @@ export default function CruceCampanasPage() {
           />
         </div>
         <div>
-          <label className="block text-[10px] font-medium text-muted-foreground mb-1">Hasta</label>
+          <label className="block text-xs font-medium text-muted-foreground mb-1">Hasta</label>
           <input
             type="date"
             value={dateTo}
@@ -450,7 +448,7 @@ export default function CruceCampanasPage() {
               <div className="flex items-center gap-2 mb-3">
                 <Sparkles className="h-4 w-4 text-emerald-500" />
                 <h2 className="text-sm font-semibold text-foreground">Cómo cruzaron los leads</h2>
-                <span className="text-[10px] text-muted-foreground font-mono ml-auto">
+                <span className="text-xs text-muted-foreground font-mono ml-auto">
                   {coverage.total} leads que cuentan
                 </span>
               </div>
@@ -468,7 +466,7 @@ export default function CruceCampanasPage() {
                 <button
                   onClick={confirmAllSuggestions}
                   disabled={bulkBusy}
-                  className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] font-medium text-white nav-active-emerald disabled:opacity-40"
+                  className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium text-white nav-active-emerald disabled:opacity-40"
                 >
                   {bulkBusy ? (
                     <Loader2 className="h-3 w-3 animate-spin" />
@@ -479,7 +477,7 @@ export default function CruceCampanasPage() {
                 </button>
               )}
               <div className="ml-auto flex items-center gap-3">
-                <label className="flex items-center gap-1.5 text-[11px] text-muted-foreground cursor-pointer select-none">
+                <label className="flex items-center gap-1.5 text-xs text-muted-foreground cursor-pointer select-none">
                   <input
                     type="checkbox"
                     checked={onlyUncrossed}
@@ -508,7 +506,7 @@ export default function CruceCampanasPage() {
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead className="bg-muted/60">
-                    <tr className="text-left text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                    <tr className="text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                       <th className="px-6 py-3">UTM Campaign</th>
                       <th className="px-6 py-3 text-right">Leads</th>
                       <th className="px-6 py-3">Estado</th>
@@ -531,7 +529,7 @@ export default function CruceCampanasPage() {
                           >
                             {row.value}
                           </td>
-                          <td className="px-6 py-3 text-right text-xs font-mono tabular-nums text-foreground">
+                          <td className="px-6 py-3 text-right text-xs tabular-nums text-foreground">
                             {row.count}
                           </td>
                           <td className="px-6 py-3">
@@ -546,7 +544,7 @@ export default function CruceCampanasPage() {
                                     ? `Varias campañas (${row.distinct_campaigns})`
                                     : row.matched_campaign}
                                 </span>
-                                <span className="shrink-0 px-1.5 py-0.5 rounded-md text-[10px] font-medium text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10">
+                                <span className="shrink-0 px-1.5 py-0.5 rounded-md text-xs font-medium text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10">
                                   {METHOD_LABEL[row.method] ?? row.method}
                                 </span>
                               </div>
@@ -586,7 +584,7 @@ export default function CruceCampanasPage() {
                                 {sugg && (
                                   <span
                                     title={`Sugerido: ${sugg.campaign_name}`}
-                                    className={`shrink-0 inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-medium ${sugg.confidence >= BULK_CONFIDENCE ? 'text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10' : 'text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-500/10'}`}
+                                    className={`shrink-0 inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-xs font-medium ${sugg.confidence >= BULK_CONFIDENCE ? 'text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10' : 'text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-500/10'}`}
                                   >
                                     <Sparkles className="h-3 w-3" /> {sugg.confidence}%
                                   </span>
@@ -594,7 +592,7 @@ export default function CruceCampanasPage() {
                                 <button
                                   onClick={() => saveRow(row)}
                                   disabled={!picks[row.value]}
-                                  className="shrink-0 flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] font-medium text-white nav-active-emerald disabled:opacity-40"
+                                  className="shrink-0 flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium text-white nav-active-emerald disabled:opacity-40"
                                 >
                                   {isSuggested ? (
                                     <>
@@ -608,13 +606,13 @@ export default function CruceCampanasPage() {
                                 </button>
                               </div>
                             ) : row.invalid_reason ? (
-                              <span className="text-[11px] text-muted-foreground">
+                              <span className="text-xs text-muted-foreground">
                                 {row.invalid_reason === 'macro_no_renderizado'
                                   ? 'Revisa los parámetros de URL en Meta/TikTok (clic orgánico/compartido o macro mal configurado).'
                                   : 'El lead llegó sin UTM. Si no es captación pagada, exclúyelo con la regla «Qué leads cuentan» de la ficha del cliente.'}
                               </span>
                             ) : (
-                              <span className="text-[11px] text-muted-foreground">—</span>
+                              <span className="text-xs text-muted-foreground">—</span>
                             )}
                           </td>
                         </tr>
@@ -652,7 +650,7 @@ export default function CruceCampanasPage() {
               </div>
               <table className="w-full">
                 <thead className="bg-muted/60">
-                  <tr className="text-left text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                  <tr className="text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                     <th className="px-6 py-3">Nivel</th>
                     <th className="px-6 py-3">Campo</th>
                     <th className="px-6 py-3">Valor UTM</th>
@@ -663,10 +661,10 @@ export default function CruceCampanasPage() {
                 <tbody className="divide-y divide-border">
                   {overrides.map((o) => (
                     <tr key={o.id} className="hover:bg-accent">
-                      <td className="px-6 py-3 text-[11px] text-muted-foreground">
+                      <td className="px-6 py-3 text-xs text-muted-foreground">
                         {NIVEL_LABEL[o.nivel ?? 'campaign']}
                       </td>
-                      <td className="px-6 py-3 text-[11px] font-mono text-muted-foreground">
+                      <td className="px-6 py-3 text-xs font-mono text-muted-foreground">
                         {o.match_field}
                       </td>
                       <td className="px-6 py-3 text-xs font-mono text-foreground max-w-[260px] truncate">
@@ -727,7 +725,7 @@ const METHOD_LABELS: { key: string; label: string; color: string }[] = [
 function IdsLinea({ ids }: { ids: CoberturaIds }) {
   if (!ids.columnas) {
     return (
-      <p className="mt-3 text-[11px] text-muted-foreground">
+      <p className="mt-3 text-xs text-muted-foreground">
         Los IDs propios de campaña, conjunto y anuncio se guardarán con cada lead en cuanto se
         aplique la migración 082. Mientras tanto el cruce sigue usando los UTM.
       </p>
@@ -735,7 +733,7 @@ function IdsLinea({ ids }: { ids: CoberturaIds }) {
   }
   const pct = (n: number) => (ids.total > 0 ? Math.round((n / ids.total) * 100) : 0);
   return (
-    <p className="mt-3 text-[11px] text-muted-foreground">
+    <p className="mt-3 text-xs text-muted-foreground">
       Leads con ID propio: <span className="font-mono text-foreground">{pct(ids.ad)}%</span> anuncio
       · <span className="font-mono text-foreground">{pct(ids.adset)}%</span> conjunto ·{' '}
       <span className="font-mono text-foreground">{pct(ids.campaign)}%</span> campaña. Para subirlo,
@@ -756,11 +754,11 @@ function AmbiguosPanel({ rows }: { rows: AmbiguoRow[] }) {
         <h2 className="text-sm font-semibold text-foreground">
           Nombres repetidos en varias campañas
         </h2>
-        <span className="text-[10px] text-muted-foreground font-mono ml-auto">
+        <span className="text-xs text-muted-foreground font-mono ml-auto">
           {total.toLocaleString()} leads sin atribuir
         </span>
       </div>
-      <p className="px-6 pt-3 text-[11px] text-muted-foreground">
+      <p className="px-6 pt-3 text-xs text-muted-foreground">
         Estos leads solo traen el nombre del anuncio o del conjunto, y ese nombre existe en más de
         una campaña. Para no inventar la atribución se quedan sin cruzar. Corrígelos por nivel más
         abajo o, para que no vuelva a pasar, añade{' '}
@@ -769,7 +767,7 @@ function AmbiguosPanel({ rows }: { rows: AmbiguoRow[] }) {
       <div className="overflow-x-auto">
         <table className="w-full mt-2">
           <thead className="bg-muted/60">
-            <tr className="text-left text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+            <tr className="text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               <th className="px-6 py-3">Valor UTM</th>
               <th className="px-6 py-3 text-right">Leads</th>
               <th className="px-6 py-3">Existe en</th>
@@ -779,7 +777,7 @@ function AmbiguosPanel({ rows }: { rows: AmbiguoRow[] }) {
             {rows.map((r) => (
               <tr key={`${r.field}|${r.value}`} className="hover:bg-accent align-top">
                 <td className="px-6 py-3 text-xs font-mono text-foreground max-w-[320px]">
-                  <span className="mr-2 px-1.5 py-0.5 rounded-md text-[10px] text-muted-foreground bg-muted">
+                  <span className="mr-2 px-1.5 py-0.5 rounded-md text-xs text-muted-foreground bg-muted">
                     {r.field === 'utm_content'
                       ? 'anuncio'
                       : r.field === 'utm_campaign'
@@ -788,10 +786,10 @@ function AmbiguosPanel({ rows }: { rows: AmbiguoRow[] }) {
                   </span>
                   <span className="break-all">{r.value}</span>
                 </td>
-                <td className="px-6 py-3 text-right text-xs font-mono tabular-nums text-foreground">
+                <td className="px-6 py-3 text-right text-xs tabular-nums text-foreground">
                   {r.count}
                 </td>
-                <td className="px-6 py-3 text-[11px] text-muted-foreground">
+                <td className="px-6 py-3 text-xs text-muted-foreground">
                   {r.candidates.slice(0, 4).map((c) => (
                     <div key={`${c.platform}|${c.name}`} className="truncate max-w-[420px]">
                       [{c.platform}] {c.name}
@@ -827,13 +825,11 @@ function CoverageBar({ coverage }: { coverage: Coverage }) {
       </div>
       <div className="flex flex-wrap gap-x-4 gap-y-1">
         {segs.map((s) => (
-          <div key={s.key} className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+          <div key={s.key} className="flex items-center gap-1.5 text-xs text-muted-foreground">
             <span className={`h-2.5 w-2.5 rounded-sm ${s.color}`} />
             <span className="text-foreground font-medium">{s.label}</span>
-            <span className="font-mono tabular-nums">{s.count}</span>
-            <span className="text-muted-foreground/70">
-              ({Math.round((s.count / total) * 100)}%)
-            </span>
+            <span className="tabular-nums">{s.count}</span>
+            <span className="text-muted-foreground">({Math.round((s.count / total) * 100)}%)</span>
           </div>
         ))}
       </div>
@@ -864,7 +860,7 @@ function Stat({
           <Icon className="h-4 w-4" />
         </div>
       </div>
-      <p className="mt-3 text-2xl font-semibold font-mono tabular-nums text-foreground">{value}</p>
+      <p className="mt-3 text-2xl font-semibold tabular-nums text-foreground">{value}</p>
     </div>
   );
 }

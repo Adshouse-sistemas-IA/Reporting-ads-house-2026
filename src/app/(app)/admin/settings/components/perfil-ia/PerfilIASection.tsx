@@ -174,7 +174,7 @@ export function PerfilIASection({ clienteId }: { clienteId: string }) {
                 placeholder="Ej.: la medición llega hasta el lead. Las ventas las reporta el cliente aparte."
                 className="bg-background border-input"
               />
-              <p className="text-muted-foreground/70 text-xs">
+              <p className="text-muted-foreground text-xs">
                 Es el campo que más cambia la calidad del análisis.
               </p>
             </div>
@@ -210,7 +210,7 @@ export function PerfilIASection({ clienteId }: { clienteId: string }) {
                     </label>
                   ))}
                 </div>
-                <p className="text-muted-foreground/70 text-xs">
+                <p className="text-muted-foreground text-xs">
                   El agente no las reportará como carencia. Marcar aquí lo que este cliente no usa
                   por diseño es lo que evita conclusiones del tipo «faltan los datos de ventas».
                 </p>
@@ -238,7 +238,7 @@ export function PerfilIASection({ clienteId }: { clienteId: string }) {
                       <button
                         type="button"
                         onClick={() => void silenciar(f.id)}
-                        className="text-muted-foreground/50 hover:text-foreground shrink-0"
+                        className="text-muted-foreground hover:text-foreground shrink-0"
                         title="Dejar de aplicar esta nota"
                       >
                         <EyeOff className="h-3.5 w-3.5" />
@@ -246,7 +246,7 @@ export function PerfilIASection({ clienteId }: { clienteId: string }) {
                     </div>
                   ))}
                 </div>
-                <p className="text-muted-foreground/70 text-xs">
+                <p className="text-muted-foreground text-xs">
                   Notas que el equipo le ha dado al agente. Se le pasan en cada consulta sobre este
                   cliente.
                 </p>

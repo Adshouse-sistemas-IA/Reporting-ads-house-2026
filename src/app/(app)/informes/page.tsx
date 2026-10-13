@@ -36,10 +36,10 @@ export default async function InformesPage(props: {
       {/* Header */}
       <div className="flex items-end justify-between gap-4 flex-wrap">
         <div>
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-emerald-500 dark:text-emerald-400">
+          <p className="text-xs font-semibold uppercase tracking-widest text-emerald-500 dark:text-emerald-400">
             Report-UTM · BI Builder
           </p>
-          <h1 className="text-3xl font-bold tracking-tight text-foreground mt-1">Informes</h1>
+          <h1 className="text-2xl font-semibold tracking-tight text-foreground mt-1">Informes</h1>
           <p className="mt-1 text-sm text-muted-foreground">
             Crea reportes personalizados combinando leads, ventas y gasto publicitario.
           </p>

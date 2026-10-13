@@ -791,12 +791,12 @@ export function BiWidgetEditor({
                   }`}
                 >
                   <div className="font-semibold">{t.label}</div>
-                  <div className="text-[10px] opacity-70 mt-0.5 leading-tight">{t.desc}</div>
+                  <div className="text-xs opacity-70 mt-0.5 leading-tight">{t.desc}</div>
                 </button>
               ))}
             </div>
             {/* Bloques de organización */}
-            <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mt-3 mb-2">
+            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mt-3 mb-2">
               Organización
             </p>
             <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
@@ -811,7 +811,7 @@ export function BiWidgetEditor({
                   }`}
                 >
                   <div className="font-semibold">{t.label}</div>
-                  <div className="text-[10px] opacity-70 mt-0.5 leading-tight">{t.desc}</div>
+                  <div className="text-xs opacity-70 mt-0.5 leading-tight">{t.desc}</div>
                 </button>
               ))}
             </div>
@@ -854,7 +854,7 @@ export function BiWidgetEditor({
                 }
                 className="w-full px-3 py-2 text-sm rounded-lg bg-muted border border-border text-foreground focus:outline-none focus:ring-2 focus:ring-emerald-500/40 resize-y"
               />
-              <p className="text-[10px] text-muted-foreground mt-1">
+              <p className="text-xs text-muted-foreground mt-1">
                 Formato: <span className="font-mono">**negrita**</span>, línea nueva = párrafo,{' '}
                 <span className="font-mono">- </span> = viñeta.
               </p>
@@ -863,7 +863,7 @@ export function BiWidgetEditor({
           {type === 'summary' && (
             <div>
               <label className="block text-xs font-medium text-muted-foreground mb-1">
-                Texto del resumen <span className="text-muted-foreground/50">(opcional)</span>
+                Texto del resumen <span className="text-muted-foreground">(opcional)</span>
               </label>
               <textarea
                 value={text}
@@ -874,7 +874,7 @@ export function BiWidgetEditor({
                 }
                 className="w-full px-3 py-2 text-sm rounded-lg bg-muted border border-border text-foreground focus:outline-none focus:ring-2 focus:ring-emerald-500/40 resize-y"
               />
-              <p className="text-[10px] text-muted-foreground mt-1">
+              <p className="text-xs text-muted-foreground mt-1">
                 Si escribes algo aquí, ese texto reemplaza al resumen automático — útil para ajustar
                 la lectura antes de enviar el informe al cliente.
               </p>
@@ -949,7 +949,7 @@ export function BiWidgetEditor({
               <div className="flex gap-2 flex-wrap items-center">
                 <button
                   onClick={() => setAccent('')}
-                  className={`h-6 px-2 rounded-full text-[10px] border transition-all ${accent === '' ? 'border-foreground ring-2 ring-offset-2 ring-offset-card ring-foreground' : 'border-border text-muted-foreground'}`}
+                  className={`h-6 px-2 rounded-full text-xs border transition-all ${accent === '' ? 'border-foreground ring-2 ring-offset-2 ring-offset-card ring-foreground' : 'border-border text-muted-foreground'}`}
                 >
                   Sin color
                 </button>
@@ -1039,12 +1039,12 @@ export function BiWidgetEditor({
                       />
                       <span className="text-xs text-foreground flex-1">{label}</span>
                       {hasNoData(m) && (
-                        <span className="text-[9px] text-amber-600 dark:text-amber-400">
+                        <span className="text-xs text-amber-600 dark:text-amber-400">
                           sin datos
                         </span>
                       )}
                       {checked && (
-                        <span className="text-[10px] font-mono text-emerald-600 dark:text-emerald-400">
+                        <span className="text-xs font-mono text-emerald-600 dark:text-emerald-400">
                           {order + 1}
                         </span>
                       )}
@@ -1052,7 +1052,7 @@ export function BiWidgetEditor({
                   );
                 })}
               </div>
-              <p className="text-[10px] text-muted-foreground mt-1">
+              <p className="text-xs text-muted-foreground mt-1">
                 {funnelStages.length < 2
                   ? 'Marca al menos 2 etapas (si no, se usa el embudo por defecto).'
                   : `${funnelStages.length} etapas · en el orden marcado`}
@@ -1077,7 +1077,7 @@ export function BiWidgetEditor({
                         <button
                           key={String(f)}
                           onClick={() => setUseFormula(f)}
-                          className={`px-2 py-1 text-[10px] font-medium transition-colors ${
+                          className={`px-2 py-1 text-xs font-medium transition-colors ${
                             useFormula === f
                               ? 'bg-emerald-500 text-white'
                               : 'bg-muted text-muted-foreground hover:bg-accent'
@@ -1107,7 +1107,7 @@ export function BiWidgetEditor({
                     />
                     <div className="grid grid-cols-2 gap-2">
                       <div>
-                        <label className="block text-[10px] font-medium text-muted-foreground mb-1">
+                        <label className="block text-xs font-medium text-muted-foreground mb-1">
                           Formato
                         </label>
                         <select
@@ -1122,7 +1122,7 @@ export function BiWidgetEditor({
                         </select>
                       </div>
                       <div>
-                        <label className="block text-[10px] font-medium text-muted-foreground mb-1">
+                        <label className="block text-xs font-medium text-muted-foreground mb-1">
                           Decimales
                         </label>
                         <input
@@ -1147,7 +1147,7 @@ export function BiWidgetEditor({
                         const p = parseExpr(formula);
                         if (!isExprError(p)) return null;
                         return (
-                          <p className="text-[10px] text-red-500">
+                          <p className="text-xs text-red-500">
                             {p.error}
                             {p.at < formula.length && (
                               <span className="font-mono ml-1 opacity-70">
@@ -1182,7 +1182,7 @@ export function BiWidgetEditor({
                         <div className="max-h-56 overflow-y-auto rounded-lg border border-border bg-muted/30">
                           {metricGroups.map((g) => (
                             <div key={g.key}>
-                              <div className="sticky top-0 z-10 px-3 py-1 bg-muted/95 backdrop-blur border-y border-border text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+                              <div className="sticky top-0 z-10 px-3 py-1 bg-muted/95 backdrop-blur border-y border-border text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                                 {g.title}
                               </div>
                               <div className="divide-y divide-border">
@@ -1207,18 +1207,18 @@ export function BiWidgetEditor({
                                       {noCross && (
                                         <span
                                           title={`No se desglosa por ${resolveDimLabel(dim)}: saldría en la fila “(total)”.`}
-                                          className="text-[9px] text-amber-600 dark:text-amber-400"
+                                          className="text-xs text-amber-600 dark:text-amber-400"
                                         >
                                           no cruza
                                         </span>
                                       )}
                                       {hasNoData(m.value) && (
-                                        <span className="text-[9px] text-amber-600 dark:text-amber-400">
+                                        <span className="text-xs text-amber-600 dark:text-amber-400">
                                           sin datos
                                         </span>
                                       )}
                                       {checked && (
-                                        <span className="text-[10px] font-mono text-emerald-600 dark:text-emerald-400">
+                                        <span className="text-xs font-mono text-emerald-600 dark:text-emerald-400">
                                           col {order + 1}
                                         </span>
                                       )}
@@ -1230,7 +1230,7 @@ export function BiWidgetEditor({
                           ))}
                         </div>
                         <div className="flex items-center justify-between gap-2 mt-1">
-                          <p className="text-[10px] text-muted-foreground">
+                          <p className="text-xs text-muted-foreground">
                             {tableCols.length === 0
                               ? 'Selecciona al menos una columna.'
                               : `${tableCols.length} columna${tableCols.length > 1 ? 's' : ''} · se muestran en el orden marcado`}
@@ -1239,7 +1239,7 @@ export function BiWidgetEditor({
                             <button
                               type="button"
                               onClick={() => setShowAllMetrics(true)}
-                              className="text-[10px] font-medium text-emerald-600 dark:text-emerald-400 hover:underline shrink-0"
+                              className="text-xs font-medium text-emerald-600 dark:text-emerald-400 hover:underline shrink-0"
                             >
                               Ver todas ({hiddenCount} más)
                             </button>
@@ -1266,7 +1266,7 @@ export function BiWidgetEditor({
                     {hasNoData(String(metric)) && (
                       <div className="mt-2 flex items-start gap-2 rounded-lg border border-amber-300/60 dark:border-amber-500/30 bg-amber-50/60 dark:bg-amber-500/10 px-3 py-2">
                         <AlertTriangle className="h-3.5 w-3.5 text-amber-500 shrink-0 mt-0.5" />
-                        <p className="text-[11px] text-amber-700 dark:text-amber-300 leading-snug">
+                        <p className="text-xs text-amber-700 dark:text-amber-300 leading-snug">
                           <strong>{resolveMetricLabel(String(metric))}</strong> no tiene datos para
                           este cliente en el rango seleccionado: el widget mostrará 0. Puedes
                           dejarlo configurado si esperas que la fuente empiece a alimentarse.
@@ -1297,7 +1297,7 @@ export function BiWidgetEditor({
                   {showAdDimWarning && (
                     <div className="mt-2 flex items-start gap-2 rounded-lg border border-amber-300/60 dark:border-amber-500/30 bg-amber-50/60 dark:bg-amber-500/10 px-3 py-2">
                       <AlertTriangle className="h-3.5 w-3.5 text-amber-500 shrink-0 mt-0.5" />
-                      <p className="text-[11px] text-amber-700 dark:text-amber-300 leading-snug">
+                      <p className="text-xs text-amber-700 dark:text-amber-300 leading-snug">
                         <strong>{noCrossMetrics.map(resolveMetricLabel).join(', ')}</strong>{' '}
                         {noCrossMetrics.length === 1 ? 'no se desglosa' : 'no se desglosan'} por{' '}
                         <strong>{resolveDimLabel(dim)}</strong>:{' '}
@@ -1311,7 +1311,7 @@ export function BiWidgetEditor({
                   {showSheetMetricDimWarning && (
                     <div className="mt-2 flex items-start gap-2 rounded-lg border border-amber-300/60 dark:border-amber-500/30 bg-amber-50/60 dark:bg-amber-500/10 px-3 py-2">
                       <AlertTriangle className="h-3.5 w-3.5 text-amber-500 shrink-0 mt-0.5" />
-                      <p className="text-[11px] text-amber-700 dark:text-amber-300 leading-snug">
+                      <p className="text-xs text-amber-700 dark:text-amber-300 leading-snug">
                         Los campos de Sheet no se desglosan por{' '}
                         <strong>{resolveDimLabel(dim)}</strong>: el Sheet no guarda a qué lead
                         corresponde cada fila. Usa <strong>Fecha</strong> para la evolución, o el
@@ -1322,7 +1322,7 @@ export function BiWidgetEditor({
                   {sheetDimNoSheetMetric && (
                     <div className="mt-2 flex items-start gap-2 rounded-lg border border-amber-300/60 dark:border-amber-500/30 bg-amber-50/60 dark:bg-amber-500/10 px-3 py-2">
                       <AlertTriangle className="h-3.5 w-3.5 text-amber-500 shrink-0 mt-0.5" />
-                      <p className="text-[11px] text-amber-700 dark:text-amber-300 leading-snug">
+                      <p className="text-xs text-amber-700 dark:text-amber-300 leading-snug">
                         Al agrupar por <strong>{resolveDimLabel(dim)}</strong> solo se pueden medir
                         campos de Sheet. Las demás métricas saldrían en cero.
                       </p>
@@ -1332,7 +1332,7 @@ export function BiWidgetEditor({
               )}
 
               {['bar', 'combo', 'area', 'line'].includes(type) && !dim2Supported && (
-                <p className="text-[10px] text-muted-foreground leading-snug">
+                <p className="text-xs text-muted-foreground leading-snug">
                   El apilado por dimensión secundaria solo está disponible para{' '}
                   {PIVOT_METRICS.map((m) => METRIC_META[m].label).join(', ')} — son las únicas
                   métricas que se pueden desglosar fila a fila.
@@ -1342,7 +1342,7 @@ export function BiWidgetEditor({
               {supportsDim2 && (
                 <div>
                   <label className="flex items-center gap-1 text-xs font-medium text-muted-foreground mb-1">
-                    Dimensión secundaria <span className="text-muted-foreground/50">(apilado)</span>
+                    Dimensión secundaria <span className="text-muted-foreground">(apilado)</span>
                     <HelpTip text="Divide cada barra/línea en sub-series. Ej: dimensión Campaña + secundaria Source = cada campaña apilada por su origen de tráfico. Déjala en 'Ninguna' para un gráfico simple." />
                   </label>
                   <select
@@ -1454,7 +1454,7 @@ export function BiWidgetEditor({
               {/* Presentación del scorecard: semáforo / progreso */}
               {type === 'scorecard' && (
                 <div className="rounded-xl border border-border p-3 space-y-2.5">
-                  <label className="flex items-center gap-1 text-[11px] font-medium text-foreground">
+                  <label className="flex items-center gap-1 text-xs font-medium text-foreground">
                     Presentación
                     <HelpTip text="Estándar = solo el número. Semáforo = lo pinta de verde/ámbar/rojo según los umbrales que definas aquí. Progreso = barra de avance hacia un objetivo." />
                   </label>
@@ -1463,7 +1463,7 @@ export function BiWidgetEditor({
                       <button
                         key={v.value}
                         onClick={() => setVariant(v.value)}
-                        className={`px-2 py-1.5 rounded-lg text-[11px] font-medium border transition-colors ${
+                        className={`px-2 py-1.5 rounded-lg text-xs font-medium border transition-colors ${
                           variant === v.value
                             ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-300'
                             : 'border-border bg-muted/30 text-muted-foreground hover:bg-accent'
@@ -1495,9 +1495,7 @@ export function BiWidgetEditor({
                         ] as const
                       ).map((row) => (
                         <div key={row.color} className="flex items-center gap-1.5">
-                          <span className="w-12 text-[11px] text-muted-foreground">
-                            {row.color}
-                          </span>
+                          <span className="w-12 text-xs text-muted-foreground">{row.color}</span>
                           <select
                             value={row.op}
                             onChange={(e) => row.setOp(e.target.value as 'gte' | 'lte')}
@@ -1515,7 +1513,7 @@ export function BiWidgetEditor({
                           />
                         </div>
                       ))}
-                      <p className="text-[10px] text-muted-foreground">
+                      <p className="text-xs text-muted-foreground">
                         Si no cumple ninguno de los dos, se pinta en rojo.
                       </p>
                     </div>
@@ -1523,7 +1521,7 @@ export function BiWidgetEditor({
 
                   {variant === 'progress' && (
                     <div>
-                      <label className="block text-[10px] font-medium text-muted-foreground mb-1">
+                      <label className="block text-xs font-medium text-muted-foreground mb-1">
                         Objetivo del período
                       </label>
                       <input
@@ -1557,7 +1555,7 @@ export function BiWidgetEditor({
               {/* Formato condicional (tabla) */}
               {type === 'table' && (
                 <div className="rounded-xl border border-border p-3 space-y-2">
-                  <p className="flex items-center gap-1 text-[11px] font-medium text-foreground">
+                  <p className="flex items-center gap-1 text-xs font-medium text-foreground">
                     Formato condicional
                     <HelpTip text="Pinta una celda de color cuando cumple una condición. Ej: ROAS > 2 en verde resalta las campañas rentables; CPL > 50 en rojo marca leads caros. Solo se pueden usar las columnas que tiene la tabla." />
                   </p>
@@ -1575,7 +1573,7 @@ export function BiWidgetEditor({
                             c.map((r, idx) => (idx === i ? { ...r, metric: e.target.value } : r))
                           )
                         }
-                        className="w-32 px-1.5 py-1 text-[11px] rounded bg-muted border border-border text-foreground"
+                        className="w-32 px-1.5 py-1 text-xs rounded bg-muted border border-border text-foreground"
                       >
                         {/* Se conserva el valor guardado aunque ya no sea una
                                                     columna: si no, editar el widget borraría la regla
@@ -1600,7 +1598,7 @@ export function BiWidgetEditor({
                             )
                           )
                         }
-                        className="px-1 py-1 text-[11px] rounded bg-muted border border-border text-foreground"
+                        className="px-1 py-1 text-xs rounded bg-muted border border-border text-foreground"
                       >
                         <option value="gt">&gt;</option>
                         <option value="lt">&lt;</option>
@@ -1615,7 +1613,7 @@ export function BiWidgetEditor({
                             )
                           )
                         }
-                        className="w-16 px-2 py-1 text-[11px] font-mono rounded bg-muted border border-border text-foreground"
+                        className="w-16 px-2 py-1 text-xs font-mono rounded bg-muted border border-border text-foreground"
                       />
                       <select
                         value={rule.color}
@@ -1628,7 +1626,7 @@ export function BiWidgetEditor({
                             )
                           )
                         }
-                        className="px-1 py-1 text-[11px] rounded bg-muted border border-border text-foreground"
+                        className="px-1 py-1 text-xs rounded bg-muted border border-border text-foreground"
                       >
                         <option value="green">Verde</option>
                         <option value="red">Rojo</option>
@@ -1657,7 +1655,7 @@ export function BiWidgetEditor({
                         },
                       ])
                     }
-                    className="flex items-center gap-1 text-[11px] font-medium text-emerald-600 dark:text-emerald-400 hover:underline"
+                    className="flex items-center gap-1 text-xs font-medium text-emerald-600 dark:text-emerald-400 hover:underline"
                   >
                     <Plus className="h-3 w-3" /> Agregar regla
                   </button>
@@ -1667,7 +1665,7 @@ export function BiWidgetEditor({
               {/* Filtros por valor (tabla y gráficas): ocultar filas que no cumplan */}
               {(type === 'table' || isChart) && (
                 <div className="rounded-xl border border-border p-3 space-y-2">
-                  <p className="flex items-center gap-1 text-[11px] font-medium text-foreground">
+                  <p className="flex items-center gap-1 text-xs font-medium text-foreground">
                     Filtrar filas por valor
                     <HelpTip text="Oculta las filas que no cumplan la condición. Ej: Gasto > 0 quita campañas sin gasto; CPL ≤ 50 deja solo leads baratos; Leads entre 10 y 100. Si hay varias, deben cumplirse todas (Y)." />
                   </p>
@@ -1680,7 +1678,7 @@ export function BiWidgetEditor({
                             v.map((r, idx) => (idx === i ? { ...r, metric: e.target.value } : r))
                           )
                         }
-                        className="px-2 py-1 text-[11px] rounded bg-muted border border-border text-foreground max-w-[140px]"
+                        className="px-2 py-1 text-xs rounded bg-muted border border-border text-foreground max-w-[140px]"
                       >
                         {valueFilterChoices.map((k) => (
                           <option key={k} value={k}>
@@ -1698,7 +1696,7 @@ export function BiWidgetEditor({
                             )
                           )
                         }
-                        className="px-1 py-1 text-[11px] rounded bg-muted border border-border text-foreground"
+                        className="px-1 py-1 text-xs rounded bg-muted border border-border text-foreground"
                       >
                         {VALUE_OPS.map((o) => (
                           <option key={o.value} value={o.value} title={o.label}>
@@ -1716,11 +1714,11 @@ export function BiWidgetEditor({
                             )
                           )
                         }
-                        className="w-16 px-2 py-1 text-[11px] font-mono rounded bg-muted border border-border text-foreground"
+                        className="w-16 px-2 py-1 text-xs font-mono rounded bg-muted border border-border text-foreground"
                       />
                       {f.op === 'between' && (
                         <>
-                          <span className="text-[10px] text-muted-foreground">y</span>
+                          <span className="text-xs text-muted-foreground">y</span>
                           <input
                             type="number"
                             value={f.value2 ?? 0}
@@ -1731,7 +1729,7 @@ export function BiWidgetEditor({
                                 )
                               )
                             }
-                            className="w-16 px-2 py-1 text-[11px] font-mono rounded bg-muted border border-border text-foreground"
+                            className="w-16 px-2 py-1 text-xs font-mono rounded bg-muted border border-border text-foreground"
                           />
                         </>
                       )}
@@ -1750,7 +1748,7 @@ export function BiWidgetEditor({
                         { metric: valueFilterChoices[0] ?? 'spend', op: 'gt', value: 0 },
                       ])
                     }
-                    className="flex items-center gap-1 text-[11px] font-medium text-emerald-600 dark:text-emerald-400 hover:underline"
+                    className="flex items-center gap-1 text-xs font-medium text-emerald-600 dark:text-emerald-400 hover:underline"
                   >
                     <Plus className="h-3 w-3" /> Agregar filtro
                   </button>
@@ -1762,7 +1760,7 @@ export function BiWidgetEditor({
           {/* Filtro rápido por campaña: recorta gasto Y leads de este widget */}
           {!isStructural && type !== 'slicer' && (
             <div className="rounded-xl border border-border p-3 space-y-2">
-              <p className="flex items-center gap-1 text-[11px] font-medium text-foreground">
+              <p className="flex items-center gap-1 text-xs font-medium text-foreground">
                 Campaña
                 <HelpTip text="Limita este widget a las campañas cuyo nombre cumpla la condición. A diferencia de otros filtros, este SÍ recorta el gasto de anuncios (además de los leads), porque el nombre de campaña es el puente entre ambos." />
               </p>
@@ -1802,14 +1800,14 @@ export function BiWidgetEditor({
                 ))}
               </datalist>
               {!clienteId && (
-                <p className="text-[10px] text-muted-foreground">
+                <p className="text-xs text-muted-foreground">
                   Selecciona un cliente para ver la lista de campañas.
                 </p>
               )}
               {campaignFilterMatchesNothing && (
                 <div className="flex items-start gap-2 rounded-lg border border-amber-300/60 dark:border-amber-500/30 bg-amber-50/60 dark:bg-amber-500/10 px-3 py-2">
                   <AlertTriangle className="h-3.5 w-3.5 text-amber-500 shrink-0 mt-0.5" />
-                  <p className="text-[11px] text-amber-700 dark:text-amber-300 leading-snug">
+                  <p className="text-xs text-amber-700 dark:text-amber-300 leading-snug">
                     Ninguna campaña de este cliente cumple la condición, así que el widget mostrará{' '}
                     <strong>0</strong> en gasto y leads. Revisa el texto o elige una de la lista.
                   </p>
@@ -1821,12 +1819,12 @@ export function BiWidgetEditor({
           {/* Filtros del widget (Y de O): filtran SOLO este widget, en Y con los globales */}
           {!isStructural && type !== 'slicer' && (
             <div className="rounded-xl border border-border p-3 space-y-2">
-              <p className="flex items-center gap-1 text-[11px] font-medium text-foreground">
+              <p className="flex items-center gap-1 text-xs font-medium text-foreground">
                 Filtros del widget
                 <HelpTip text="Filtra SOLO este widget por variables (UTMs, país, formulario, campos…). Dentro de un grupo las condiciones se unen con O; los grupos entre sí con Y. Se combina (Y) con los filtros globales del informe. Ej: País contiene Colombia." />
               </p>
               {!clienteId && (
-                <p className="text-[10px] text-muted-foreground">
+                <p className="text-xs text-muted-foreground">
                   Selecciona un cliente en los filtros globales para ver los campos de formulario.
                 </p>
               )}

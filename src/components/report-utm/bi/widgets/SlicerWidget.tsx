@@ -63,7 +63,7 @@ export function SlicerWidget({ title, config, filters, onSetFilter, onSetDateRan
         <Filter className="h-3.5 w-3.5 text-emerald-500" />
         <p className="text-xs font-semibold text-foreground">{title || dimLabel}</p>
         {current.length > 0 && (
-          <span className="ml-auto px-1.5 py-0.5 rounded-full bg-emerald-500 text-white text-[9px] font-semibold">
+          <span className="ml-auto px-1.5 py-0.5 rounded-full bg-emerald-500 text-white text-xs font-semibold">
             {current.length}
           </span>
         )}
@@ -72,7 +72,7 @@ export function SlicerWidget({ title, config, filters, onSetFilter, onSetDateRan
       {mode === 'daterange' ? (
         <div className="space-y-2">
           <div>
-            <label className="block text-[10px] text-muted-foreground mb-1">Desde</label>
+            <label className="block text-xs text-muted-foreground mb-1">Desde</label>
             <input
               type="date"
               value={filters.date_from ?? ''}
@@ -81,7 +81,7 @@ export function SlicerWidget({ title, config, filters, onSetFilter, onSetDateRan
             />
           </div>
           <div>
-            <label className="block text-[10px] text-muted-foreground mb-1">Hasta</label>
+            <label className="block text-xs text-muted-foreground mb-1">Hasta</label>
             <input
               type="date"
               value={filters.date_to ?? ''}
@@ -114,7 +114,7 @@ export function SlicerWidget({ title, config, filters, onSetFilter, onSetDateRan
           {current.length > 0 && (
             <button
               onClick={() => onSetFilter?.(dimension, null)}
-              className="text-left px-2 py-1 text-[11px] text-muted-foreground hover:text-foreground"
+              className="text-left px-2 py-1 text-xs text-muted-foreground hover:text-foreground"
             >
               Limpiar selección
             </button>
@@ -142,14 +142,14 @@ export function SlicerWidget({ title, config, filters, onSetFilter, onSetDateRan
                 {/* El recuento es lo que convierte la lista en
                                     información: un «(sin campaña) · 47» junto a
                                     los demás delata el etiquetado de un vistazo. */}
-                <span className="shrink-0 tabular-nums text-muted-foreground text-[10px]">
+                <span className="shrink-0 tabular-nums text-muted-foreground text-xs">
                   {v.n.toLocaleString('es-CO')}
                 </span>
               </button>
             );
           })}
           {values.length === 0 && (
-            <p className="text-[11px] text-muted-foreground px-2 py-3">Sin valores</p>
+            <p className="text-xs text-muted-foreground px-2 py-3">Sin valores</p>
           )}
         </div>
       )}

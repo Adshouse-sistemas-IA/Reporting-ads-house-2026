@@ -92,7 +92,7 @@ export default async function PublicBiReportPage({ params }: Params) {
           frescura={frescura}
         />
         <BiReportCanvas report={report} readonly publicToken={token} />
-        <p className="mt-8 text-center text-[10px] text-muted-foreground">
+        <p className="mt-8 text-center text-xs text-muted-foreground">
           Vista de solo lectura · {cliente?.nombre ? `${cliente.nombre} · ` : ''}Ad House Reporting
         </p>
       </div>

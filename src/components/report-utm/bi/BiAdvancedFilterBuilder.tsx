@@ -76,7 +76,7 @@ export function BiAdvancedFilterBuilder({
   return (
     <div className="space-y-2">
       {groups.length === 0 && (
-        <p className="text-[11px] text-muted-foreground">
+        <p className="text-xs text-muted-foreground">
           Sin condiciones. Agrega un grupo para empezar a filtrar este widget.
         </p>
       )}
@@ -85,7 +85,7 @@ export function BiAdvancedFilterBuilder({
         <div key={gi}>
           {gi > 0 && (
             <div className="flex items-center gap-2 my-1.5">
-              <span className="px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-700 dark:text-amber-300 text-[10px] font-bold tracking-wider">
+              <span className="px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-700 dark:text-amber-300 text-xs font-bold tracking-wider">
                 Y
               </span>
               <div className="flex-1 h-px bg-border" />
@@ -95,7 +95,7 @@ export function BiAdvancedFilterBuilder({
             {g.conditions.map((c, ci) => (
               <div key={ci} className="flex items-center gap-1.5 flex-wrap">
                 {ci > 0 && (
-                  <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 w-4 text-center">
+                  <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 w-4 text-center">
                     O
                   </span>
                 )}
@@ -163,14 +163,14 @@ export function BiAdvancedFilterBuilder({
               <button
                 type="button"
                 onClick={() => addCondition(gi)}
-                className="flex items-center gap-1 text-[11px] font-medium text-emerald-600 dark:text-emerald-400 hover:underline"
+                className="flex items-center gap-1 text-xs font-medium text-emerald-600 dark:text-emerald-400 hover:underline"
               >
                 <Plus className="h-3 w-3" /> Condición (O)
               </button>
               <button
                 type="button"
                 onClick={() => removeGroup(gi)}
-                className="flex items-center gap-1 text-[11px] font-medium text-muted-foreground hover:text-red-500"
+                className="flex items-center gap-1 text-xs font-medium text-muted-foreground hover:text-red-500"
               >
                 <X className="h-3 w-3" /> Eliminar grupo
               </button>
@@ -183,7 +183,7 @@ export function BiAdvancedFilterBuilder({
         <button
           type="button"
           onClick={addGroup}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium bg-muted text-foreground hover:bg-accent transition-colors"
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-muted text-foreground hover:bg-accent transition-colors"
         >
           <Plus className="h-3 w-3" /> Agregar grupo (Y)
         </button>

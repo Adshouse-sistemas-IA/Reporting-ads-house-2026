@@ -107,7 +107,7 @@ export function BiSectionContainer({
         >
           {section.title}
         </h3>
-        <span className="text-[10px] text-muted-foreground tabular-nums">
+        <span className="text-xs text-muted-foreground tabular-nums">
           {children.length} {children.length === 1 ? 'widget' : 'widgets'}
         </span>
 
@@ -148,7 +148,7 @@ export function BiSectionContainer({
                   onDeleteSection?.(section.id);
                   setConfirming(false);
                 }}
-                className="px-2 py-1 rounded-lg bg-red-500 text-white text-[10px] font-medium shadow-sm"
+                className="px-2 py-1 rounded-lg bg-red-500 text-white text-xs font-medium shadow-sm"
               >
                 Eliminar sección
               </button>
@@ -157,7 +157,7 @@ export function BiSectionContainer({
               {...attributes}
               {...listeners}
               title="Arrastrar sección"
-              className="p-1.5 rounded-lg bg-card border border-border text-muted-foreground/60 hover:text-foreground cursor-grab active:cursor-grabbing shadow-sm touch-none"
+              className="p-1.5 rounded-lg bg-card border border-border text-muted-foreground hover:text-foreground cursor-grab active:cursor-grabbing shadow-sm touch-none"
             >
               <GripVertical className="h-3.5 w-3.5" />
             </button>

@@ -373,7 +373,7 @@ function CustomTooltip({ active, payload, label, categories, localUnits }: any) 
   return (
     <div className="rounded-lg border border-border bg-popover text-popover-foreground px-3 py-2.5 shadow-md min-w-[140px] max-w-[320px]">
       {label && (
-        <p className="text-[10px] uppercase tracking-[0.1em] font-bold text-muted-foreground mb-2 break-words">
+        <p className="text-xs uppercase tracking-[0.1em] font-bold text-muted-foreground mb-2 break-words">
           {label}
         </p>
       )}
@@ -387,7 +387,7 @@ function CustomTooltip({ active, payload, label, categories, localUnits }: any) 
               className="w-2 h-2 rounded-full shrink-0 mt-1"
               style={{ background: e.color || e.fill }}
             />
-            <span className="text-[11px] text-muted-foreground flex-1 min-w-0 break-words">
+            <span className="text-xs text-muted-foreground flex-1 min-w-0 break-words">
               {e.name}
             </span>
             <span className="text-xs font-semibold font-mono text-foreground shrink-0">
@@ -717,7 +717,7 @@ function SingleMetricChart({
             className="text-sm font-semibold text-foreground"
           />
           {formulasNoAplicables.length > 0 && (
-            <p className="text-[11px] text-amber-600 dark:text-amber-400 mt-1">
+            <p className="text-xs text-amber-600 dark:text-amber-400 mt-1">
               {formulasNoAplicables.length === 1
                 ? 'Serie omitida'
                 : `${formulasNoAplicables.length} series omitidas`}
@@ -736,7 +736,7 @@ function SingleMetricChart({
               leyendaCircular.map((it) => (
                 <span
                   key={it.nombre}
-                  className="flex items-center gap-1.5 text-[11px] text-muted-foreground max-w-[200px] min-w-0"
+                  className="flex items-center gap-1.5 text-xs text-muted-foreground max-w-[200px] min-w-0"
                   title={it.nombre}
                 >
                   <span
@@ -758,7 +758,7 @@ function SingleMetricChart({
                 return (
                   <div
                     key={cat}
-                    className="flex items-center gap-1.5 bg-background/40 border border-border px-2 py-0.5 rounded-lg text-[10px] text-muted-foreground hover:border-muted-foreground/30 transition"
+                    className="flex items-center gap-1.5 bg-background/40 border border-border px-2 py-0.5 rounded-lg text-xs text-muted-foreground hover:border-muted-foreground/30 transition"
                   >
                     <span
                       style={{
@@ -783,7 +783,7 @@ function SingleMetricChart({
                           onUpdateChart(chart.id, { ...chart, types: newTypes });
                         }
                       }}
-                      className="bg-card/60 border-none text-[9px] text-muted-foreground rounded px-1.5 py-0.5 outline-none hover:text-foreground cursor-pointer transition font-medium"
+                      className="bg-card/60 border-none text-xs text-muted-foreground rounded px-1.5 py-0.5 outline-none hover:text-foreground cursor-pointer transition font-medium"
                     >
                       <option value="">Defecto</option>
                       <option value="line">Línea</option>
@@ -804,7 +804,7 @@ function SingleMetricChart({
                 <button
                   key={p}
                   onClick={() => setPeriodicity(p)}
-                  className={`px-2.5 py-1 text-[10px] font-medium rounded-md transition ${periodicity === p ? 'bg-muted text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
+                  className={`px-2.5 py-1 text-xs font-medium rounded-md transition ${periodicity === p ? 'bg-muted text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
                 >
                   {p === 'day' ? 'Día' : p === 'week' ? 'Semana' : p === 'month' ? 'Mes' : 'Año'}
                 </button>
@@ -812,7 +812,7 @@ function SingleMetricChart({
             </div>
           )}
 
-          <div className="flex items-center gap-2 text-[10px] text-muted-foreground/70">
+          <div className="flex items-center gap-2 text-xs text-muted-foreground">
             <span className="border border-border px-2 py-0.5 rounded font-mono">
               {TYPE_LABELS[chart.type] ?? chart.type}
             </span>
@@ -1207,7 +1207,7 @@ function ChartBody({
   }
 
   return (
-    <div className="h-40 flex items-center justify-center text-muted-foreground/70 text-sm">
+    <div className="h-40 flex items-center justify-center text-muted-foreground text-sm">
       Tipo &quot;{type}&quot; no reconocido
     </div>
   );

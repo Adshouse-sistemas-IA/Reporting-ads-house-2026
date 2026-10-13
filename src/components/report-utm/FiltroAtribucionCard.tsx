@@ -264,14 +264,14 @@ export function FiltroAtribucionCard({
 
         <div className="space-y-2 pt-1">
           <div className="flex items-center justify-between gap-2">
-            <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               Condiciones de exclusión
             </p>
             <EstadoValores valores={valores} />
           </div>
 
           {condiciones.length === 0 && (
-            <p className="text-[11px] text-muted-foreground">
+            <p className="text-xs text-muted-foreground">
               Sin condiciones. Añade una para dejar fuera leads por campaña, formulario, respuesta,
               etiqueta, país, medio o datos de contacto.
             </p>
@@ -289,13 +289,13 @@ export function FiltroAtribucionCard({
 
           <button
             onClick={anadir}
-            className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] font-medium border border-dashed border-border text-muted-foreground hover:bg-accent hover:text-foreground"
+            className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium border border-dashed border-border text-muted-foreground hover:bg-accent hover:text-foreground"
           >
             <Plus className="h-3 w-3" /> Añadir condición
           </button>
         </div>
 
-        <p className="text-[11px] text-muted-foreground">
+        <p className="text-xs text-muted-foreground">
           Aparte de esto, la conexión GHL tiene su propio filtro de etiquetas: ese descarta el
           contacto antes de guardarlo (no queda rastro). Estas condiciones lo guardan marcado y se
           pueden deshacer.
@@ -303,7 +303,7 @@ export function FiltroAtribucionCard({
       </div>
 
       {incompletas.length > 0 && (
-        <p className="text-[11px] text-amber-600 dark:text-amber-400">
+        <p className="text-xs text-amber-600 dark:text-amber-400">
           {incompletas.length === 1 ? 'Hay una condición' : `Hay ${incompletas.length} condiciones`}{' '}
           sin valores (o sin pregunta): no se guardarán hasta completarlas.
         </p>
@@ -339,14 +339,14 @@ export function FiltroAtribucionCard({
             </button>
           )}
         {guardado && (
-          <span className="text-[11px] text-blue-600">
+          <span className="text-xs text-blue-600">
             Regla guardada. Se aplica a los leads que entren desde ahora.
           </span>
         )}
       </div>
 
       {resultado && (
-        <div className="rounded-lg border border-border bg-muted/40 px-3 py-2 text-[11px] text-foreground space-y-2">
+        <div className="rounded-lg border border-border bg-muted/40 px-3 py-2 text-xs text-foreground space-y-2">
           <p className="font-medium">
             {resultado.aplicado ? 'Aplicado' : 'Previsualización'} sobre{' '}
             {resultado.revisados.toLocaleString()} leads decididos automáticamente:
@@ -432,7 +432,7 @@ export function FiltroAtribucionCard({
         </div>
       )}
 
-      {error && <p className="text-[11px] text-red-500">{error}</p>}
+      {error && <p className="text-xs text-red-500">{error}</p>}
     </div>
   );
 }
@@ -441,7 +441,7 @@ export function FiltroAtribucionCard({
 
 function Aviso({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex items-start gap-2 rounded-lg border border-amber-500/30 bg-amber-50 dark:bg-amber-500/10 px-3 py-2 text-[11px] text-amber-700 dark:text-amber-400">
+    <div className="flex items-start gap-2 rounded-lg border border-amber-500/30 bg-amber-50 dark:bg-amber-500/10 px-3 py-2 text-xs text-amber-700 dark:text-amber-400">
       <AlertTriangle className="h-3.5 w-3.5 mt-0.5 shrink-0" />
       <span>{children}</span>
     </div>
@@ -469,7 +469,7 @@ function Casilla({
       />
       <span>
         <span className="font-medium">{titulo}</span>
-        <span className="block text-muted-foreground text-[11px]">{detalle}</span>
+        <span className="block text-muted-foreground text-xs">{detalle}</span>
       </span>
     </label>
   );
@@ -578,7 +578,7 @@ function FilaCondicion({
           />
         ))}
 
-      {PISTA_OP[c.op] && <p className="text-[10px] text-muted-foreground">{PISTA_OP[c.op]}</p>}
+      {PISTA_OP[c.op] && <p className="text-xs text-muted-foreground">{PISTA_OP[c.op]}</p>}
     </div>
   );
 }
@@ -700,7 +700,7 @@ function SelectorValores({
         {elegidos.map((v) => (
           <span
             key={v}
-            className="inline-flex items-center gap-1 rounded-md bg-blue-500/10 text-blue-700 dark:text-blue-300 px-1.5 py-0.5 text-[11px]"
+            className="inline-flex items-center gap-1 rounded-md bg-blue-500/10 text-blue-700 dark:text-blue-300 px-1.5 py-0.5 text-xs"
           >
             {v}
             {conteo.has(v.toLowerCase()) && (
@@ -752,7 +752,7 @@ function SelectorValores({
             </button>
           )}
           {filtradas.length === 0 && !puedeAnadirLibre && (
-            <p className="px-2 py-1 text-[11px] text-muted-foreground">
+            <p className="px-2 py-1 text-xs text-muted-foreground">
               {opciones.length === 0
                 ? 'No hay valores en los leads de este cliente.'
                 : 'Sin coincidencias.'}
@@ -783,21 +783,21 @@ function SelectorValores({
 function EstadoValores({ valores }: { valores: EstadoValoresRegla }) {
   if (valores.cargando) {
     return (
-      <span className="inline-flex items-center gap-1 text-[10px] text-muted-foreground">
+      <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
         <Loader2 className="h-3 w-3 animate-spin" /> leyendo los leads del cliente…
       </span>
     );
   }
   if (valores.error) {
     return (
-      <button onClick={valores.recargar} className="text-[10px] text-red-500 hover:underline">
+      <button onClick={valores.recargar} className="text-xs text-red-500 hover:underline">
         No se pudieron leer los valores (reintentar)
       </button>
     );
   }
   if (!valores.datos) return null;
   return (
-    <span className="text-[10px] text-muted-foreground">
+    <span className="text-xs text-muted-foreground">
       Valores de {valores.datos.leidos.toLocaleString()} leads del último año
       {valores.datos.truncado ? ' (muestra)' : ''}
     </span>

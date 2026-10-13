@@ -103,7 +103,7 @@ export function LeadsCampoFormulario({
     <div className="rounded-2xl border border-border bg-card px-4 py-3 space-y-2">
       <div className="flex items-center gap-1.5 text-muted-foreground">
         <ClipboardList className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
-        <span className="text-[10px] font-semibold uppercase tracking-wider">
+        <span className="text-xs font-semibold uppercase tracking-wider">
           Respuesta del formulario
         </span>
         {cargando && <Loader2 className="h-3 w-3 animate-spin" />}
@@ -113,11 +113,11 @@ export function LeadsCampoFormulario({
       <input type="hidden" name="campo_valor" value={valorURL} />
 
       {!clienteId ? (
-        <p className="text-[11px] text-muted-foreground">
+        <p className="text-xs text-muted-foreground">
           Elegí un cliente: las preguntas del formulario son distintas en cada uno.
         </p>
       ) : fallo ? (
-        <p className="inline-flex items-center gap-1.5 text-[11px] text-red-600 dark:text-red-400">
+        <p className="inline-flex items-center gap-1.5 text-xs text-red-600 dark:text-red-400">
           <AlertTriangle className="h-3 w-3" />
           No se pudieron cargar las preguntas. No es que no haya.
         </p>
@@ -146,7 +146,7 @@ export function LeadsCampoFormulario({
                 aria-label="Operador de la respuesta"
                 value={operador}
                 onChange={(e) => setOperador(e.target.value as FilterOp)}
-                className="px-2 py-1 text-[11px] rounded-lg border border-border bg-muted text-foreground"
+                className="px-2 py-1 text-xs rounded-lg border border-border bg-muted text-foreground"
               >
                 {OPS.map((o) => (
                   <option key={o.value} value={o.value}>
@@ -171,7 +171,7 @@ export function LeadsCampoFormulario({
               </div>
               {parseSeleccion(sel).length > 1 && (
                 // No se corta en silencio: se dice cuál se aplica.
-                <span className="text-[10px] text-amber-600 dark:text-amber-400">
+                <span className="text-xs text-amber-600 dark:text-amber-400">
                   Solo se aplica «{unValor}»: este filtro admite una respuesta.
                 </span>
               )}

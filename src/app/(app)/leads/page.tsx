@@ -246,7 +246,7 @@ export default async function LeadsPage({
             <div className="h-8 w-8 rounded-lg flex items-center justify-center bg-emerald-50 dark:bg-emerald-500/10">
               <UserCheck className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
             </div>
-            <h1 className="text-2xl font-bold text-foreground">Leads</h1>
+            <h1 className="text-2xl font-semibold text-foreground tracking-tight">Leads</h1>
           </div>
           <p className="text-xs text-muted-foreground">
             {conteo === 'estimated' && total > 0 ? '~' : ''}
@@ -282,7 +282,7 @@ export default async function LeadsPage({
                   ? 'Elegí un cliente: ordenar todos los leads por fecha se pasa del tiempo límite.'
                   : 'La consulta falló, así que esta lista está incompleta o vacía.'}
               </p>
-              <p className="text-[11px] text-red-700/80 dark:text-red-400/80 mt-0.5 break-all">
+              <p className="text-xs text-red-700/80 dark:text-red-400/80 mt-0.5 break-all">
                 {timeoutSinCliente
                   ? `Sin cliente no hay índice que dé el orden por fecha, así que habría que recorrer los ${total > 0 ? total.toLocaleString() : '93.000'} leads enteros. Lo arregla la migración 088.`
                   : error}
@@ -300,7 +300,7 @@ export default async function LeadsPage({
               <p className="text-xs font-semibold text-amber-700 dark:text-amber-400">
                 Elegí un cliente para filtrar por «tiene dato» o «está vacío».
               </p>
-              <p className="text-[11px] text-amber-700/80 dark:text-amber-400/80 mt-0.5">
+              <p className="text-xs text-amber-700/80 dark:text-amber-400/80 mt-0.5">
                 Buscar los leads a los que les falta un dato no lo puede resolver ningún índice: sin
                 un cliente que acote, habría que leer los {(93415).toLocaleString()} leads enteros.
                 No se ha lanzado la consulta, así que abajo no hay nada — no es que no haya
@@ -380,7 +380,7 @@ export default async function LeadsPage({
 
         <div className="flex flex-wrap gap-3 items-end">
           <div className="grow max-w-md">
-            <label className="block text-[11px] font-medium text-muted-foreground mb-1">
+            <label className="block text-xs font-medium text-muted-foreground mb-1">
               Buscar lead
             </label>
             <div className="relative">
@@ -394,7 +394,7 @@ export default async function LeadsPage({
               />
             </div>
             {f.qCorto && (
-              <p className="text-[11px] text-amber-600 dark:text-amber-400 mt-1">
+              <p className="text-xs text-amber-600 dark:text-amber-400 mt-1">
                 Escribí al menos {MIN_BUSQUEDA} caracteres: con menos no se busca y estarías viendo
                 la lista completa.
               </p>
@@ -479,14 +479,14 @@ export default async function LeadsPage({
 
       {/* Atajos de fecha y orden. Son enlaces de servidor: ni JS ni estado. */}
       <div className="flex flex-wrap items-center gap-2">
-        <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+        <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
           Periodo
         </span>
         {presets.map((p) => (
           <Link
             key={p.id}
             href={urlLeads(f, { from: p.from, to: p.to, page: undefined })}
-            className={`px-2.5 py-1 rounded-lg text-[11px] font-medium border transition-colors ${
+            className={`px-2.5 py-1 rounded-lg text-xs font-medium border transition-colors ${
               preset === p.id
                 ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400'
                 : 'border-border text-muted-foreground hover:bg-accent'
@@ -498,13 +498,13 @@ export default async function LeadsPage({
         {(f.from || f.to) && (
           <Link
             href={urlLeads(f, { from: undefined, to: undefined, page: undefined })}
-            className="px-2.5 py-1 rounded-lg text-[11px] text-muted-foreground border border-border hover:bg-accent transition-colors"
+            className="px-2.5 py-1 rounded-lg text-xs text-muted-foreground border border-border hover:bg-accent transition-colors"
           >
             Todo el histórico
           </Link>
         )}
 
-        <span className="ml-auto text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+        <span className="ml-auto text-xs font-semibold uppercase tracking-wider text-muted-foreground">
           Orden
         </span>
         <Link
@@ -512,7 +512,7 @@ export default async function LeadsPage({
             orden: f.orden === 'reciente' ? 'antiguo' : undefined,
             page: undefined,
           })}
-          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-medium border border-border text-muted-foreground hover:bg-accent transition-colors"
+          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium border border-border text-muted-foreground hover:bg-accent transition-colors"
         >
           <ArrowUpDown className="h-3 w-3" />
           {f.orden === 'reciente' ? 'Más recientes primero' : 'Más antiguos primero'}
@@ -528,7 +528,7 @@ export default async function LeadsPage({
               key={c.clave}
               href={urlLeads(f, { ...c.quitar, page: undefined })}
               title="Quitar este filtro"
-              className="inline-flex items-center gap-1.5 pl-2.5 pr-2 py-1 rounded-full text-[11px] border border-border bg-muted text-foreground hover:bg-accent transition-colors"
+              className="inline-flex items-center gap-1.5 pl-2.5 pr-2 py-1 rounded-full text-xs border border-border bg-muted text-foreground hover:bg-accent transition-colors"
             >
               <span className="text-muted-foreground">{ETIQUETAS_CAMPO[c.param] ?? c.param}:</span>
               <span className="font-medium max-w-[16rem] truncate">{dec(c.texto)}</span>
@@ -537,7 +537,7 @@ export default async function LeadsPage({
           ))}
           <Link
             href="/leads"
-            className="text-[11px] text-muted-foreground hover:text-foreground underline underline-offset-2"
+            className="text-xs text-muted-foreground hover:text-foreground underline underline-offset-2"
           >
             quitar todos
           </Link>
@@ -680,13 +680,13 @@ function StatCard({
     <div className="rounded-2xl border border-border bg-card p-4">
       <div className="flex items-center gap-1.5 text-muted-foreground mb-1.5">
         <span className="text-emerald-600 dark:text-emerald-400">{icon}</span>
-        <span className="text-[10px] font-semibold uppercase tracking-wider">{label}</span>
+        <span className="text-xs font-semibold uppercase tracking-wider">{label}</span>
       </div>
       <p className="text-lg font-bold text-foreground truncate" title={value}>
         {value}
       </p>
       {hint && (
-        <p className="text-[10px] text-muted-foreground mt-0.5 truncate" title={hint}>
+        <p className="text-xs text-muted-foreground mt-0.5 truncate" title={hint}>
           {hint}
         </p>
       )}
@@ -707,7 +707,7 @@ function FilterSelect({
 }) {
   return (
     <div>
-      <label className="block text-[11px] font-medium text-muted-foreground mb-1">{label}</label>
+      <label className="block text-xs font-medium text-muted-foreground mb-1">{label}</label>
       <select
         name={name}
         defaultValue={defaultValue}
@@ -736,7 +736,7 @@ function FilterInput({
 }) {
   return (
     <div>
-      <label className="block text-[11px] font-medium text-muted-foreground mb-1">{label}</label>
+      <label className="block text-xs font-medium text-muted-foreground mb-1">{label}</label>
       <input
         type={type}
         name={name}

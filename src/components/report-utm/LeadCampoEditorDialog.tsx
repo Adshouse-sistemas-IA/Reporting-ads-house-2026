@@ -170,7 +170,7 @@ export function LeadCampoEditorDialog({
               placeholder="Rango de ingresos"
               className="h-8 text-sm bg-background border-input"
             />
-            <p className="text-xs text-muted-foreground/60">
+            <p className="text-xs text-muted-foreground">
               Es el nombre que verás en los informes al agrupar y al filtrar. En los widgets se
               guarda como{' '}
               <span className="font-mono text-emerald-500">leadfield:{clavePrevia}</span>.
@@ -182,7 +182,7 @@ export function LeadCampoEditorDialog({
           <div className="space-y-2">
             <div>
               <Label className="text-sm text-foreground">¿Qué preguntas son este campo?</Label>
-              <p className="text-xs text-muted-foreground/70">
+              <p className="text-xs text-muted-foreground">
                 Marca todas las que sean la misma pregunta. Si el formulario web y el de Meta la
                 escriben distinto, aquí se unifican y los leads se suman.
               </p>
@@ -210,15 +210,15 @@ export function LeadCampoEditorDialog({
                         {d.clave}
                       </span>
                       {d.es_opcion && (
-                        <span className="text-[9px] uppercase tracking-wider text-emerald-600 dark:text-emerald-400 shrink-0">
+                        <span className="text-xs uppercase tracking-wider text-emerald-600 dark:text-emerald-400 shrink-0">
                           opción
                         </span>
                       )}
-                      <span className="text-[10px] text-muted-foreground/60 shrink-0 ml-auto">
+                      <span className="text-xs text-muted-foreground shrink-0 ml-auto">
                         {d.leads} leads
                       </span>
                     </span>
-                    <span className="block text-[10px] text-muted-foreground/60 break-words">
+                    <span className="block text-xs text-muted-foreground break-words">
                       {d.distintos} respuestas distintas
                       {d.formularios.length > 0 && ` · ${d.formularios.join(', ')}`}
                     </span>
@@ -233,7 +233,7 @@ export function LeadCampoEditorDialog({
             <div className="flex items-end justify-between gap-2">
               <div>
                 <Label className="text-sm text-foreground">Respuestas</Label>
-                <p className="text-xs text-muted-foreground/70">
+                <p className="text-xs text-muted-foreground">
                   Junta las formas distintas de escribir lo mismo bajo un solo nombre.
                 </p>
               </div>
@@ -287,7 +287,7 @@ export function LeadCampoEditorDialog({
               <div className="flex items-end justify-between gap-2">
                 <div>
                   <Label className="text-sm text-foreground">Orden en los informes</Label>
-                  <p className="text-xs text-muted-foreground/70">
+                  <p className="text-xs text-muted-foreground">
                     Un rango se lee de menor a mayor. Sin este orden, la tabla los pone
                     alfabéticamente y «Menos de $2M» acaba entre medio de los demás.
                   </p>
@@ -309,13 +309,13 @@ export function LeadCampoEditorDialog({
                     key={b.bucket}
                     className="flex items-center gap-2 px-1 py-1 rounded hover:bg-muted/40"
                   >
-                    <span className="text-[10px] text-muted-foreground/50 w-5 shrink-0 text-right">
+                    <span className="text-xs text-muted-foreground w-5 shrink-0 text-right">
                       {i + 1}
                     </span>
                     <span className="text-xs text-foreground break-words leading-snug min-w-0 flex-1">
                       {b.bucket}
                     </span>
-                    <span className="text-[10px] text-muted-foreground/60 shrink-0">{b.filas}</span>
+                    <span className="text-xs text-muted-foreground shrink-0">{b.filas}</span>
                     <Button
                       type="button"
                       variant="ghost"

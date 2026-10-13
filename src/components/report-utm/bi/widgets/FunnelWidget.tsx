@@ -95,7 +95,7 @@ export function FunnelWidget({ title, config, filters }: Props) {
                   <div className="flex items-center gap-2 ml-4 my-1">
                     <ArrowDown className="h-3 w-3 text-muted-foreground/40" />
                     {convRate !== null && (
-                      <span className="text-[10px] font-mono text-muted-foreground">
+                      <span className="text-xs font-mono text-muted-foreground">
                         {convRate}% conversión
                       </span>
                     )}
@@ -111,7 +111,7 @@ export function FunnelWidget({ title, config, filters }: Props) {
                     >
                       {s.label}
                     </span>
-                    <span className="text-lg font-bold font-mono tabular-nums shrink-0 pl-2">
+                    <span className="text-lg font-bold tabular-nums shrink-0 pl-2">
                       {fmtN(s.value)}
                     </span>
                   </div>

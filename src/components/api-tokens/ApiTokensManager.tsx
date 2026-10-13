@@ -117,7 +117,7 @@ function NewTokenModal({
           </h3>
           <button
             onClick={onClose}
-            className="text-muted-foreground/70 hover:text-foreground transition-colors text-lg leading-none"
+            className="text-muted-foreground hover:text-foreground transition-colors text-lg leading-none"
           >
             ✕
           </button>
@@ -133,7 +133,7 @@ function NewTokenModal({
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Ej: Zapier Integration, n8n Workflow..."
-              className="w-full bg-background border border-input rounded-lg px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground/70 focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring"
+              className="w-full bg-background border border-input rounded-lg px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring"
             />
           </div>
 
@@ -151,7 +151,7 @@ function NewTokenModal({
                   <span className="text-sm text-foreground/90 group-hover:text-foreground transition-colors">
                     {PERMISSION_LABELS[p]}
                   </span>
-                  <code className="ml-auto text-[10px] text-muted-foreground/70 bg-muted px-1.5 py-0.5 rounded">
+                  <code className="ml-auto text-xs text-muted-foreground bg-muted px-1.5 py-0.5 rounded">
                     {p}
                   </code>
                 </label>
@@ -340,14 +340,14 @@ export function ApiTokensManager({ baseUrl }: Props) {
           {loading ? (
             <Card className="bg-card border-border">
               <CardContent className="p-8 flex justify-center">
-                <RefreshCw className="h-6 w-6 animate-spin text-muted-foreground/70" />
+                <RefreshCw className="h-6 w-6 animate-spin text-muted-foreground" />
               </CardContent>
             </Card>
           ) : tokens.length === 0 ? (
             <Card className="bg-card border-border">
               <CardContent className="p-12 flex flex-col items-center gap-3 text-center">
                 <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center">
-                  <Key className="h-6 w-6 text-muted-foreground/60" />
+                  <Key className="h-6 w-6 text-muted-foreground" />
                 </div>
                 <p className="text-muted-foreground text-sm">No tienes tokens generados aún.</p>
                 <Button
@@ -390,13 +390,13 @@ export function ApiTokensManager({ baseUrl }: Props) {
                           {t.permissions.map((p) => (
                             <span
                               key={p}
-                              className="text-[10px] bg-muted text-muted-foreground px-1.5 py-0.5 rounded font-mono"
+                              className="text-xs bg-muted text-muted-foreground px-1.5 py-0.5 rounded font-mono"
                             >
                               {p}
                             </span>
                           ))}
                         </div>
-                        <div className="flex gap-4 mt-2 text-xs text-muted-foreground/60">
+                        <div className="flex gap-4 mt-2 text-xs text-muted-foreground">
                           <span>Creado: {formatDate(t.created_at)}</span>
                           <span>Último uso: {formatDate(t.last_used_at)}</span>
                           {t.expires_at && <span>Expira: {formatDate(t.expires_at)}</span>}
@@ -413,7 +413,7 @@ export function ApiTokensManager({ baseUrl }: Props) {
                         <button
                           onClick={() => handleDelete(t.id)}
                           title="Eliminar token"
-                          className="p-2 rounded-lg hover:bg-red-500/10 text-muted-foreground/70 hover:text-red-500 dark:hover:text-red-400 transition-colors"
+                          className="p-2 rounded-lg hover:bg-red-500/10 text-muted-foreground hover:text-red-500 dark:hover:text-red-400 transition-colors"
                         >
                           <Trash2 className="h-4 w-4" />
                         </button>
@@ -482,7 +482,7 @@ export function ApiTokensManager({ baseUrl }: Props) {
                     {ep.method}
                   </span>
                   <code className="text-sm text-foreground font-mono">{ep.path}</code>
-                  <span className="ml-auto text-[10px] bg-muted text-muted-foreground px-1.5 py-0.5 rounded">
+                  <span className="ml-auto text-xs bg-muted text-muted-foreground px-1.5 py-0.5 rounded">
                     {ep.scope}
                   </span>
                 </div>

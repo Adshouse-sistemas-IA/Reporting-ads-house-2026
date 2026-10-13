@@ -456,13 +456,13 @@ function MetricCatalog({
         className="w-full flex items-center justify-between px-3 py-2 text-xs font-medium text-foreground/90 hover:bg-accent/50 transition"
       >
         <span className="flex items-center gap-2">
-          <Search className="w-3.5 h-3.5 text-muted-foreground/70" />
+          <Search className="w-3.5 h-3.5 text-muted-foreground" />
           Catálogo de métricas — haz click en una para insertarla en la fórmula
         </span>
         {expanded ? (
-          <ChevronUp className="w-3.5 h-3.5 text-muted-foreground/70" />
+          <ChevronUp className="w-3.5 h-3.5 text-muted-foreground" />
         ) : (
-          <ChevronDown className="w-3.5 h-3.5 text-muted-foreground/70" />
+          <ChevronDown className="w-3.5 h-3.5 text-muted-foreground" />
         )}
       </button>
 
@@ -480,7 +480,7 @@ function MetricCatalog({
           <div className="max-h-72 overflow-y-auto px-2 pb-2 space-y-3">
             {filtered.map((cat) => (
               <div key={cat.category}>
-                <p className="text-[10px] font-semibold text-muted-foreground/70 uppercase tracking-wider mb-1 px-1">
+                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1 px-1">
                   {cat.category}
                 </p>
                 <div className="flex flex-wrap gap-1">
@@ -489,7 +489,7 @@ function MetricCatalog({
                       key={m.id}
                       title={`${m.desc}\n${m.id}`}
                       onClick={() => onInsert(m.id)}
-                      className={`text-[10px] px-2 py-0.5 rounded border transition cursor-pointer ${CATEGORY_COLORS[cat.color]}`}
+                      className={`text-xs px-2 py-0.5 rounded border transition cursor-pointer ${CATEGORY_COLORS[cat.color]}`}
                     >
                       {m.label}
                     </button>
@@ -498,7 +498,7 @@ function MetricCatalog({
               </div>
             ))}
             {filtered.length === 0 && (
-              <p className="text-xs text-muted-foreground/70 text-center py-4">
+              <p className="text-xs text-muted-foreground text-center py-4">
                 Sin resultados para &quot;{query}&quot;
               </p>
             )}
@@ -549,7 +549,7 @@ function FieldRow({
 }) {
   return (
     <div className="grid grid-cols-12 gap-2 items-start bg-muted/40 border border-border rounded-lg p-3">
-      <div className="col-span-1 flex justify-center pt-2.5 text-muted-foreground/70">
+      <div className="col-span-1 flex justify-center pt-2.5 text-muted-foreground">
         <GripVertical className="w-4 h-4" />
       </div>
       <div className="col-span-3">
@@ -580,7 +580,7 @@ function FieldRow({
                   suffix: p.suffix,
                 })
               }
-              className="text-[10px] bg-muted hover:bg-indigo-500/20 hover:text-indigo-700 dark:hover:text-indigo-300 text-muted-foreground px-1.5 py-0.5 rounded transition"
+              className="text-xs bg-muted hover:bg-indigo-500/20 hover:text-indigo-700 dark:hover:text-indigo-300 text-muted-foreground px-1.5 py-0.5 rounded transition"
             >
               {p.label}
             </button>
@@ -617,7 +617,7 @@ function FieldRow({
       <div className="col-span-1 flex justify-end">
         <button
           onClick={onRemove}
-          className="p-1.5 text-muted-foreground/70 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-500/10 rounded transition"
+          className="p-1.5 text-muted-foreground hover:text-red-600 dark:hover:text-red-400 hover:bg-red-500/10 rounded transition"
         >
           <X className="w-4 h-4" />
         </button>
@@ -760,7 +760,7 @@ function LayoutEditor({
   }
 
   const colHeaders = (
-    <div className="grid grid-cols-12 gap-2 text-[10px] text-muted-foreground/70 font-medium px-1 mb-1">
+    <div className="grid grid-cols-12 gap-2 text-xs text-muted-foreground font-medium px-1 mb-1">
       <div className="col-span-1" />
       <div className="col-span-3">Etiqueta</div>
       <div className="col-span-4">Fórmula</div>
@@ -815,7 +815,7 @@ function LayoutEditor({
               </option>
             ))}
           </select>
-          <span className="text-muted-foreground/70">
+          <span className="text-muted-foreground">
             Los campos de Sheet son propios de cada cliente: una plantilla que use uno solo mostrará
             datos en los clientes que lo tengan.
           </span>
@@ -825,7 +825,7 @@ function LayoutEditor({
       {/* Catálogo de métricas */}
       <MetricCatalog onInsert={handleInsertMetric} extraCategories={extraCategories} />
       {activeField && (
-        <p className="text-[11px] text-indigo-600 dark:text-indigo-400 text-center -mt-3">
+        <p className="text-xs text-indigo-600 dark:text-indigo-400 text-center -mt-3">
           Insertando en:{' '}
           <span className="font-mono font-semibold">
             {activeField.section === 'col'
@@ -872,7 +872,7 @@ function LayoutEditor({
             </div>
           ))}
           {layout.columnas.length === 0 && (
-            <p className="text-xs text-muted-foreground/70 text-center py-4">
+            <p className="text-xs text-muted-foreground text-center py-4">
               Sin columnas. Añade al menos la columna &quot;fecha&quot;.
             </p>
           )}
@@ -914,7 +914,7 @@ function LayoutEditor({
             </div>
           ))}
           {layout.tarjetas.length === 0 && (
-            <p className="text-xs text-muted-foreground/70 text-center py-4">
+            <p className="text-xs text-muted-foreground text-center py-4">
               Sin tarjetas de resumen todavía.
             </p>
           )}
@@ -1136,7 +1136,7 @@ export function LayoutBuilderClient({
 
       {layouts.length === 0 && (
         <Card className="bg-card border-border text-center p-12">
-          <LayoutDashboard className="w-10 h-10 text-muted-foreground/50 mx-auto mb-3" />
+          <LayoutDashboard className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
           <p className="text-muted-foreground">
             No hay plantillas. Crea la primera usando el botón de arriba.
           </p>
@@ -1175,7 +1175,7 @@ export function LayoutBuilderClient({
                       size="sm"
                       variant="outline"
                       onClick={() => handleDelete(layout.id)}
-                      className="border-input text-muted-foreground/70 hover:text-red-600 dark:hover:text-red-400 hover:border-red-500/30 hover:bg-red-500/5"
+                      className="border-input text-muted-foreground hover:text-red-600 dark:hover:text-red-400 hover:border-red-500/30 hover:bg-red-500/5"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
                     </Button>
@@ -1186,7 +1186,7 @@ export function LayoutBuilderClient({
             <CardContent>
               <div className="space-y-3">
                 <div>
-                  <p className="text-xs text-muted-foreground/70 mb-1.5 font-medium uppercase tracking-wider">
+                  <p className="text-xs text-muted-foreground mb-1.5 font-medium uppercase tracking-wider">
                     Columnas ({(layout.columnas || []).length})
                   </p>
                   <div className="flex flex-wrap gap-1.5">
@@ -1202,7 +1202,7 @@ export function LayoutBuilderClient({
                 </div>
                 {(layout.tarjetas || []).length > 0 && (
                   <div>
-                    <p className="text-xs text-muted-foreground/70 mb-1.5 font-medium uppercase tracking-wider">
+                    <p className="text-xs text-muted-foreground mb-1.5 font-medium uppercase tracking-wider">
                       Tarjetas ({layout.tarjetas.length})
                     </p>
                     <div className="flex flex-wrap gap-1.5">

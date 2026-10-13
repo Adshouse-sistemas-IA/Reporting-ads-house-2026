@@ -59,7 +59,7 @@ export function VistasEditor({
         >
           <span className="min-w-0 flex-1">
             <span className="block text-xs text-foreground truncate">{v.nombre}</span>
-            <span className="block text-[10px] text-muted-foreground/60 truncate">
+            <span className="block text-xs text-muted-foreground truncate">
               {v.agregacion === 'count' ? 'contar filas' : v.agregacion}
               {' · '}
               {v.operador === 'not_in' ? 'excepto' : 'donde'} {v.valores.join(', ')}
@@ -112,7 +112,7 @@ export function VistasEditor({
 
           <div className="rounded-md border border-input bg-background max-h-32 overflow-y-auto p-1.5 space-y-0.5">
             {buckets.length === 0 && (
-              <p className="text-xs text-muted-foreground/60 px-1 py-0.5">
+              <p className="text-xs text-muted-foreground px-1 py-0.5">
                 Calcula el campo primero para ver sus valores.
               </p>
             )}

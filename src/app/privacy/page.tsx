@@ -26,7 +26,7 @@ export default function PrivacyPolicyPage() {
           </div>
           <div className="flex flex-col leading-tight">
             <span className="text-xl font-bold tracking-tight text-foreground">AdsHouse</span>
-            <span className="text-[10px] font-medium text-muted-foreground/70 tracking-widest uppercase">
+            <span className="text-xs font-medium text-muted-foreground tracking-widest uppercase">
               Reporting
             </span>
           </div>
@@ -34,7 +34,7 @@ export default function PrivacyPolicyPage() {
 
         <article className="prose-custom space-y-8">
           <header className="space-y-2 border-b border-border pb-8">
-            <h1 className="text-3xl font-bold tracking-tight text-foreground">
+            <h1 className="text-2xl font-semibold tracking-tight text-foreground">
               Política de Privacidad
             </h1>
             <p className="text-sm text-muted-foreground">Última actualización: {LAST_UPDATED}</p>
@@ -192,7 +192,7 @@ export default function PrivacyPolicyPage() {
         </article>
 
         <footer className="mt-16 pt-8 border-t border-border">
-          <p className="text-sm text-muted-foreground/70">
+          <p className="text-sm text-muted-foreground">
             © {LAST_UPDATED.split(' ').pop()} AdsHouse Reporting. Todos los derechos reservados.
           </p>
         </footer>

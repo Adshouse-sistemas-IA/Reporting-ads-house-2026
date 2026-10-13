@@ -132,7 +132,7 @@ function ChartTooltip({ active, payload, label, format }: ChartTooltipProps) {
   if (!active || !payload || payload.length === 0) return null;
   const hasLabel = label !== undefined && label !== null && String(label) !== '';
   return (
-    <div className="rounded-lg border border-border bg-card px-2.5 py-1.5 shadow-md text-[11px] max-w-[340px]">
+    <div className="rounded-lg border border-border bg-card px-2.5 py-1.5 shadow-md text-xs max-w-[340px]">
       {hasLabel && <p className="font-medium text-foreground mb-1 break-words">{String(label)}</p>}
       {payload.map((p, i) => {
         const showName = p.name !== undefined && p.name !== 'value';
@@ -146,7 +146,7 @@ function ChartTooltip({ active, payload, label, format }: ChartTooltipProps) {
                 {String(p.name)}
               </span>
             )}
-            <span className="text-foreground font-mono tabular-nums ml-auto shrink-0 pl-2">
+            <span className="text-foreground tabular-nums ml-auto shrink-0 pl-2">
               {fmtNum(Number(p.value ?? 0), format, prefijo)}
             </span>
           </div>
@@ -329,7 +329,7 @@ export function ChartWidget({
             )}
           </p>
           <span
-            className="text-[10px] text-muted-foreground font-mono shrink-0 max-w-[45%] truncate"
+            className="text-xs text-muted-foreground font-mono shrink-0 max-w-[45%] truncate"
             title={`${dimLabel}${
               dimension2
                 ? ` × ${etiquetas[dimension2] ?? DIMENSION_META[dimension2 as BiDimension]?.label ?? leadFieldLabel(dimension2) ?? fieldDimLabel(dimension2) ?? dimension2}`
@@ -648,8 +648,8 @@ function PieChartBody({
               className="h-2.5 w-2.5 rounded-sm shrink-0"
               style={{ background: COLORS[i % COLORS.length] }}
             />
-            <span className="text-[11px] text-foreground truncate flex-1">{d.name}</span>
-            <span className="text-[11px] text-muted-foreground font-mono tabular-nums shrink-0">
+            <span className="text-xs text-foreground truncate flex-1">{d.name}</span>
+            <span className="text-xs text-muted-foreground tabular-nums shrink-0">
               {fmtNum(d.value, format, prefijo)}
             </span>
           </button>

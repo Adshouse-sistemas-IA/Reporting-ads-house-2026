@@ -117,12 +117,12 @@ export function MonedaReporteCard({
           Guardar
         </button>
         {msg && (
-          <span className={`text-[11px] ${msg.ok ? 'text-blue-600' : 'text-red-500'}`}>
+          <span className={`text-xs ${msg.ok ? 'text-blue-600' : 'text-red-500'}`}>
             {msg.texto}
           </span>
         )}
       </div>
-      <p className="text-[11px] text-muted-foreground">
+      <p className="text-xs text-muted-foreground">
         Se reporta en <strong className="text-foreground">{moneda}</strong>
         {eleccion
           ? ', elegida a mano.'
@@ -131,13 +131,13 @@ export function MonedaReporteCard({
             : ': no se conoce la moneda de la cuenta de Meta.'}
       </p>
       {aviso && (
-        <p className="flex items-start gap-1.5 text-[11px] text-amber-600">
+        <p className="flex items-start gap-1.5 text-xs text-amber-600">
           <AlertTriangle className="h-3 w-3 mt-0.5 shrink-0" />
           {aviso}
         </p>
       )}
       {moneda !== 'USD' && (
-        <p className={`text-[11px] ${vieja ? 'text-amber-600' : 'text-muted-foreground'}`}>
+        <p className={`text-xs ${vieja ? 'text-amber-600' : 'text-muted-foreground'}`}>
           {tasa ? (
             <>
               Última tasa guardada: 1 USD ={' '}

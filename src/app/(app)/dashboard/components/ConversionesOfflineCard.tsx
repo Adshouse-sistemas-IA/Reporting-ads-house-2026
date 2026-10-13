@@ -138,7 +138,7 @@ export function ConversionesOfflineCard({ dailyData, error, clientId, canSync }:
           <p className="text-sm text-muted-foreground">
             {error || 'No hay datos de conversiones offline'}
           </p>
-          <p className="text-xs text-muted-foreground/70 mt-2">
+          <p className="text-xs text-muted-foreground mt-2">
             Configura el Sheet de conversiones offline en los ajustes del cliente.
           </p>
         </CardContent>
@@ -201,7 +201,7 @@ export function ConversionesOfflineCard({ dailyData, error, clientId, canSync }:
             <CardContent className="pt-6">
               <div className="text-center">
                 <p className="text-xs text-muted-foreground mb-1">{s.label}</p>
-                <p className={`text-2xl font-bold font-mono tabular-nums ${s.color}`}>{s.value}</p>
+                <p className={`text-2xl font-bold tabular-nums ${s.color}`}>{s.value}</p>
               </div>
             </CardContent>
           </Card>

@@ -52,7 +52,7 @@ export function readUnavailable(
 export function UnavailableNote({ info }: { info: WidgetUnavailable | null }) {
   if (!info) return null;
   return (
-    <p className="flex items-start gap-1 text-[10px] leading-snug text-amber-600 dark:text-amber-500">
+    <p className="flex items-start gap-1 text-xs leading-snug text-amber-600 dark:text-amber-500">
       <AlertCircle className="h-3 w-3 shrink-0 mt-[1px]" />
       <span>{info.text}</span>
     </p>
@@ -121,7 +121,7 @@ export function AvisosConsultaNote({ avisos }: { avisos: string[] }) {
       {avisos.map((a) => (
         <p
           key={a}
-          className="flex items-start gap-1 text-[10px] leading-snug text-amber-600 dark:text-amber-400"
+          className="flex items-start gap-1 text-xs leading-snug text-amber-600 dark:text-amber-400"
         >
           <AlertTriangle className="h-3 w-3 shrink-0 mt-[1px]" />
           <span>{a}</span>
@@ -135,7 +135,7 @@ export function TasasNote({ aviso }: { aviso: AvisoTasas | null }) {
   const texto = textoAvisoTasas(aviso);
   if (!texto) return null;
   return (
-    <p className="flex items-start gap-1 text-[10px] leading-snug text-muted-foreground">
+    <p className="flex items-start gap-1 text-xs leading-snug text-muted-foreground">
       <Coins className="h-3 w-3 shrink-0 mt-[1px]" />
       <span>{texto}</span>
     </p>

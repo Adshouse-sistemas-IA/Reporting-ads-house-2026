@@ -52,7 +52,7 @@ function TooltipContent({
         className={cn(
           // Tokens de tema, cero hex: `docs/DESIGN.md` lo exige para todo el
           // chrome de gráfico, y este tooltip es parte de él.
-          'bg-popover text-popover-foreground border-border data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 z-50 max-w-[320px] rounded-md border px-2.5 py-1.5 text-[11px] break-words shadow-md',
+          'bg-popover text-popover-foreground border-border data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 z-50 max-w-[320px] rounded-md border px-2.5 py-1.5 text-xs break-words shadow-md',
           className
         )}
         {...props}

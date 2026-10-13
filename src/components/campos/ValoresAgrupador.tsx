@@ -147,7 +147,7 @@ export function ValoresAgrupador({
       <div className="grid grid-cols-2 gap-3">
         {/* ── Valores crudos ─────────────────────────────────────────── */}
         <div className="space-y-1.5">
-          <p className="text-xs text-muted-foreground/60 px-1">
+          <p className="text-xs text-muted-foreground px-1">
             {origenLabel} ({visibles.length})
           </p>
           <div className="rounded-md border border-input bg-background max-h-80 overflow-y-auto p-1.5 space-y-0.5">
@@ -172,11 +172,11 @@ export function ValoresAgrupador({
                       <span className="text-xs text-foreground break-words leading-snug">
                         {v.valor_crudo}
                       </span>
-                      <span className="text-[10px] text-muted-foreground/60 shrink-0 ml-auto">
+                      <span className="text-xs text-muted-foreground shrink-0 ml-auto">
                         {v.filas}
                       </span>
                     </span>
-                    <span className="block text-[10px] text-muted-foreground/60 break-words">
+                    <span className="block text-xs text-muted-foreground break-words">
                       {v.origenes.join(', ')}
                       {agrupado && <span className="text-indigo-400"> → {agrupado}</span>}
                       {!agrupado && bucket === null && (
@@ -217,7 +217,7 @@ export function ValoresAgrupador({
 
         {/* ── Buckets resultantes ────────────────────────────────────── */}
         <div className="space-y-1.5">
-          <p className="text-xs text-muted-foreground/60 px-1">
+          <p className="text-xs text-muted-foreground px-1">
             Así queda el campo ({buckets.length} valores)
           </p>
           <div className="rounded-md border border-input bg-background max-h-80 overflow-y-auto p-1.5 space-y-0.5">
@@ -233,12 +233,12 @@ export function ValoresAgrupador({
                       <span className="text-xs text-foreground break-words leading-snug">
                         {b.bucket}
                       </span>
-                      <span className="text-[10px] text-muted-foreground/60 shrink-0 ml-auto">
+                      <span className="text-xs text-muted-foreground shrink-0 ml-auto">
                         {b.filas}
                       </span>
                     </span>
                     {esGrupo && (
-                      <span className="block text-[10px] text-muted-foreground/60 break-words">
+                      <span className="block text-xs text-muted-foreground break-words">
                         une: {b.crudos.join(' · ')}
                       </span>
                     )}
@@ -259,7 +259,7 @@ export function ValoresAgrupador({
               );
             })}
           </div>
-          <p className="text-[10px] text-muted-foreground/60 px-1">
+          <p className="text-xs text-muted-foreground px-1">
             Estos son los valores por los que podrás filtrar y agrupar en los informes.
           </p>
         </div>

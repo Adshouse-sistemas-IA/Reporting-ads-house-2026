@@ -111,7 +111,7 @@ export function BiCrossBanner({ clienteId, dateFrom, dateTo, readonly }: Props) 
   if (dateTo) qs.set('date_to', dateTo);
 
   return (
-    <div className={`rounded-lg border px-3 py-2 text-[11px] ${color}`}>
+    <div className={`rounded-lg border px-3 py-2 text-xs ${color}`}>
       <div className="flex items-start gap-2">
         <Info className="h-3.5 w-3.5 mt-0.5 shrink-0" />
         <div className="min-w-0 flex-1">
@@ -154,7 +154,7 @@ export function BiCrossBanner({ clienteId, dateFrom, dateTo, readonly }: Props) 
                   <p className="font-medium mb-0.5">UTMs sin cruzar (mapeables):</p>
                   <ul className="space-y-0.5">
                     {sum.unmatchedTop.map((u, i) => (
-                      <li key={i} className="font-mono text-[10px] truncate">
+                      <li key={i} className="font-mono text-xs truncate">
                         {u.value} · {u.leads} leads
                         {u.suggestion && ` → ¿${u.suggestion}? (${u.confidence}%)`}
                       </li>
@@ -171,7 +171,7 @@ export function BiCrossBanner({ clienteId, dateFrom, dateTo, readonly }: Props) 
                   </p>
                   <ul className="space-y-0.5">
                     {sum.invalidTop.map((u, i) => (
-                      <li key={i} className="font-mono text-[10px] truncate">
+                      <li key={i} className="font-mono text-xs truncate">
                         {u.value} · {u.count} leads · {u.reason}
                       </li>
                     ))}
@@ -183,7 +183,7 @@ export function BiCrossBanner({ clienteId, dateFrom, dateTo, readonly }: Props) 
                   <p className="font-medium mb-0.5">Campañas con gasto y sin ningún lead:</p>
                   <ul className="space-y-0.5">
                     {sum.spend!.orphans.slice(0, 6).map((o, i) => (
-                      <li key={i} className="font-mono text-[10px] truncate">
+                      <li key={i} className="font-mono text-xs truncate">
                         {o.name} · {money(o.spend)}
                       </li>
                     ))}

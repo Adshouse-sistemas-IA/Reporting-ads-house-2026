@@ -180,7 +180,7 @@ function EtiquetaScope({ scope }: { scope: TokenPermission }) {
   const escribe = scope.startsWith('write:');
   return (
     <span
-      className={`text-[10px] font-mono px-1.5 py-0.5 rounded border ${
+      className={`text-xs font-mono px-1.5 py-0.5 rounded border ${
         escribe
           ? 'bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/20'
           : 'bg-muted text-muted-foreground border-border'
@@ -215,13 +215,13 @@ function FilaTool({ tool, appUrl }: { tool: ToolDoc; appUrl: string }) {
               <EtiquetaScope key={s} scope={s} />
             ))}
             {tool.minLevel !== 'consulta' && (
-              <span className="text-[10px] px-1.5 py-0.5 rounded border bg-muted text-muted-foreground border-border">
+              <span className="text-xs px-1.5 py-0.5 rounded border bg-muted text-muted-foreground border-border">
                 nivel {tool.minLevel}
               </span>
             )}
             {tool.riesgo !== null && (
               <span
-                className={`text-[10px] px-1.5 py-0.5 rounded border ${
+                className={`text-xs px-1.5 py-0.5 rounded border ${
                   tool.riesgo === 'high'
                     ? 'bg-red-500/10 text-red-700 dark:text-red-400 border-red-500/20'
                     : tool.aprobacion === 'directa'
@@ -253,9 +253,9 @@ function FilaTool({ tool, appUrl }: { tool: ToolDoc; appUrl: string }) {
                   <div key={p.nombre} className="text-sm">
                     <div className="flex flex-wrap items-center gap-2">
                       <code className="text-xs font-mono text-foreground">{p.nombre}</code>
-                      <span className="text-[10px] text-muted-foreground font-mono">{p.tipo}</span>
+                      <span className="text-xs text-muted-foreground font-mono">{p.tipo}</span>
                       <span
-                        className={`text-[10px] px-1.5 py-0.5 rounded ${
+                        className={`text-xs px-1.5 py-0.5 rounded ${
                           p.requerido
                             ? 'bg-red-500/10 text-red-700 dark:text-red-400'
                             : 'bg-muted text-muted-foreground'
@@ -363,7 +363,7 @@ function Catalogo({ appUrl }: { appUrl: string }) {
             value={q}
             onChange={(e) => setQ(e.target.value)}
             placeholder="Buscar por nombre, descripción, scope o parámetro…"
-            className="w-full bg-background border border-input rounded-lg pl-9 pr-3 py-2 text-sm text-foreground placeholder:text-muted-foreground/70 focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring"
+            className="w-full bg-background border border-input rounded-lg pl-9 pr-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring"
           />
         </div>
         <span className="text-xs text-muted-foreground whitespace-nowrap">
@@ -857,7 +857,7 @@ export function McpDocs({ appUrl, onIrATokens }: { appUrl: string; onIrATokens: 
             >
               <code className="text-xs font-mono text-foreground min-w-[180px]">{metodo}</code>
               <span
-                className={`text-[10px] px-1.5 py-0.5 rounded ${
+                className={`text-xs px-1.5 py-0.5 rounded ${
                   auth === 'sí'
                     ? 'bg-amber-500/10 text-amber-700 dark:text-amber-400'
                     : 'bg-muted text-muted-foreground'

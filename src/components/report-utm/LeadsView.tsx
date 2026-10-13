@@ -129,7 +129,7 @@ export function LeadsView({
               type="button"
               onClick={() => marcar(true)}
               disabled={pendiente}
-              className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] font-medium border border-border text-foreground hover:bg-accent disabled:opacity-40"
+              className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium border border-border text-foreground hover:bg-accent disabled:opacity-40"
             >
               {pendiente ? (
                 <Loader2 className="h-3 w-3 animate-spin" />
@@ -142,7 +142,7 @@ export function LeadsView({
               type="button"
               onClick={() => marcar(false)}
               disabled={pendiente}
-              className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] font-medium border border-border text-foreground hover:bg-accent disabled:opacity-40"
+              className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium border border-border text-foreground hover:bg-accent disabled:opacity-40"
             >
               <Eye className="h-3 w-3" />
               Volver a contar
@@ -155,13 +155,13 @@ export function LeadsView({
                 type="button"
                 onClick={() => marcarTodos(true)}
                 disabled={pendiente}
-                className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] font-medium border border-amber-400 text-amber-700 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-500/10 disabled:opacity-40"
+                className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium border border-amber-400 text-amber-700 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-500/10 disabled:opacity-40"
               >
                 <EyeOff className="h-3 w-3" />
                 Excluir los {totalFiltrado.toLocaleString()} que coinciden
               </button>
             )}
-            {error && <span className="text-[11px] text-red-500">{error}</span>}
+            {error && <span className="text-xs text-red-500">{error}</span>}
           </div>
         ) : (
           <span />
@@ -189,7 +189,7 @@ export function LeadsView({
           <div className="max-h-[70vh] overflow-auto">
             <table className="w-full">
               <thead className="sticky top-0 z-10 bg-muted">
-                <tr className="text-left text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                <tr className="text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                   {puedeExcluir && (
                     <th className="pl-4 py-3 w-6">
                       <input
@@ -287,7 +287,7 @@ function ExcluidoBadge({ lead }: { lead: ReportUtmLeadEvent }) {
   return (
     <span
       title={motivo}
-      className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-medium text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-500/10"
+      className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-xs font-medium text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-500/10"
     >
       <EyeOff className="h-3 w-3" /> No cuenta
     </span>
@@ -336,13 +336,11 @@ function LeadRow({
               <p className="text-xs font-medium text-foreground">{lead.lead_name}</p>
             )}
             {lead.lead_email && (
-              <p className="text-[11px] text-muted-foreground font-mono">{lead.lead_email}</p>
+              <p className="text-xs text-muted-foreground font-mono">{lead.lead_email}</p>
             )}
-            {lead.lead_phone && (
-              <p className="text-[11px] text-muted-foreground">{lead.lead_phone}</p>
-            )}
+            {lead.lead_phone && <p className="text-xs text-muted-foreground">{lead.lead_phone}</p>}
             {!lead.lead_name && !lead.lead_email && !lead.lead_phone && (
-              <p className="text-[11px] text-muted-foreground italic">Sin datos de contacto</p>
+              <p className="text-xs text-muted-foreground italic">Sin datos de contacto</p>
             )}
           </div>
         </td>
@@ -351,7 +349,7 @@ function LeadRow({
             <p className="text-xs font-medium text-foreground">{lead.form_name}</p>
           )}
           {lead.form_plugin && (
-            <p className="text-[10px] text-muted-foreground">
+            <p className="text-xs text-muted-foreground">
               {PLUGIN_LABELS[lead.form_plugin] ?? lead.form_plugin}
             </p>
           )}
@@ -370,7 +368,7 @@ function LeadRow({
       {/* Detalle expandible: click_id, landing, país + campos del formulario */}
       <tr className="bg-muted/30">
         <td colSpan={columnas} className="px-4 py-2">
-          <details className="text-[11px]">
+          <details className="text-xs">
             <summary className="cursor-pointer text-muted-foreground hover:text-foreground select-none">
               Ver detalle
               {hasRawFields
@@ -385,7 +383,7 @@ function LeadRow({
               </div>
               {hasRawFields && (
                 <div>
-                  <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide mb-1.5">
+                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1.5">
                     Campos del formulario
                   </p>
                   <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
@@ -444,7 +442,7 @@ function DetailItem({
     <div
       className={`bg-card rounded-lg border border-border px-2 py-1.5 ${span ? 'col-span-2 md:col-span-3 lg:col-span-4' : ''}`}
     >
-      <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide truncate">
+      <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide truncate">
         {label}
       </p>
       <p
@@ -497,21 +495,21 @@ function LeadCard({
             )}
             <div className="mt-0.5 space-y-0.5">
               {lead.lead_email && (
-                <p className="text-[11px] text-muted-foreground font-mono break-all">
+                <p className="text-xs text-muted-foreground font-mono break-all">
                   {lead.lead_email}
                 </p>
               )}
               {lead.lead_phone && (
-                <p className="text-[11px] text-muted-foreground">{lead.lead_phone}</p>
+                <p className="text-xs text-muted-foreground">{lead.lead_phone}</p>
               )}
               {!hasContact && (
-                <p className="text-[11px] text-muted-foreground italic">Sin datos de contacto</p>
+                <p className="text-xs text-muted-foreground italic">Sin datos de contacto</p>
               )}
             </div>
           </div>
         </div>
         <div className="shrink-0 text-right space-y-1">
-          <span className="block text-[11px] text-muted-foreground whitespace-nowrap">
+          <span className="block text-xs text-muted-foreground whitespace-nowrap">
             {formatDateTime(lead.created_at)}
           </span>
           <ExcluidoBadge lead={lead} />
@@ -519,7 +517,7 @@ function LeadCard({
       </div>
 
       {/* Formulario + cliente */}
-      <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] text-muted-foreground border-t border-border pt-3">
+      <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground border-t border-border pt-3">
         {lead.form_name && <span className="font-medium text-foreground">{lead.form_name}</span>}
         {lead.form_plugin && <span>· {PLUGIN_LABELS[lead.form_plugin] ?? lead.form_plugin}</span>}
         <span>· {clienteNombre}</span>
@@ -541,7 +539,7 @@ function LeadCard({
       </div>
 
       {/* Detalle expandible */}
-      <details className="text-[11px] border-t border-border pt-3">
+      <details className="text-xs border-t border-border pt-3">
         <summary className="cursor-pointer text-muted-foreground hover:text-foreground select-none">
           Ver detalle
           {hasRawFields ? ` · ${Object.keys(lead.raw_fields!).length} campos del formulario` : ''}
@@ -554,7 +552,7 @@ function LeadCard({
           </div>
           {hasRawFields && (
             <div>
-              <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide mb-1.5">
+              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1.5">
                 Campos del formulario
               </p>
               <div className="grid grid-cols-2 gap-2">
@@ -586,12 +584,12 @@ function UtmChip({
   if (!v) return null;
   return (
     <span
-      className={`inline-flex max-w-full items-center gap-1 rounded-md border border-border px-2 py-1 text-[11px] ${
+      className={`inline-flex max-w-full items-center gap-1 rounded-md border border-border px-2 py-1 text-xs ${
         accent ? 'bg-emerald-50 dark:bg-emerald-500/10' : 'bg-muted/50'
       }`}
       title={`${label}: ${v}`}
     >
-      <span className="text-[9px] font-semibold uppercase tracking-wider text-muted-foreground">
+      <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
         {label}
       </span>
       <span

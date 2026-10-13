@@ -67,7 +67,7 @@ export function BiPublicHeader({
           )}
           {periodLabel && (
             <span
-              className="px-2.5 py-1 rounded-full text-[11px] font-semibold"
+              className="px-2.5 py-1 rounded-full text-xs font-semibold"
               style={{ backgroundColor: `${brand}1f`, color: brand }}
             >
               {periodLabel}
@@ -88,7 +88,7 @@ export function BiPublicHeader({
                 />
               )}
               <div className="text-right leading-tight">
-                <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                <p className="text-xs uppercase tracking-wider text-muted-foreground">
                   Informe para
                 </p>
                 <p className="text-sm font-semibold" style={{ color: brand }}>

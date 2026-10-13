@@ -54,7 +54,7 @@ export default async function PublicMirrorPage({ params, searchParams }: any) {
                   branding.title
                 ) : (
                   <span className="flex items-center gap-2">
-                    AdsHouse <span className="text-muted-foreground/70 font-normal">|</span>{' '}
+                    AdsHouse <span className="text-muted-foreground font-normal">|</span>{' '}
                     <span style={{ color: accent }}>Mirror</span>
                   </span>
                 )}

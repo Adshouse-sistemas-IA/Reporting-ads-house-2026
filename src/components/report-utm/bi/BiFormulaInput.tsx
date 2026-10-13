@@ -338,7 +338,7 @@ export function BiFormulaInput({
           type="button"
           onClick={() => setOpen((o) => !o)}
           title="Insertar métrica"
-          className={`flex items-center gap-1 px-2 py-1.5 rounded-lg text-[11px] font-medium border transition-colors ${
+          className={`flex items-center gap-1 px-2 py-1.5 rounded-lg text-xs font-medium border transition-colors ${
             open
               ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-300'
               : 'border-border bg-muted text-muted-foreground hover:bg-accent'
@@ -349,7 +349,7 @@ export function BiFormulaInput({
         </button>
       </div>
       {lectura && (
-        <p className="mt-1 text-[10px] text-muted-foreground leading-snug">
+        <p className="mt-1 text-xs text-muted-foreground leading-snug">
           Se lee como: <span className="text-foreground/80">{lectura}</span>
         </p>
       )}
@@ -379,13 +379,13 @@ export function BiFormulaInput({
           </div>
           <div className="max-h-56 overflow-y-auto">
             {filtered.length === 0 ? (
-              <p className="px-3 py-4 text-center text-[11px] text-muted-foreground">
+              <p className="px-3 py-4 text-center text-xs text-muted-foreground">
                 Sin coincidencias
               </p>
             ) : (
               filtered.map((g) => (
                 <div key={g.title}>
-                  <p className="px-3 pt-2 pb-1 text-[9px] font-semibold uppercase tracking-wider text-muted-foreground bg-muted/40">
+                  <p className="px-3 pt-2 pb-1 text-xs font-semibold uppercase tracking-wider text-muted-foreground bg-muted/40">
                     {g.title}
                   </p>
                   {g.items.map((i) => (
@@ -401,9 +401,7 @@ export function BiFormulaInput({
                         title={i.key}
                         className="flex-1 min-w-0 text-left py-0.5"
                       >
-                        <span className="block text-[11px] text-foreground truncate">
-                          {i.label}
-                        </span>
+                        <span className="block text-xs text-foreground truncate">{i.label}</span>
                       </button>
                       {i.conteo && (
                         <>
@@ -411,7 +409,7 @@ export function BiFormulaInput({
                             type="button"
                             onClick={() => insert(`spend / ${i.key}`)}
                             title={`Costo por lead de «${i.label}»: inversión ÷ estos leads`}
-                            className="shrink-0 px-1.5 py-0.5 rounded text-[10px] font-medium text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-500/10 hover:bg-emerald-100"
+                            className="shrink-0 px-1.5 py-0.5 rounded text-xs font-medium text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-500/10 hover:bg-emerald-100"
                           >
                             CPL
                           </button>
@@ -419,7 +417,7 @@ export function BiFormulaInput({
                             type="button"
                             onClick={() => insert(`${i.key} / leads_count * 100`)}
                             title={`Porcentaje de los leads que son «${i.label}»`}
-                            className="shrink-0 px-1.5 py-0.5 rounded text-[10px] font-medium text-sky-700 dark:text-sky-300 bg-sky-50 dark:bg-sky-500/10 hover:bg-sky-100"
+                            className="shrink-0 px-1.5 py-0.5 rounded text-xs font-medium text-sky-700 dark:text-sky-300 bg-sky-50 dark:bg-sky-500/10 hover:bg-sky-100"
                           >
                             %
                           </button>

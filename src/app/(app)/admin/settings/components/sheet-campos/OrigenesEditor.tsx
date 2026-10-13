@@ -70,7 +70,7 @@ function OrigenRow({
       {/* Cabecera: qué pestaña y qué hacer si se marcan varias columnas */}
       <div className="flex flex-wrap items-end gap-3">
         <div className="flex-1 min-w-[240px] space-y-1">
-          <label className="block text-[11px] text-muted-foreground/70">Pestaña</label>
+          <label className="block text-xs text-muted-foreground">Pestaña</label>
           <select
             // El valor es el índice: los nombres de pestaña llevan espacios
             // y cualquier separador acaba siendo ambiguo.
@@ -98,7 +98,7 @@ function OrigenRow({
                     ajuste que no hace nada y que induce a dejarlo en "Sumarlas". */}
         {origen.columnas.length > 1 && (
           <div className="w-[190px] space-y-1">
-            <label className="block text-[11px] text-muted-foreground/70">
+            <label className="block text-xs text-muted-foreground">
               Con {origen.columnas.length} columnas…
             </label>
             <select
@@ -129,7 +129,7 @@ function OrigenRow({
       <div className="space-y-1.5">
         <div className="flex items-center gap-2">
           <div className="relative flex-1">
-            <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground/50" />
+            <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
             <Input
               value={busqueda}
               onChange={(e) => setBusqueda(e.target.value)}
@@ -137,7 +137,7 @@ function OrigenRow({
               className="h-8 pl-7 text-xs bg-background border-input"
             />
           </div>
-          <span className="text-[11px] text-muted-foreground/70 shrink-0">
+          <span className="text-xs text-muted-foreground shrink-0">
             {origen.columnas.length} de {totalColumnas} marcadas
           </span>
         </div>
@@ -145,13 +145,13 @@ function OrigenRow({
         <div className="rounded-md border border-input bg-background max-h-72 overflow-y-auto divide-y divide-border/50">
           {columnas.length === 0 && (
             <div className="px-3 py-3 text-center space-y-1">
-              <p className="text-xs text-muted-foreground/70">
+              <p className="text-xs text-muted-foreground">
                 {totalColumnas === 0
                   ? 'Esta pestaña no tiene columnas sincronizadas.'
                   : 'Ninguna columna coincide con la búsqueda.'}
               </p>
               {totalColumnas === 0 && fuente?.aviso && (
-                <p className="text-[11px] text-amber-600 dark:text-amber-400">{fuente.aviso}</p>
+                <p className="text-xs text-amber-600 dark:text-amber-400">{fuente.aviso}</p>
               )}
             </div>
           )}
@@ -184,7 +184,7 @@ function OrigenRow({
                     {col}
                   </span>
                   {muestra && (
-                    <span className="block text-[11px] text-muted-foreground/70 mt-0.5 line-clamp-2 break-words">
+                    <span className="block text-xs text-muted-foreground mt-0.5 line-clamp-2 break-words">
                       {muestra}
                     </span>
                   )}
@@ -221,7 +221,7 @@ export function OrigenesEditor({
         <p className="text-xs text-muted-foreground">
           Todavía no hay datos sincronizados de ninguna pestaña.
         </p>
-        <p className="text-xs text-muted-foreground/70 mt-1">
+        <p className="text-xs text-muted-foreground mt-1">
           Sincroniza el Sheet una vez y aquí aparecerán sus columnas para poder mapearlas.
         </p>
       </div>
@@ -271,13 +271,13 @@ export function OrigenesEditor({
         </Button>
 
         {origenes.length > 0 && (
-          <span className="text-xs text-muted-foreground/70 flex items-center gap-1.5">
+          <span className="text-xs text-muted-foreground flex items-center gap-1.5">
             <Columns3 className="w-3.5 h-3.5" />
             {totalColumnas} {totalColumnas === 1 ? 'columna' : 'columnas'} en {origenes.length}{' '}
             {origenes.length === 1 ? 'pestaña' : 'pestañas'}
           </span>
         )}
-        <span className="text-xs text-muted-foreground/50 ml-auto">
+        <span className="text-xs text-muted-foreground ml-auto">
           {fuentes.length} {fuentes.length === 1 ? 'pestaña disponible' : 'pestañas disponibles'}
         </span>
       </div>

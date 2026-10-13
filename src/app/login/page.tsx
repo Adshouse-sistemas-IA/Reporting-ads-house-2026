@@ -128,7 +128,7 @@ export default function LoginPage() {
                 placeholder="tu@email.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="bg-background border-input text-foreground placeholder:text-muted-foreground/70"
+                className="bg-background border-input text-foreground placeholder:text-muted-foreground"
                 required
               />
             </div>

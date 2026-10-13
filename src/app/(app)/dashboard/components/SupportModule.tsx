@@ -247,7 +247,7 @@ export function SupportModule({
       icon: CheckCircle2,
       color: 'text-emerald-600 dark:text-emerald-400',
     },
-    cancelado: { label: 'Descartado', icon: MessageSquare, color: 'text-muted-foreground/70' },
+    cancelado: { label: 'Descartado', icon: MessageSquare, color: 'text-muted-foreground' },
   };
 
   const typeMap: Record<string, { label: string; icon: any; color: string }> = {
@@ -279,7 +279,7 @@ export function SupportModule({
         <div>
           <h2 className="text-2xl font-bold text-foreground flex items-center gap-2">
             <History className="w-6 h-6 text-indigo-600 dark:text-indigo-400" />
-            🗺️ Roadmap
+            Roadmap
           </h2>
           <p className="text-muted-foreground text-sm">
             Bugs, mejoras e implementaciones de este cliente.
@@ -320,7 +320,7 @@ export function SupportModule({
                           key={k}
                           type="button"
                           onClick={() => setFormData({ ...formData, tipo: k })}
-                          className={`flex items-center gap-1.5 py-2 px-3 rounded-lg border text-xs font-medium transition ${formData.tipo === k ? tp.color : 'bg-background border-border text-muted-foreground/70 hover:border-muted-foreground/30'}`}
+                          className={`flex items-center gap-1.5 py-2 px-3 rounded-lg border text-xs font-medium transition ${formData.tipo === k ? tp.color : 'bg-background border-border text-muted-foreground hover:border-muted-foreground/30'}`}
                         >
                           <Icon className="w-3.5 h-3.5" />
                           {tp.label}
@@ -376,7 +376,7 @@ export function SupportModule({
                         key={p}
                         type="button"
                         onClick={() => setFormData({ ...formData, prioridad: p })}
-                        className={`flex-1 py-2 px-3 rounded-lg border text-xs font-medium transition ${formData.prioridad === p ? priorityMap[p].bg + ' ' + priorityMap[p].color + ' border-' + priorityMap[p].color.split('-')[1] + '-500/50' : 'bg-background border-border text-muted-foreground/70 hover:border-muted-foreground/30'}`}
+                        className={`flex-1 py-2 px-3 rounded-lg border text-xs font-medium transition ${formData.prioridad === p ? priorityMap[p].bg + ' ' + priorityMap[p].color + ' border-' + priorityMap[p].color.split('-')[1] + '-500/50' : 'bg-background border-border text-muted-foreground hover:border-muted-foreground/30'}`}
                       >
                         {priorityMap[p].label}
                       </button>
@@ -442,7 +442,7 @@ export function SupportModule({
             </CardDescription>
           </div>
           <div className="relative max-w-sm w-full">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/70" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
@@ -495,7 +495,7 @@ export function SupportModule({
                   <TableRow>
                     <TableCell
                       colSpan={isTeam ? 8 : 7}
-                      className="text-center py-10 text-muted-foreground/70"
+                      className="text-center py-10 text-muted-foreground"
                     >
                       Cargando tickets...
                     </TableCell>
@@ -504,7 +504,7 @@ export function SupportModule({
                   <TableRow>
                     <TableCell
                       colSpan={isTeam ? 8 : 7}
-                      className="text-center py-10 text-muted-foreground/70"
+                      className="text-center py-10 text-muted-foreground"
                     >
                       No se encontraron requerimientos registrados.
                     </TableCell>
@@ -532,7 +532,7 @@ export function SupportModule({
                             <span className="text-foreground font-medium">
                               {t.nombre_solicitante}
                             </span>
-                            <span className="text-muted-foreground/70 text-[10px] flex items-center gap-1">
+                            <span className="text-muted-foreground text-xs flex items-center gap-1">
                               <Calendar className="w-3 h-3" />
                               {safeFormatDate(t.fecha_solicitud, 'dd MMM yyyy')}
                             </span>
@@ -540,7 +540,7 @@ export function SupportModule({
                         </TableCell>
                         <TableCell>
                           <Badge
-                            className={`inline-flex items-center gap-1 ${(typeMap[t.tipo] ?? typeMap.tarea).color} text-[10px] font-bold uppercase`}
+                            className={`inline-flex items-center gap-1 ${(typeMap[t.tipo] ?? typeMap.tarea).color} text-xs font-bold uppercase`}
                           >
                             {React.createElement((typeMap[t.tipo] ?? typeMap.tarea).icon, {
                               className: 'w-3 h-3',
@@ -554,7 +554,7 @@ export function SupportModule({
                               {t.requerimiento}
                             </span>
                             {t.observaciones && (
-                              <span className="text-muted-foreground/70 text-[11px] mt-1 flex items-start gap-1">
+                              <span className="text-muted-foreground text-xs mt-1 flex items-start gap-1">
                                 <MessageSquare className="w-3 h-3 mt-0.5 shrink-0" />
                                 {t.observaciones}
                               </span>
@@ -563,7 +563,7 @@ export function SupportModule({
                         </TableCell>
                         <TableCell>
                           <Badge
-                            className={`${priorityMap[t.prioridad]?.bg} ${priorityMap[t.prioridad]?.color} border-transparent text-[10px] font-bold uppercase`}
+                            className={`${priorityMap[t.prioridad]?.bg} ${priorityMap[t.prioridad]?.color} border-transparent text-xs font-bold uppercase`}
                           >
                             {priorityMap[t.prioridad]?.label.split('(')[1].replace(')', '')}
                           </Badge>
@@ -571,24 +571,24 @@ export function SupportModule({
                         <TableCell>
                           <div className="flex flex-col gap-1">
                             <span className="text-foreground/90 text-sm flex items-center gap-1.5">
-                              <User className="w-3.5 h-3.5 text-muted-foreground/70" />
+                              <User className="w-3.5 h-3.5 text-muted-foreground" />
                               {t.responsable || (
-                                <span className="text-muted-foreground/70 italic">Por asignar</span>
+                                <span className="text-muted-foreground italic">Por asignar</span>
                               )}
                             </span>
                             {t.fecha_entrega && (
-                              <span className="text-emerald-500/80 text-[10px] font-semibold flex items-center gap-1">
+                              <span className="text-emerald-500/80 text-xs font-semibold flex items-center gap-1">
                                 <Clock className="w-3 h-3" />
                                 Est: {safeFormatDate(t.fecha_entrega, 'dd MMM yyyy')}
                               </span>
                             )}
                             {isActive && (
-                              <span className="inline-flex items-center gap-1 text-[10px] font-semibold px-1.5 py-0.5 rounded bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400 w-fit">
+                              <span className="inline-flex items-center gap-1 text-xs font-semibold px-1.5 py-0.5 rounded bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400 w-fit">
                                 ⏱ {formatElapsed(t.fecha_solicitud)} abierto
                               </span>
                             )}
                             {isActive && daysLeft !== null && daysLeft <= 2 && (
-                              <span className="inline-flex items-center gap-1 text-[10px] font-semibold px-1.5 py-0.5 rounded bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 w-fit">
+                              <span className="inline-flex items-center gap-1 text-xs font-semibold px-1.5 py-0.5 rounded bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 w-fit">
                                 ⚠️ Vence en {daysLeft <= 0 ? 'hoy' : `${daysLeft}d`}
                               </span>
                             )}
@@ -615,7 +615,7 @@ export function SupportModule({
                           ) : (
                             <div className="flex flex-col items-center justify-center">
                               <div
-                                className={`flex items-center gap-1.5 ${statusMap[t.estado]?.color} font-bold text-[11px] uppercase tracking-wider`}
+                                className={`flex items-center gap-1.5 ${statusMap[t.estado]?.color} font-bold text-xs uppercase tracking-wider`}
                               >
                                 <StatusIcon className="w-3.5 h-3.5" />
                                 {statusMap[t.estado]?.label}
@@ -627,7 +627,7 @@ export function SupportModule({
                           <TableCell>
                             <button
                               onClick={() => handleEditOpen(t)}
-                              className="text-muted-foreground/70 hover:text-indigo-400 transition"
+                              className="text-muted-foreground hover:text-indigo-400 transition"
                               title="Editar ticket"
                             >
                               <Edit2 className="w-4 h-4" />
@@ -699,7 +699,7 @@ export function SupportModule({
                       key={k}
                       type="button"
                       onClick={() => setEditForm({ ...editForm, tipo: k })}
-                      className={`flex items-center gap-1.5 py-2 px-3 rounded-lg border text-xs font-medium transition ${editForm.tipo === k ? tp.color : 'bg-background border-border text-muted-foreground/70 hover:border-muted-foreground/30'}`}
+                      className={`flex items-center gap-1.5 py-2 px-3 rounded-lg border text-xs font-medium transition ${editForm.tipo === k ? tp.color : 'bg-background border-border text-muted-foreground hover:border-muted-foreground/30'}`}
                     >
                       <Icon className="w-3.5 h-3.5" />
                       {tp.label}
@@ -718,7 +718,7 @@ export function SupportModule({
                     key={p}
                     type="button"
                     onClick={() => setEditForm({ ...editForm, prioridad: p })}
-                    className={`flex-1 py-2 px-3 rounded-lg border text-xs font-medium transition ${editForm.prioridad === p ? priorityMap[p].bg + ' ' + priorityMap[p].color : 'bg-background border-border text-muted-foreground/70 hover:border-muted-foreground/30'}`}
+                    className={`flex-1 py-2 px-3 rounded-lg border text-xs font-medium transition ${editForm.prioridad === p ? priorityMap[p].bg + ' ' + priorityMap[p].color : 'bg-background border-border text-muted-foreground hover:border-muted-foreground/30'}`}
                   >
                     {priorityMap[p].label}
                   </button>

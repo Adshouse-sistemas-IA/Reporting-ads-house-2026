@@ -93,13 +93,13 @@ export function InformesBrowser({
       {/* Toolbar: búsqueda + filtro por cliente + orden */}
       <div className="flex flex-wrap items-center gap-3">
         <div className="relative flex-1 min-w-[220px]">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/60" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <input
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Buscar informe por nombre o descripción…"
-            className="w-full pl-9 pr-9 py-2.5 text-sm rounded-xl bg-card border border-border text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-emerald-500/40"
+            className="w-full pl-9 pr-9 py-2.5 text-sm rounded-xl bg-card border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-emerald-500/40"
           />
           {query && (
             <button
@@ -174,7 +174,7 @@ export function InformesBrowser({
           <BarChart2 className="h-4 w-4 text-muted-foreground" />
           <h2 className="text-sm font-semibold text-foreground">Mis informes</h2>
           <HelpTip text="Tus informes personalizados. Crea uno con 'Nuevo Informe', agrega widgets en modo edición y compártelos con un link público cuando estén listos." />
-          <span className="px-1.5 py-0.5 rounded-md bg-muted text-[10px] font-mono text-muted-foreground">
+          <span className="px-1.5 py-0.5 rounded-md bg-muted text-xs font-mono text-muted-foreground">
             {visibleCustom.length}
           </span>
         </div>
@@ -196,7 +196,7 @@ export function InformesBrowser({
           />
         ) : (
           <div className="rounded-2xl border border-dashed border-border bg-muted/20 p-12 text-center">
-            <BarChart2 className="h-8 w-8 text-muted-foreground/50 mx-auto mb-3" />
+            <BarChart2 className="h-8 w-8 text-muted-foreground mx-auto mb-3" />
             <p className="text-sm font-medium text-foreground mb-1">Sin informes personalizados</p>
             <p className="text-xs text-muted-foreground mb-4">
               Crea tu primer informe o usa una plantilla del sistema.
@@ -220,7 +220,7 @@ export function InformesBrowser({
         >
           <LayoutTemplate className="h-4 w-4 text-muted-foreground" />
           <h2 className="text-sm font-semibold text-foreground">Plantillas</h2>
-          <span className="px-1.5 py-0.5 rounded-md bg-muted text-[10px] font-mono text-muted-foreground">
+          <span className="px-1.5 py-0.5 rounded-md bg-muted text-xs font-mono text-muted-foreground">
             {visibleTemplates.length}
           </span>
           <ChevronDown
@@ -263,7 +263,7 @@ function FilterChip({
   return (
     <button
       onClick={onClick}
-      className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-medium border transition-colors ${
+      className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium border transition-colors ${
         active
           ? 'border-emerald-500/40 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
           : 'border-border bg-card text-muted-foreground hover:text-foreground hover:bg-accent'
@@ -307,11 +307,11 @@ function ReportCard({
             <BarChart2 className="h-4.5 w-4.5 text-emerald-600 dark:text-emerald-400" />
           </div>
           {isTemplate ? (
-            <span className="px-1.5 py-0.5 rounded-md bg-muted text-[9px] font-semibold uppercase tracking-wider text-muted-foreground">
+            <span className="px-1.5 py-0.5 rounded-md bg-muted text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               plantilla
             </span>
           ) : clienteName ? (
-            <span className="flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-emerald-50 dark:bg-emerald-500/10 text-[9px] font-semibold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
+            <span className="flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-emerald-50 dark:bg-emerald-500/10 text-xs font-semibold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
               <Lock className="h-2.5 w-2.5" />
               {clienteName}
             </span>
@@ -328,7 +328,7 @@ function ReportCard({
         </div>
 
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
+          <div className="flex items-center gap-1 text-xs text-muted-foreground">
             <Clock className="h-3 w-3" />
             {formatDate(report.updated_at)}
           </div>

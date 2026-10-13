@@ -371,7 +371,7 @@ export function BitacorasSidebar({
                 <div className="flex flex-col items-center justify-center py-16 text-center gap-3">
                   <BookOpen className="w-8 h-8 text-muted-foreground/30" />
                   <p className="text-sm text-muted-foreground">Sin entradas aún</p>
-                  <p className="text-xs text-muted-foreground/60">
+                  <p className="text-xs text-muted-foreground">
                     Crea la primera para registrar cambios o ideas
                   </p>
                 </div>
@@ -393,7 +393,7 @@ export function BitacorasSidebar({
                         <p className="text-xs text-muted-foreground line-clamp-2">
                           {stripHtml(entry.contenido)}
                         </p>
-                        <div className="flex items-center gap-1.5 mt-1.5 text-xs text-muted-foreground/60">
+                        <div className="flex items-center gap-1.5 mt-1.5 text-xs text-muted-foreground">
                           {entry.author_name && <span>{entry.author_name} ·</span>}
                           <span>
                             {new Date(entry.created_at).toLocaleDateString('es', {

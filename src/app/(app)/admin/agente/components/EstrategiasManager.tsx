@@ -81,14 +81,14 @@ function SelectorMetricas({
 
   return (
     <div className="space-y-2">
-      <p className="text-muted-foreground/70 text-xs">{ayuda}</p>
+      <p className="text-muted-foreground text-xs">{ayuda}</p>
       {valor.length > 0 && (
         <div className="flex flex-wrap gap-1">
           {valor.map((v) => (
             <Badge
               key={v}
               variant="outline"
-              className="cursor-pointer border-indigo-500/20 bg-indigo-500/10 py-0.5 text-[10px] text-indigo-500"
+              className="cursor-pointer border-indigo-500/20 bg-indigo-500/10 py-0.5 text-xs text-indigo-500"
               onClick={() => alternar(v)}
             >
               {v} ×
@@ -107,7 +107,7 @@ function SelectorMetricas({
           <label key={m.clave} className="flex cursor-pointer items-center gap-2 text-xs">
             <Checkbox checked={valor.includes(m.clave)} onCheckedChange={() => alternar(m.clave)} />
             <span>{m.label}</span>
-            <span className="text-muted-foreground/50 font-mono text-[10px]">{m.clave}</span>
+            <span className="text-muted-foreground font-mono text-xs">{m.clave}</span>
           </label>
         ))}
       </div>
@@ -244,9 +244,9 @@ export function EstrategiasManager({ iniciales, soloLectura }: Props) {
         <CardContent>
           {filas.length === 0 ? (
             <div className="py-10 text-center">
-              <Target className="text-muted-foreground/50 mx-auto h-10 w-10" />
+              <Target className="text-muted-foreground mx-auto h-10 w-10" />
               <p className="mt-3 text-sm font-medium">Todavía no hay tipos de estrategia</p>
-              <p className="text-muted-foreground/70 mt-1 text-sm">
+              <p className="text-muted-foreground mt-1 text-sm">
                 Sin ellos, el agente no sabe qué métricas mirar en cada pestaña.
               </p>
             </div>
@@ -266,7 +266,7 @@ export function EstrategiasManager({ iniciales, soloLectura }: Props) {
                   <TableRow key={r.id} className="border-border hover:bg-muted/10 border-b">
                     <TableCell>
                       <p className="font-medium">{r.nombre}</p>
-                      <p className="text-muted-foreground/70 text-xs">
+                      <p className="text-muted-foreground text-xs">
                         {r.categoria}/{r.subcategoria}
                         {r.temporal && ' · con fecha de fin'}
                       </p>
@@ -276,31 +276,31 @@ export function EstrategiasManager({ iniciales, soloLectura }: Props) {
                         variant="outline"
                         className={
                           r.alcance === 'hasta_venta'
-                            ? 'border-emerald-500/20 bg-emerald-500/10 py-0.5 text-[10px] text-emerald-500'
-                            : 'border-amber-500/20 bg-amber-500/10 py-0.5 text-[10px] text-amber-500'
+                            ? 'border-emerald-500/20 bg-emerald-500/10 py-0.5 text-xs text-emerald-500'
+                            : 'border-amber-500/20 bg-amber-500/10 py-0.5 text-xs text-amber-500'
                         }
                       >
                         {r.alcance === 'hasta_venta' ? 'hasta la venta' : 'hasta el lead'}
                       </Badge>
-                      <p className="text-muted-foreground/70 mt-1 text-xs">
+                      <p className="text-muted-foreground mt-1 text-xs">
                         {(r.metricas_clave ?? []).length} métrica(s) clave
                       </p>
                     </TableCell>
                     <TableCell>
                       {(r.metricas_na ?? []).length === 0 ? (
-                        <span className="text-muted-foreground/50 text-xs">—</span>
+                        <span className="text-muted-foreground text-xs">—</span>
                       ) : (
                         <div className="flex flex-wrap gap-1">
                           {(r.metricas_na ?? []).slice(0, 3).map((m) => (
                             <span
                               key={m}
-                              className="text-muted-foreground/70 bg-muted/50 rounded px-1.5 py-0.5 font-mono text-[10px]"
+                              className="text-muted-foreground bg-muted/50 rounded px-1.5 py-0.5 font-mono text-xs"
                             >
                               {m}
                             </span>
                           ))}
                           {(r.metricas_na ?? []).length > 3 && (
-                            <span className="text-muted-foreground/50 text-[10px]">
+                            <span className="text-muted-foreground text-xs">
                               +{(r.metricas_na ?? []).length - 3}
                             </span>
                           )}

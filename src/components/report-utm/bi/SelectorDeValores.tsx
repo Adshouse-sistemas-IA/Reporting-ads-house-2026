@@ -223,7 +223,7 @@ export function SelectorDeValores({
       )}
 
       {truncado && (
-        <p className="text-[11px] text-muted-foreground border-t border-border pt-1.5">
+        <p className="text-xs text-muted-foreground border-t border-border pt-1.5">
           Se muestran los más frecuentes de {total.toLocaleString('es-CO')}. Busca para encontrar el
           resto.
         </p>
@@ -232,7 +232,7 @@ export function SelectorDeValores({
       {/* Un valor con coma no cabe en el formato guardado, que separa por
                 comas. Se avisa en vez de guardarlo partido en dos silenciosamente. */}
       {seleccion.some(tieneComa) && (
-        <p className="text-[11px] text-amber-700 dark:text-amber-400 border-t border-border pt-1.5">
+        <p className="text-xs text-amber-700 dark:text-amber-400 border-t border-border pt-1.5">
           Algún valor contiene una coma; se guarda escapado para no partirse.
         </p>
       )}

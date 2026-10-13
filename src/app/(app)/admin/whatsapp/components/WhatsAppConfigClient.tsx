@@ -184,7 +184,7 @@ export function WhatsAppConfigClient({
             <p className="text-amber-600 dark:text-amber-400 text-sm">
               No se pudo contactar al gateway: {gatewayError}
               <br />
-              <span className="text-muted-foreground/70">
+              <span className="text-muted-foreground">
                 Verifica WHATSAPP_GATEWAY_URL / WHATSAPP_GATEWAY_API_KEY y que el servicio esté
                 arriba.
               </span>
@@ -193,7 +193,7 @@ export function WhatsAppConfigClient({
             <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400 text-sm">
               ● Conectado{status.me?.name ? ` como ${status.me.name}` : ''}
               {status.me?.id ? (
-                <span className="text-muted-foreground/70">({status.me.id.split(':')[0]})</span>
+                <span className="text-muted-foreground">({status.me.id.split(':')[0]})</span>
               ) : null}
             </div>
           ) : (
@@ -211,7 +211,7 @@ export function WhatsAppConfigClient({
                   className="rounded-md bg-white p-2"
                 />
               ) : (
-                <p className="text-muted-foreground/70 text-sm">
+                <p className="text-muted-foreground text-sm">
                   QR no disponible todavía. Refresca en unos segundos.
                 </p>
               )}
@@ -240,7 +240,7 @@ export function WhatsAppConfigClient({
         </CardHeader>
         <CardContent>
           {groups.length === 0 ? (
-            <p className="text-muted-foreground/70 text-sm">
+            <p className="text-muted-foreground text-sm">
               Sin grupos. Conecta WhatsApp y pulsa “Sincronizar grupos”.
             </p>
           ) : (
@@ -251,9 +251,7 @@ export function WhatsAppConfigClient({
                   className="flex justify-between bg-muted/60 px-3 py-1.5 rounded"
                 >
                   <span>{g.group_name}</span>
-                  <span className="text-muted-foreground/70 text-xs">
-                    {g.group_id.split('@')[0]}
-                  </span>
+                  <span className="text-muted-foreground text-xs">{g.group_id.split('@')[0]}</span>
                 </li>
               ))}
             </ul>
@@ -357,11 +355,11 @@ export function WhatsAppConfigClient({
           </div>
 
           {routes.length === 0 ? (
-            <p className="text-muted-foreground/70 text-sm">Sin rutas configuradas.</p>
+            <p className="text-muted-foreground text-sm">Sin rutas configuradas.</p>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-sm text-foreground/90">
-                <thead className="text-muted-foreground/70 text-xs uppercase">
+                <thead className="text-muted-foreground text-xs uppercase">
                   <tr className="border-b border-border">
                     <th className="text-left py-2">Cliente</th>
                     <th className="text-left py-2">Tipo</th>
@@ -438,7 +436,7 @@ export function WhatsAppConfigClient({
           >
             Enviar
           </button>
-          <p className="text-muted-foreground/70 text-xs">
+          <p className="text-muted-foreground text-xs">
             Se envía a los grupos ruteados para el tipo “Envío manual” (del cliente, o global si no
             hay).
           </p>
@@ -452,14 +450,14 @@ export function WhatsAppConfigClient({
         </CardHeader>
         <CardContent>
           {messages.length === 0 ? (
-            <p className="text-muted-foreground/70 text-sm">Sin envíos todavía.</p>
+            <p className="text-muted-foreground text-sm">Sin envíos todavía.</p>
           ) : (
             <ul className="space-y-1 text-sm">
               {messages.map((m) => (
                 <li key={m.id} className="bg-muted/60 px-3 py-2 rounded flex justify-between gap-3">
                   <div className="min-w-0">
                     <span className="text-foreground/90 truncate block">{m.message}</span>
-                    <span className="text-muted-foreground/70 text-xs">
+                    <span className="text-muted-foreground text-xs">
                       {m.cliente?.nombre ?? 'Global'} ·{' '}
                       {NOTIFICATION_TYPE_LABELS[m.notification_type as NotificationType] ??
                         m.notification_type}{' '}

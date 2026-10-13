@@ -36,7 +36,7 @@ export function LeadsMotivosBar({
   return (
     <div className="rounded-2xl border border-border bg-card p-3">
       <div className="flex flex-wrap items-center gap-2">
-        <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mr-1">
+        <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mr-1">
           Motivo
         </span>
 
@@ -59,7 +59,7 @@ export function LeadsMotivosBar({
         {hrefRegla && (
           <Link
             href={hrefRegla}
-            className="ml-auto inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-medium text-muted-foreground hover:bg-accent transition-colors"
+            className="ml-auto inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium text-muted-foreground hover:bg-accent transition-colors"
           >
             <Settings2 className="h-3 w-3" />
             Ajustar la regla del cliente
@@ -67,9 +67,7 @@ export function LeadsMotivosBar({
         )}
       </div>
 
-      {activo && (
-        <p className="text-[11px] text-muted-foreground mt-2">{MOTIVOS_EXCLUSION[activo]}</p>
-      )}
+      {activo && <p className="text-xs text-muted-foreground mt-2">{MOTIVOS_EXCLUSION[activo]}</p>}
     </div>
   );
 }
@@ -107,11 +105,11 @@ function Chip({
       href={href}
       title={title}
       aria-current={activo ? 'true' : undefined}
-      className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-medium border transition-colors ${
+      className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium border transition-colors ${
         activo
           ? 'border-emerald-600 bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400'
           : n === 0
-            ? 'border-border text-muted-foreground/50 hover:bg-accent'
+            ? 'border-border text-muted-foreground hover:bg-accent'
             : 'border-border text-foreground hover:bg-accent'
       }`}
     >

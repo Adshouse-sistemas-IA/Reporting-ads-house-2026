@@ -121,7 +121,7 @@ function MetaAccountRow({
           variant="ghost"
           size="sm"
           onClick={onRemove}
-          className="text-muted-foreground/70 hover:text-red-600 dark:hover:text-red-400 shrink-0 h-8 w-8 p-0"
+          className="text-muted-foreground hover:text-red-600 dark:hover:text-red-400 shrink-0 h-8 w-8 p-0"
         >
           <Trash2 className="w-4 h-4" />
         </Button>
@@ -214,7 +214,7 @@ function TikTokAccountRow({
           variant="ghost"
           size="sm"
           onClick={onRemove}
-          className="text-muted-foreground/70 hover:text-red-600 dark:hover:text-red-400 shrink-0 h-8 w-8 p-0"
+          className="text-muted-foreground hover:text-red-600 dark:hover:text-red-400 shrink-0 h-8 w-8 p-0"
         >
           <Trash2 className="w-4 h-4" />
         </Button>
@@ -320,7 +320,7 @@ function CampoSecreto({
         className="bg-background border-input"
       />
       {hayGuardado && (
-        <p className="text-xs text-muted-foreground/70">
+        <p className="text-xs text-muted-foreground">
           {conservado
             ? 'Guardado y cifrado. Escribe uno nuevo solo si quieres reemplazarlo. '
             : texto
@@ -1338,7 +1338,7 @@ export function ClientConfigForm({
                   })()}
 
                 {!selectedLayoutId && (
-                  <p className="text-xs text-muted-foreground/70">
+                  <p className="text-xs text-muted-foreground">
                     Sin plantilla activa → el Dashboard usará la vista clásica con columnas basadas
                     en APIs conectadas.
                   </p>
@@ -1399,7 +1399,7 @@ export function ClientConfigForm({
           {/* ─── Meta Ads ─────────────────────────────────────────────────── */}
           <Card className="bg-card border-border">
             <CardHeader>
-              <CardTitle>Meta Ads Configuration</CardTitle>
+              <CardTitle>Meta Ads</CardTitle>
               <CardDescription>
                 Conecta una o más cuentas publicitarias de Meta. Los datos de todas las cuentas se
                 consolidarán en el reporte.
@@ -1474,7 +1474,7 @@ export function ClientConfigForm({
                   onChange={(e) => setConfig({ ...config, meta_token: e.target.value })}
                   className="bg-background border-input"
                 />
-                <p className="text-xs text-muted-foreground/70">
+                <p className="text-xs text-muted-foreground">
                   Se completa automáticamente al conectar por OAuth. Si una cuenta no tiene token
                   propio, se usará este. Para una conexión que <strong>no caduca</strong>, pega aquí
                   un <strong>System User token</strong> del Business Manager.
@@ -1522,7 +1522,7 @@ export function ClientConfigForm({
                         variant="ghost"
                         size="sm"
                         onClick={() => setAvailableMetaAccounts(null)}
-                        className="h-6 text-xs text-muted-foreground/70 hover:text-foreground/90"
+                        className="h-6 text-xs text-muted-foreground hover:text-foreground/90"
                       >
                         Cancelar
                       </Button>
@@ -1533,7 +1533,7 @@ export function ClientConfigForm({
                       </p>
                     )}
                     {availableMetaAccounts.length === 0 && !metaPickerError && (
-                      <p className="text-xs text-muted-foreground/70">
+                      <p className="text-xs text-muted-foreground">
                         No se encontraron cuentas publicitarias para este token.
                       </p>
                     )}
@@ -1555,7 +1555,7 @@ export function ClientConfigForm({
                               className="rounded border-input bg-background text-indigo-500 focus:ring-indigo-500"
                             />
                             <span className="text-sm text-foreground flex-1">{a.name}</span>
-                            <span className="text-xs text-muted-foreground/70 font-mono">
+                            <span className="text-xs text-muted-foreground font-mono">
                               {a.account_id}
                             </span>
                             {alreadyAdded && (
@@ -1582,7 +1582,7 @@ export function ClientConfigForm({
                 )}
 
                 {metaAccounts.length === 0 && (
-                  <p className="text-xs text-muted-foreground/70 py-3 text-center border border-dashed border-border rounded-lg">
+                  <p className="text-xs text-muted-foreground py-3 text-center border border-dashed border-border rounded-lg">
                     Sin cuentas configuradas. Agrega al menos una para activar Meta Ads.
                   </p>
                 )}
@@ -1612,7 +1612,7 @@ export function ClientConfigForm({
           {/* ─── Filtros de Dashboard ─────────────────────────────────────── */}
           <Card className="bg-card border-border">
             <CardHeader>
-              <CardTitle>Filtros de Dashboard</CardTitle>
+              <CardTitle>Filtros del dashboard</CardTitle>
               <CardDescription>
                 Configura botones de filtrado rápido para el Dashboard (ej. nombres de campañas o
                 proyectos).
@@ -1630,7 +1630,7 @@ export function ClientConfigForm({
                   onChange={(e) => setConfig({ ...config, meta_keywords: e.target.value })}
                   className="bg-background border-input"
                 />
-                <p className="text-xs text-muted-foreground/70">
+                <p className="text-xs text-muted-foreground">
                   Estos textos aparecerán como botones de filtro rápido en la vista superior del
                   embudo de Meta Ads.
                 </p>
@@ -1646,7 +1646,7 @@ export function ClientConfigForm({
                   onChange={(e) => setConfig({ ...config, alcance_campanas: e.target.value })}
                   className="bg-background border-input"
                 />
-                <p className="text-xs text-muted-foreground/70">
+                <p className="text-xs text-muted-foreground">
                   Solo si la cuenta publicitaria la comparte con otro cliente. Una campaña es suya
                   si su nombre contiene alguno de estos textos; un texto con «-» delante la excluye.
                   Recorta el gasto y el cruce de leads de los informes. Vacío = toda la cuenta.
@@ -1663,7 +1663,7 @@ export function ClientConfigForm({
                   onChange={(e) => setConfig({ ...config, zona_horaria: e.target.value.trim() })}
                   className="bg-background border-input"
                 />
-                <p className="text-xs text-muted-foreground/70">
+                <p className="text-xs text-muted-foreground">
                   Define dónde empieza y termina cada día para leads y ventas. Por defecto se usa la
                   zona de la cuenta de Meta, que es la del gasto; escríbela solo para forzar otra.
                 </p>
@@ -1780,9 +1780,7 @@ export function ClientConfigForm({
                 <div className="space-y-2">
                   <Label htmlFor="ga_property_id" className="text-foreground/90">
                     Property ID{' '}
-                    <span className="text-muted-foreground/70 font-normal ml-1">
-                      (ej: 400123456)
-                    </span>
+                    <span className="text-muted-foreground font-normal ml-1">(ej: 400123456)</span>
                   </Label>
                   <Input
                     id="ga_property_id"
@@ -1826,7 +1824,7 @@ export function ClientConfigForm({
                     <h4 className="text-sm font-medium text-foreground">
                       Credenciales de Autenticación
                     </h4>
-                    <p className="text-xs text-muted-foreground/70 mt-0.5">
+                    <p className="text-xs text-muted-foreground mt-0.5">
                       Sube el archivo JSON de tu Service Account de Google Cloud. Automáticamente
                       extraeremos el Email y la Private Key aplicando el formato correcto.
                     </p>
@@ -1836,7 +1834,7 @@ export function ClientConfigForm({
                 <div className="mt-3">
                   <Label className="cursor-pointer">
                     <div className="border border-dashed border-input hover:border-indigo-500/50 bg-muted/50 hover:bg-muted transition-colors p-4 rounded-lg text-center flex flex-col items-center justify-center gap-2">
-                      <DatabaseZap className="w-6 h-6 text-muted-foreground/70" />
+                      <DatabaseZap className="w-6 h-6 text-muted-foreground" />
                       <span className="text-sm text-muted-foreground">
                         Seleccionar o arrastrar archivo <strong>.json</strong>
                       </span>
@@ -1859,7 +1857,7 @@ export function ClientConfigForm({
                       id="ga_client_email"
                       value={config.ga_client_email || ''}
                       readOnly
-                      className="bg-muted/50 border-border text-muted-foreground/70 text-xs focus-visible:ring-0"
+                      className="bg-muted/50 border-border text-muted-foreground text-xs focus-visible:ring-0"
                     />
                   </div>
                   <div className="space-y-2">
@@ -1874,7 +1872,7 @@ export function ClientConfigForm({
                           : ''
                       }
                       readOnly
-                      className="w-full h-9 rounded-md bg-muted/50 border border-border px-3 py-2 text-xs text-muted-foreground/70 resize-none focus-visible:outline-none focus-visible:ring-0"
+                      className="w-full h-9 rounded-md bg-muted/50 border border-border px-3 py-2 text-xs text-muted-foreground resize-none focus-visible:outline-none focus-visible:ring-0"
                     />
                   </div>
                 </div>
@@ -1943,7 +1941,7 @@ export function ClientConfigForm({
                 ))}
               </div>
 
-              <p className="text-xs text-muted-foreground/60 text-center border-t border-border pt-3">
+              <p className="text-xs text-muted-foreground text-center border-t border-border pt-3">
                 ¿Falta una propiedad? Dale acceso de Lector a{' '}
                 {googleEmail || 'la cuenta de la agencia'} en GA4 → Administrar.
               </p>
@@ -2274,7 +2272,7 @@ export function ClientConfigForm({
                                 }
                                 abrirBorradoSheet(idx, sid, sheet.name || `Sheet ${idx + 1}`);
                               }}
-                              className="text-muted-foreground/70 hover:text-red-500 shrink-0 h-8 w-8 p-0"
+                              className="text-muted-foreground hover:text-red-500 shrink-0 h-8 w-8 p-0"
                             >
                               <Trash2 className="w-3.5 h-3.5" />
                             </Button>
@@ -2313,7 +2311,7 @@ export function ClientConfigForm({
                                 )}
                               </div>
                               {bloqueado && (
-                                <p className="text-xs text-muted-foreground/70 flex items-center gap-1.5">
+                                <p className="text-xs text-muted-foreground flex items-center gap-1.5">
                                   <Lock className="w-3 h-3 shrink-0" />
                                   El documento queda fijo al guardar. Todos los datos sincronizados
                                   cuelgan de este sheet, así que para usar otro documento hay que
@@ -2329,7 +2327,7 @@ export function ClientConfigForm({
                                   <Label className="text-foreground/90 text-sm">
                                     Pestañas a sincronizar
                                   </Label>
-                                  <p className="text-xs text-muted-foreground/70 mt-0.5">
+                                  <p className="text-xs text-muted-foreground mt-0.5">
                                     Cada pestaña tiene su propio mapeo de columnas.
                                   </p>
                                 </div>
@@ -2367,7 +2365,7 @@ export function ClientConfigForm({
 
                               {tabsState.available.length > 0 && (
                                 <div className="bg-muted/40 border border-border rounded-lg p-3 space-y-1.5">
-                                  <p className="text-xs text-muted-foreground/70">
+                                  <p className="text-xs text-muted-foreground">
                                     Pestañas del documento — marca las que quieras sincronizar:
                                   </p>
                                   <div className="grid grid-cols-2 md:grid-cols-3 gap-1.5">
@@ -2387,7 +2385,7 @@ export function ClientConfigForm({
                                           <span className="truncate" title={t.title}>
                                             {t.title}
                                           </span>
-                                          <span className="text-muted-foreground/50 shrink-0">
+                                          <span className="text-muted-foreground shrink-0">
                                             ({t.rowCount})
                                           </span>
                                         </label>
@@ -2412,7 +2410,7 @@ export function ClientConfigForm({
                               )}
 
                               {tabs.length === 0 && (
-                                <p className="text-xs text-muted-foreground/50 text-center py-3 border border-dashed border-border rounded-lg">
+                                <p className="text-xs text-muted-foreground text-center py-3 border border-dashed border-border rounded-lg">
                                   Sin pestañas seleccionadas. Usa &quot;Detectar pestañas&quot; o
                                   agrégala manualmente.
                                 </p>
@@ -2450,7 +2448,7 @@ export function ClientConfigForm({
                                         variant="ghost"
                                         size="sm"
                                         onClick={() => removeTab(idx, tab.id)}
-                                        className="text-muted-foreground/70 hover:text-red-500 shrink-0 h-7 w-7 p-0"
+                                        className="text-muted-foreground hover:text-red-500 shrink-0 h-7 w-7 p-0"
                                       >
                                         <Trash2 className="w-3 h-3" />
                                       </Button>
@@ -2463,7 +2461,7 @@ export function ClientConfigForm({
                                         <h4 className="text-sm font-medium text-foreground">
                                           Nombres de columnas
                                         </h4>
-                                        <p className="text-xs text-muted-foreground/70 -mt-1">
+                                        <p className="text-xs text-muted-foreground -mt-1">
                                           Nombres exactos en la pestaña. Vacío = usa el valor por
                                           defecto.
                                           {headerOpts.length > 0 &&
@@ -2539,7 +2537,7 @@ export function ClientConfigForm({
                                                   }
                                                   className="bg-background border-input h-8 text-sm disabled:opacity-50"
                                                 />
-                                                <p className="text-xs text-muted-foreground/60">
+                                                <p className="text-xs text-muted-foreground">
                                                   {hint}
                                                 </p>
                                               </div>
@@ -2562,7 +2560,7 @@ export function ClientConfigForm({
                                             />
                                             <span>
                                               Cada fila es una conversión
-                                              <span className="block text-muted-foreground/60">
+                                              <span className="block text-muted-foreground">
                                                 Para hojas sin columna de cantidad (un lead o una
                                                 venta por fila).
                                               </span>
@@ -2586,7 +2584,7 @@ export function ClientConfigForm({
                                               <option value="venta">Todas son ventas</option>
                                               <option value="otro">Otro</option>
                                             </select>
-                                            <span className="text-xs text-muted-foreground/60">
+                                            <span className="text-xs text-muted-foreground">
                                               Sin esto las filas entran como &quot;otro&quot; y no
                                               suman en leads/ventas offline.
                                             </span>
@@ -2913,7 +2911,7 @@ export function ClientConfigForm({
                                 </li>
                               ))}
                             </ul>
-                            <p className="text-xs text-muted-foreground/70">
+                            <p className="text-xs text-muted-foreground">
                               Los campos no se borran. Las fórmulas del dashboard que los usen
                               seguirán resolviendo.
                             </p>
@@ -3029,7 +3027,7 @@ export function ClientConfigForm({
                       ))}
                     </div>
 
-                    <p className="text-xs text-muted-foreground/60 text-center border-t border-border pt-3">
+                    <p className="text-xs text-muted-foreground text-center border-t border-border pt-3">
                       O pega la URL directamente en el campo de URL del Sheet.
                     </p>
                   </DialogContent>
@@ -3200,7 +3198,7 @@ export function ClientConfigForm({
                 <button
                   type="button"
                   onClick={() => setShowHotmartAdvanced((v) => !v)}
-                  className="text-xs text-muted-foreground/70 hover:text-foreground/90"
+                  className="text-xs text-muted-foreground hover:text-foreground/90"
                 >
                   {showHotmartAdvanced ? '▾ Ocultar avanzado' : '▸ Opciones avanzadas'}
                 </button>
@@ -3227,7 +3225,7 @@ export function ClientConfigForm({
                         hayGuardado={hayGuardado('hotmart_basic')}
                         onCambio={(v) => setConfig({ ...config, hotmart_basic: v })}
                       />
-                      <p className="text-xs text-muted-foreground/70">
+                      <p className="text-xs text-muted-foreground">
                         Se calcula automáticamente desde Client ID + Secret al guardar (también al
                         cambiar el Secret). Solo edítalo si tienes el token Basic directamente.
                       </p>
@@ -3283,7 +3281,7 @@ export function ClientConfigForm({
                   onChange={(e) => setConfig({ ...config, tiktok_access_token: e.target.value })}
                   className="bg-background border-input"
                 />
-                <p className="text-xs text-muted-foreground/70">
+                <p className="text-xs text-muted-foreground">
                   Token OAuth o token manual. Las cuentas sin token propio usarán este.
                 </p>
               </div>
@@ -3364,7 +3362,7 @@ export function ClientConfigForm({
                         variant="ghost"
                         size="sm"
                         onClick={() => setAvailableTiktokAccounts(null)}
-                        className="h-6 text-xs text-muted-foreground/70 hover:text-foreground/90"
+                        className="h-6 text-xs text-muted-foreground hover:text-foreground/90"
                       >
                         Cancelar
                       </Button>
@@ -3375,7 +3373,7 @@ export function ClientConfigForm({
                       </p>
                     )}
                     {availableTiktokAccounts.length === 0 && !tiktokPickerError && (
-                      <p className="text-xs text-muted-foreground/70">
+                      <p className="text-xs text-muted-foreground">
                         No se encontraron cuentas publicitarias para este token.
                       </p>
                     )}
@@ -3397,7 +3395,7 @@ export function ClientConfigForm({
                               className="rounded border-input bg-background text-indigo-500 focus:ring-indigo-500"
                             />
                             <span className="text-sm text-foreground flex-1">{a.name}</span>
-                            <span className="text-xs text-muted-foreground/70 font-mono">
+                            <span className="text-xs text-muted-foreground font-mono">
                               {a.advertiser_id}
                             </span>
                             {alreadyAdded && (
@@ -3424,7 +3422,7 @@ export function ClientConfigForm({
                 )}
 
                 {tiktokAccounts.length === 0 && (
-                  <p className="text-xs text-muted-foreground/70 py-3 text-center border border-dashed border-border rounded-lg">
+                  <p className="text-xs text-muted-foreground py-3 text-center border border-dashed border-border rounded-lg">
                     Sin cuentas configuradas. Conéctate via OAuth o agrega manualmente.
                   </p>
                 )}

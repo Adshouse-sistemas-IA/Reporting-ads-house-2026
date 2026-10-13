@@ -123,7 +123,7 @@ export function GoogleAdsCard({
           </label>
           <label className="block">
             <span className="block text-xs font-medium text-muted-foreground mb-1">
-              Login Customer ID <span className="text-muted-foreground/60">(MCC, opcional)</span>
+              Login Customer ID <span className="text-muted-foreground">(MCC, opcional)</span>
             </span>
             <input
               type="text"
@@ -146,7 +146,7 @@ export function GoogleAdsCard({
             placeholder="customers/1234567890/conversionActions/987654321"
             className="w-full px-3 py-2 text-xs rounded-lg border border-border bg-muted text-foreground focus:outline-none focus:ring-2 focus:ring-blue-500/40 font-mono"
           />
-          <p className="mt-1 text-[10px] text-muted-foreground">
+          <p className="mt-1 text-xs text-muted-foreground">
             Encontralo en Google Ads → Herramientas → Conversiones → Acción → Details
           </p>
         </label>
@@ -155,7 +155,7 @@ export function GoogleAdsCard({
           <span className="block text-xs font-medium text-muted-foreground mb-1">
             Access Token OAuth2{' '}
             {isConfigured && (
-              <span className="text-muted-foreground/60">(dejá vacío para mantener el actual)</span>
+              <span className="text-muted-foreground">(dejá vacío para mantener el actual)</span>
             )}
           </span>
           <div className="flex items-center gap-2">

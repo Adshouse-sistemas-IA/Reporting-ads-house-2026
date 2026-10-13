@@ -18,10 +18,6 @@ import {
   Save,
   Loader2,
   Check,
-  ChevronLeft,
-  Eye,
-  EyeOff,
-  LayoutPanelTop,
   Plus,
   Database,
   BarChart3,
@@ -41,11 +37,10 @@ import type {
   SheetFilterSpec,
   SheetFilterOperator,
   RankingTableDef,
-  CardVariant,
-  CardThreshold,
   LeadAnswerBlockDef,
 } from '@/lib/layout-types';
 import { LeadAnswerEditor } from './LeadAnswerEditor';
+import { EditorBloques, type VistaPreviaEditor } from './EditorBloques';
 import { toast } from 'sonner';
 
 // El catálogo de métricas y las reglas de formato viven en un módulo puro
@@ -82,6 +77,8 @@ import type {
 import type { SheetCampoResumen, SheetVistaResumen } from '../_actions';
 
 // ─── Formula Input component ──────────────────────────────────────────────────
+
+type Seccion = 'tarjetas' | 'columnas' | 'graficos' | 'titulos' | 'rankings' | 'respuestas';
 
 const esCampoDeSheet = (id: string) => id.startsWith('sf_') || id.startsWith('sv_');
 
@@ -207,7 +204,7 @@ export function FormulaInput({
         <Popover>
           <PopoverTrigger asChild>
             <button
-              className="absolute right-1 text-muted-foreground/70 hover:text-indigo-400 p-1 transition bg-background rounded"
+              className="absolute right-1 text-muted-foreground hover:text-indigo-400 p-1 transition bg-background rounded"
               title="Insertar métrica"
             >
               <Database className="w-3.5 h-3.5" />
@@ -230,7 +227,7 @@ export function FormulaInput({
                 className="h-8 text-xs bg-card border-border focus-visible:ring-indigo-500/50"
               />
             </div>
-            <div className="flex gap-1 p-1 bg-background border-b border-border text-[9px] overflow-x-auto custom-scrollbar">
+            <div className="flex gap-1 p-1 bg-background border-b border-border text-xs overflow-x-auto custom-scrollbar">
               {tabs.map((tab) => (
                 <button
                   key={tab}
@@ -280,7 +277,7 @@ export function FormulaInput({
                           type="button"
                           onClick={() => insertMetric(m.id, `total_spend / ${m.id}`, 'currency')}
                           title={`Costo por lead de «${m.label}»: inversión total ÷ estos leads`}
-                          className="shrink-0 px-1.5 py-0.5 rounded text-[10px] font-medium text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-500/10"
+                          className="shrink-0 px-1.5 py-0.5 rounded text-xs font-medium text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-500/10"
                         >
                           CPL
                         </button>
@@ -290,7 +287,7 @@ export function FormulaInput({
                             insertMetric(m.id, `${m.id} / ${CLAVE_TOTAL_LEADS} * 100`, 'percent')
                           }
                           title={`Porcentaje de los leads que son «${m.label}»`}
-                          className="shrink-0 mr-1 px-1.5 py-0.5 rounded text-[10px] font-medium text-sky-700 dark:text-sky-300 bg-sky-50 dark:bg-sky-500/10"
+                          className="shrink-0 mr-1 px-1.5 py-0.5 rounded text-xs font-medium text-sky-700 dark:text-sky-300 bg-sky-50 dark:bg-sky-500/10"
                         >
                           %
                         </button>
@@ -300,7 +297,7 @@ export function FormulaInput({
                 );
               })}
               {filteredMetrics.length === 0 && (
-                <p className="text-center text-xs text-muted-foreground/70 py-4">
+                <p className="text-center text-xs text-muted-foreground py-4">
                   No se encontraron métricas
                 </p>
               )}
@@ -335,7 +332,7 @@ export function MetricTypeSelector({
       label: 'Número',
       active: 'bg-secondary text-secondary-foreground border-ring',
       inactive:
-        'bg-card text-muted-foreground/70 border-border hover:border-muted-foreground/50 hover:text-foreground/90',
+        'bg-card text-muted-foreground border-border hover:border-muted-foreground/50 hover:text-foreground/90',
     },
     {
       type: 'currency',
@@ -343,7 +340,7 @@ export function MetricTypeSelector({
       label: 'Moneda',
       active: 'bg-emerald-600/30 text-emerald-600 dark:text-emerald-300 border-emerald-500/60',
       inactive:
-        'bg-card text-muted-foreground/70 border-border hover:border-emerald-500/40 hover:text-emerald-400',
+        'bg-card text-muted-foreground border-border hover:border-emerald-500/40 hover:text-emerald-400',
     },
     {
       // Importe SIEMPRE en dólares: para las gemelas sin convertir de Hotmart
@@ -353,7 +350,7 @@ export function MetricTypeSelector({
       label: 'Moneda USD (siempre dólares)',
       active: 'bg-teal-600/30 text-teal-600 dark:text-teal-300 border-teal-500/60',
       inactive:
-        'bg-card text-muted-foreground/70 border-border hover:border-teal-500/40 hover:text-teal-400',
+        'bg-card text-muted-foreground border-border hover:border-teal-500/40 hover:text-teal-400',
     },
     {
       type: 'percent',
@@ -361,7 +358,7 @@ export function MetricTypeSelector({
       label: 'Porcentaje',
       active: 'bg-blue-600/30 text-blue-600 dark:text-blue-300 border-blue-500/60',
       inactive:
-        'bg-card text-muted-foreground/70 border-border hover:border-blue-500/40 hover:text-blue-400',
+        'bg-card text-muted-foreground border-border hover:border-blue-500/40 hover:text-blue-400',
     },
   ];
   return (
@@ -376,146 +373,6 @@ export function MetricTypeSelector({
           {t.icon}
         </button>
       ))}
-    </div>
-  );
-}
-
-// ─── DnD Column Row ───────────────────────────────────────────────────────────
-
-function DraggableColumnRow({
-  col,
-  index,
-  onDragStart,
-  onDragOver,
-  onDrop,
-  onUpdate,
-  onRemove,
-  availableMetrics,
-  campaignGroups = [],
-  campaignNames = [],
-  googleSheetsConversiones = [],
-  conversionesOfflineRaw = [],
-}: {
-  col: ColDef;
-  index: number;
-  onDragStart: (i: number) => void;
-  onDragOver: (e: React.DragEvent, i: number) => void;
-  onDrop: (i: number) => void;
-  onUpdate: (col: ColDef) => void;
-  onRemove: () => void;
-  availableMetrics?: MetricOption[];
-  campaignGroups?: { id: string; nombre: string }[];
-  campaignNames?: string[];
-  googleSheetsConversiones?: any[];
-  conversionesOfflineRaw?: any[];
-}) {
-  return (
-    <div
-      className="relative group/row flex items-stretch"
-      draggable
-      onDragStart={(e) => {
-        e.stopPropagation();
-        onDragStart(index);
-      }}
-      onDragOver={(e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        onDragOver(e, index);
-      }}
-      onDrop={(e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        onDrop(index);
-      }}
-    >
-      <div
-        className={`flex flex-col gap-1.5 bg-card border rounded-l-lg px-3 py-2.5 transition cursor-grab active:cursor-grabbing select-none flex-1 min-w-0 ${col.hidden ? 'border-border border-r-0 opacity-50' : 'border-border border-r-0 hover:border-muted-foreground/40'}`}
-      >
-        {/* Row 1: grip + eye + label + formula */}
-        <div className="flex items-center gap-2">
-          <GripVertical className="w-4 h-4 text-muted-foreground/70 flex-shrink-0 group-hover/row:text-muted-foreground transition" />
-
-          <button
-            onClick={() => onUpdate({ ...col, hidden: !col.hidden })}
-            className="flex-shrink-0 text-muted-foreground/70 hover:text-foreground transition"
-            title={col.hidden ? 'Mostrar columna' : 'Ocultar columna'}
-          >
-            {col.hidden ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
-          </button>
-
-          <Input
-            value={col.label}
-            onChange={(e) => onUpdate({ ...col, label: e.target.value })}
-            className="h-7 text-xs bg-background border-border text-foreground w-28 flex-shrink-0"
-            placeholder="Etiqueta"
-          />
-
-          <FormulaInput
-            value={col.formula}
-            onChange={(val) => onUpdate({ ...col, formula: val.trim() })}
-            disabled={col.formula === 'fecha'}
-            availableMetrics={availableMetrics}
-            // Prerrellena $ / % con el formato que declara la métrica.
-            // La fórmula viaja en la misma actualización: si no, esta
-            // sobrescribiría la que acaba de poner `onChange`.
-            onMetricInserted={(_id, format, formula) => {
-              if (format) onUpdate({ ...col, formula: formula.trim(), ...applyMetricType(format) });
-            }}
-          />
-        </div>
-
-        {/* Row 2: type + highlight + campaign filter (only for non-fecha columns) */}
-        {col.formula !== 'fecha' && (
-          <div className="flex flex-col gap-1 pl-6 min-w-0">
-            <div className="flex flex-wrap items-center gap-2 min-w-0">
-              <MetricTypeSelector
-                prefix={col.prefix}
-                suffix={col.suffix}
-                onChange={(vals) => onUpdate({ ...col, ...vals })}
-              />
-
-              <button
-                onClick={() => onUpdate({ ...col, highlight: !col.highlight })}
-                title="Colorear según impacto"
-                className={`flex-shrink-0 w-6 h-7 rounded border text-xs transition ${col.highlight ? 'bg-indigo-500/20 border-indigo-500/40 text-indigo-600 dark:text-indigo-400' : 'bg-card border-border text-muted-foreground/70 hover:text-muted-foreground'}`}
-              >
-                ✦
-              </button>
-
-              <CampaignFilterPicker
-                value={col.campaignFilter}
-                onChange={(v) => onUpdate({ ...col, campaignFilter: v })}
-                campaignGroups={campaignGroups}
-                campaignNames={campaignNames}
-              />
-
-              <SheetFilterPicker
-                value={col.sheetFilter}
-                onChange={(v) => onUpdate({ ...col, sheetFilter: v })}
-                googleSheetsConversiones={googleSheetsConversiones}
-                conversionesOfflineRaw={conversionesOfflineRaw}
-              />
-
-              {col.isManual && (
-                <span className="flex-shrink-0 text-[9px] bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 px-1.5 py-0.5 rounded font-bold uppercase tracking-wide">
-                  Manual
-                </span>
-              )}
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* Sticky delete button */}
-      {col.formula !== 'fecha' && (
-        <button
-          onClick={onRemove}
-          title="Eliminar columna"
-          className={`flex-shrink-0 flex items-center justify-center w-8 bg-card border border-l-0 rounded-r-lg transition text-muted-foreground/70 hover:text-red-400 hover:bg-red-400/5 hover:border-red-400/30 ${col.hidden ? 'border-border opacity-50' : 'border-border'}`}
-        >
-          <X className="w-3.5 h-3.5" />
-        </button>
-      )}
     </div>
   );
 }
@@ -536,7 +393,7 @@ export function TikTokAccountPicker({
   if (accounts.length === 0) return null;
   return (
     <div className="flex items-center gap-1.5">
-      <span className="text-[10px] text-muted-foreground/70 shrink-0">Cuenta TikTok:</span>
+      <span className="text-xs text-muted-foreground shrink-0">Cuenta TikTok:</span>
       <select
         value={value || ''}
         onChange={(e) => onChange(e.target.value)}
@@ -562,278 +419,6 @@ export const COLOR_OPTIONS: { val: CardColor; bg: string }[] = [
   { val: 'amber', bg: 'bg-amber-400' },
   { val: 'red', bg: 'bg-red-400' },
 ];
-
-function DraggableCardRow({
-  card,
-  index,
-  onDragStart,
-  onDragOver,
-  onDrop,
-  onUpdate,
-  onRemove,
-  onDuplicate,
-  availableMetrics,
-  campaignGroups = [],
-  campaignNames = [],
-  tiktokAccounts = [],
-  googleSheetsConversiones = [],
-  conversionesOfflineRaw = [],
-}: {
-  card: CardDef;
-  index: number;
-  onDragStart: (i: number) => void;
-  onDragOver: (e: React.DragEvent, i: number) => void;
-  onDrop: (i: number) => void;
-  onUpdate: (card: CardDef) => void;
-  onRemove: () => void;
-  onDuplicate?: () => void;
-  availableMetrics?: MetricOption[];
-  campaignGroups?: { id: string; nombre: string }[];
-  campaignNames?: string[];
-  tiktokAccounts?: { id: string; label: string; advertiser_id: string }[];
-  googleSheetsConversiones?: any[];
-  conversionesOfflineRaw?: any[];
-}) {
-  return (
-    <div
-      draggable
-      onDragStart={() => onDragStart(index)}
-      onDragOver={(e) => {
-        e.preventDefault();
-        onDragOver(e, index);
-      }}
-      onDrop={() => onDrop(index)}
-      className="flex items-start gap-2 bg-card border border-border rounded-lg px-3 py-2.5 group transition cursor-grab active:cursor-grabbing select-none hover:border-muted-foreground/40"
-    >
-      <GripVertical className="w-4 h-4 text-muted-foreground/70 flex-shrink-0 group-hover:text-muted-foreground transition mt-1.5" />
-
-      <div className="flex flex-col gap-1.5 flex-1 min-w-0">
-        {/* Row 1: label + formula */}
-        <div className="flex items-center gap-2">
-          <div className="flex gap-1 flex-shrink-0">
-            {COLOR_OPTIONS.map((opt) => (
-              <button
-                key={opt.val}
-                onClick={() => onUpdate({ ...card, color: opt.val })}
-                className={`w-3 h-3 rounded-full ${opt.bg} transition ${card.color === opt.val ? 'ring-2 ring-ring ring-offset-2 ring-offset-background scale-110' : 'opacity-40 hover:opacity-100'}`}
-              />
-            ))}
-          </div>
-
-          <Input
-            value={card.label}
-            onChange={(e) => onUpdate({ ...card, label: e.target.value })}
-            className="h-7 text-xs bg-background border-border text-foreground w-28 flex-shrink-0"
-            placeholder="Etiqueta"
-          />
-
-          <FormulaInput
-            value={card.formula}
-            onChange={(val) => onUpdate({ ...card, formula: val.trim() })}
-            availableMetrics={availableMetrics}
-            onMetricInserted={(_id, format, formula) => {
-              if (format)
-                onUpdate({ ...card, formula: formula.trim(), ...applyMetricType(format) });
-            }}
-          />
-        </div>
-
-        {/* Row 2: type selector + campaign filter + TikTok account */}
-        <div className="flex flex-col gap-1 min-w-0">
-          <div className="flex flex-wrap items-center gap-2 min-w-0">
-            <MetricTypeSelector
-              prefix={card.prefix}
-              suffix={card.suffix}
-              onChange={(vals) => onUpdate({ ...card, ...vals })}
-            />
-            <CampaignFilterPicker
-              value={card.campaignFilter}
-              onChange={(v) => onUpdate({ ...card, campaignFilter: v })}
-              campaignGroups={campaignGroups}
-              campaignNames={campaignNames}
-            />
-            <SheetFilterPicker
-              value={card.sheetFilter}
-              onChange={(v) => onUpdate({ ...card, sheetFilter: v })}
-              googleSheetsConversiones={googleSheetsConversiones}
-              conversionesOfflineRaw={conversionesOfflineRaw}
-            />
-          </div>
-          {hasTikTokFormula(card.formula) && (
-            <TikTokAccountPicker
-              value={card.account_id}
-              accounts={tiktokAccounts}
-              onChange={(v) => onUpdate({ ...card, account_id: v || undefined })}
-            />
-          )}
-        </div>
-
-        {/* Row 3: visualization variant + delta toggle */}
-        <div className="flex flex-wrap items-center gap-2 pt-0.5">
-          <div className="flex items-center gap-1.5">
-            <span className="text-[10px] text-muted-foreground/70 shrink-0">Variante:</span>
-            <select
-              value={card.variant || 'default'}
-              onChange={(e) => onUpdate({ ...card, variant: e.target.value as CardVariant })}
-              className="h-6 bg-background border border-border text-foreground/90 rounded px-1.5 text-xs"
-            >
-              <option value="default">Estándar</option>
-              <option value="stat">Stat (con delta)</option>
-              <option value="sparkline">Sparkline</option>
-              <option value="threshold">Semáforo</option>
-              <option value="progress">Progreso</option>
-            </select>
-          </div>
-
-          {/* Delta toggle — available in 'stat' variant or standalone */}
-          {(card.variant === 'stat' || card.showDelta) && (
-            <label className="flex items-center gap-1 cursor-pointer select-none">
-              <input
-                type="checkbox"
-                checked={!!card.showDelta}
-                onChange={(e) => onUpdate({ ...card, showDelta: e.target.checked })}
-                className="w-3 h-3 accent-indigo-500"
-              />
-              <span className="text-[10px] text-muted-foreground/70">Mostrar delta</span>
-            </label>
-          )}
-
-          {/* Threshold config */}
-          {card.variant === 'threshold' && (
-            <div className="flex flex-wrap items-center gap-1.5 w-full">
-              <span className="text-[10px] text-muted-foreground/70 shrink-0">Verde si:</span>
-              <select
-                value={card.threshold?.greenOperator || '>='}
-                onChange={(e) =>
-                  onUpdate({
-                    ...card,
-                    threshold: {
-                      ...(card.threshold ?? {
-                        greenOperator: '>=',
-                        greenValue: 0,
-                        yellowOperator: '>=',
-                        yellowValue: 0,
-                      }),
-                      greenOperator: e.target.value as CardThreshold['greenOperator'],
-                    },
-                  })
-                }
-                className="h-5 bg-background border border-border rounded px-1 text-[10px] text-foreground/90"
-              >
-                {['>=', '<=', '>', '<'].map((o) => (
-                  <option key={o} value={o}>
-                    {o}
-                  </option>
-                ))}
-              </select>
-              <input
-                type="number"
-                value={card.threshold?.greenValue ?? ''}
-                onChange={(e) =>
-                  onUpdate({
-                    ...card,
-                    threshold: {
-                      ...(card.threshold ?? {
-                        greenOperator: '>=',
-                        greenValue: 0,
-                        yellowOperator: '>=',
-                        yellowValue: 0,
-                      }),
-                      greenValue: parseFloat(e.target.value) || 0,
-                    },
-                  })
-                }
-                className="h-5 w-16 bg-background border border-border rounded px-1 text-[10px] text-foreground/90"
-                placeholder="0"
-              />
-              <span className="text-[10px] text-muted-foreground/70 shrink-0">Amarillo si:</span>
-              <select
-                value={card.threshold?.yellowOperator || '>='}
-                onChange={(e) =>
-                  onUpdate({
-                    ...card,
-                    threshold: {
-                      ...(card.threshold ?? {
-                        greenOperator: '>=',
-                        greenValue: 0,
-                        yellowOperator: '>=',
-                        yellowValue: 0,
-                      }),
-                      yellowOperator: e.target.value as CardThreshold['yellowOperator'],
-                    },
-                  })
-                }
-                className="h-5 bg-background border border-border rounded px-1 text-[10px] text-foreground/90"
-              >
-                {['>=', '<=', '>', '<'].map((o) => (
-                  <option key={o} value={o}>
-                    {o}
-                  </option>
-                ))}
-              </select>
-              <input
-                type="number"
-                value={card.threshold?.yellowValue ?? ''}
-                onChange={(e) =>
-                  onUpdate({
-                    ...card,
-                    threshold: {
-                      ...(card.threshold ?? {
-                        greenOperator: '>=',
-                        greenValue: 0,
-                        yellowOperator: '>=',
-                        yellowValue: 0,
-                      }),
-                      yellowValue: parseFloat(e.target.value) || 0,
-                    },
-                  })
-                }
-                className="h-5 w-16 bg-background border border-border rounded px-1 text-[10px] text-foreground/90"
-                placeholder="0"
-              />
-            </div>
-          )}
-
-          {/* Progress target formula */}
-          {card.variant === 'progress' && (
-            <div className="flex items-center gap-1.5 w-full">
-              <span className="text-[10px] text-muted-foreground/70 shrink-0">Objetivo:</span>
-              <FormulaInput
-                value={card.targetFormula || ''}
-                onChange={(val) => onUpdate({ ...card, targetFormula: val.trim() })}
-                availableMetrics={availableMetrics}
-              />
-              <input
-                value={card.targetLabel || ''}
-                onChange={(e) => onUpdate({ ...card, targetLabel: e.target.value })}
-                className="h-6 bg-background border border-border text-foreground/90 rounded px-1.5 text-xs w-24"
-                placeholder="Etiqueta objetivo"
-              />
-            </div>
-          )}
-        </div>
-      </div>
-
-      <div className="flex flex-col gap-1 flex-shrink-0 mt-1.5">
-        {onDuplicate && (
-          <button
-            onClick={onDuplicate}
-            title="Duplicar tarjeta"
-            className="text-muted-foreground/50 hover:text-emerald-400 transition"
-          >
-            <Copy className="w-3.5 h-3.5" />
-          </button>
-        )}
-        <button
-          onClick={onRemove}
-          className="text-muted-foreground/50 hover:text-red-400 transition"
-        >
-          <X className="w-3.5 h-3.5" />
-        </button>
-      </div>
-    </div>
-  );
-}
 
 // ─── DnD Chart Row ────────────────────────────────────────────────────────────
 
@@ -971,7 +556,7 @@ function DraggableChartRow({
     >
       {/* Row 1: drag handle + type select + title + remove */}
       <div className="flex items-center gap-2">
-        <GripVertical className="w-4 h-4 text-muted-foreground/70 flex-shrink-0 group-hover:text-muted-foreground transition" />
+        <GripVertical className="w-4 h-4 text-muted-foreground flex-shrink-0 group-hover:text-muted-foreground transition" />
 
         <select
           value={chart.type}
@@ -997,14 +582,14 @@ function DraggableChartRow({
             <button
               onClick={onDuplicate}
               title="Duplicar gráfico"
-              className="text-muted-foreground/50 hover:text-emerald-400 transition"
+              className="text-muted-foreground hover:text-emerald-400 transition"
             >
               <Copy className="w-3.5 h-3.5" />
             </button>
           )}
           <button
             onClick={onRemove}
-            className="text-muted-foreground/50 hover:text-red-400 transition"
+            className="text-muted-foreground hover:text-red-400 transition"
           >
             <X className="w-3.5 h-3.5" />
           </button>
@@ -1046,7 +631,7 @@ function DraggableChartRow({
               {chart.valueFormulas.length > 1 && (
                 <button
                   onClick={() => removeMetric(i)}
-                  className="text-muted-foreground/50 hover:text-red-400 transition flex-shrink-0"
+                  className="text-muted-foreground hover:text-red-400 transition flex-shrink-0"
                 >
                   <X className="w-3 h-3" />
                 </button>
@@ -1055,9 +640,9 @@ function DraggableChartRow({
 
             {/* Series overrides */}
             <div className="pl-7 mt-1.5 w-full">
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-background/45 p-2 rounded-lg border border-border text-[9px] text-muted-foreground w-full min-w-0">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-background/45 p-2 rounded-lg border border-border text-xs text-muted-foreground w-full min-w-0">
                 <div className="flex flex-col gap-1">
-                  <span className="text-muted-foreground/70 font-medium">Unidad</span>
+                  <span className="text-muted-foreground font-medium">Unidad</span>
                   <div className="flex gap-1 flex-shrink-0">
                     {[
                       {
@@ -1066,7 +651,7 @@ function DraggableChartRow({
                         label: 'Número',
                         active: 'bg-secondary text-secondary-foreground border-ring',
                         inactive:
-                          'bg-card text-muted-foreground/70 border-border hover:border-muted-foreground/50 hover:text-foreground/90',
+                          'bg-card text-muted-foreground border-border hover:border-muted-foreground/50 hover:text-foreground/90',
                       },
                       {
                         type: 'currency' as const,
@@ -1075,7 +660,7 @@ function DraggableChartRow({
                         active:
                           'bg-emerald-600/30 text-emerald-600 dark:text-emerald-300 border-emerald-500/60',
                         inactive:
-                          'bg-card text-muted-foreground/70 border-border hover:border-emerald-500/40 hover:text-emerald-400',
+                          'bg-card text-muted-foreground border-border hover:border-emerald-500/40 hover:text-emerald-400',
                       },
                       {
                         type: 'percent' as const,
@@ -1084,7 +669,7 @@ function DraggableChartRow({
                         active:
                           'bg-blue-600/30 text-blue-600 dark:text-blue-300 border-blue-500/60',
                         inactive:
-                          'bg-card text-muted-foreground/70 border-border hover:border-blue-500/40 hover:text-blue-400',
+                          'bg-card text-muted-foreground border-border hover:border-blue-500/40 hover:text-blue-400',
                       },
                     ].map((t) => {
                       const currentUnit = chart.units?.[i] || 'number';
@@ -1103,7 +688,7 @@ function DraggableChartRow({
                             onUpdate({ ...chart, units: newUnits });
                           }}
                           title={t.label}
-                          className={`w-6 h-6 rounded border text-[11px] font-bold transition flex-shrink-0 flex items-center justify-center ${isActive ? t.active : t.inactive}`}
+                          className={`w-6 h-6 rounded border text-xs font-bold transition flex-shrink-0 flex items-center justify-center ${isActive ? t.active : t.inactive}`}
                         >
                           {t.icon}
                         </button>
@@ -1115,7 +700,7 @@ function DraggableChartRow({
                 {isCartesian ? (
                   <>
                     <div className="flex flex-col gap-1 min-w-0">
-                      <span className="text-muted-foreground/70 font-medium">Tipo</span>
+                      <span className="text-muted-foreground font-medium">Tipo</span>
                       <select
                         value={chart.types?.[i] || ''}
                         onChange={(e) => {
@@ -1126,7 +711,7 @@ function DraggableChartRow({
                           newTypes[i] = e.target.value as 'line' | 'bar' | 'area' | '';
                           onUpdate({ ...chart, types: newTypes });
                         }}
-                        className="bg-card border border-border text-foreground/90 rounded px-1 py-0.5 outline-none cursor-pointer h-6 text-[10px] w-full min-w-0"
+                        className="bg-card border border-border text-foreground/90 rounded px-1 py-0.5 outline-none cursor-pointer h-6 text-xs w-full min-w-0"
                       >
                         <option value="">Por defecto</option>
                         <option value="line">Línea</option>
@@ -1136,7 +721,7 @@ function DraggableChartRow({
                     </div>
 
                     <div className="flex flex-col gap-1 min-w-0">
-                      <span className="text-muted-foreground/70 font-medium">Eje Y</span>
+                      <span className="text-muted-foreground font-medium">Eje Y</span>
                       <select
                         value={chart.yAxes?.[i] || 'left'}
                         onChange={(e) => {
@@ -1145,7 +730,7 @@ function DraggableChartRow({
                           newAxes[i] = e.target.value as 'left' | 'right';
                           onUpdate({ ...chart, yAxes: newAxes });
                         }}
-                        className="bg-card border border-border text-foreground/90 rounded px-1 py-0.5 outline-none cursor-pointer h-6 text-[10px] w-full min-w-0"
+                        className="bg-card border border-border text-foreground/90 rounded px-1 py-0.5 outline-none cursor-pointer h-6 text-xs w-full min-w-0"
                       >
                         <option value="left">Izq (Pral)</option>
                         <option value="right">Der (Sec)</option>
@@ -1153,7 +738,7 @@ function DraggableChartRow({
                     </div>
 
                     <div className="flex flex-col gap-1 min-w-0">
-                      <span className="text-muted-foreground/70 font-medium">Grosor</span>
+                      <span className="text-muted-foreground font-medium">Grosor</span>
                       <select
                         value={chart.strokeWidths?.[i] ?? 2}
                         onChange={(e) => {
@@ -1162,7 +747,7 @@ function DraggableChartRow({
                           newWidths[i] = Number(e.target.value);
                           onUpdate({ ...chart, strokeWidths: newWidths });
                         }}
-                        className="bg-card border border-border text-foreground/90 rounded px-1 py-0.5 outline-none cursor-pointer h-6 text-[10px] w-full min-w-0"
+                        className="bg-card border border-border text-foreground/90 rounded px-1 py-0.5 outline-none cursor-pointer h-6 text-xs w-full min-w-0"
                       >
                         <option value={1}>1px</option>
                         <option value={2}>2px</option>
@@ -1184,25 +769,25 @@ function DraggableChartRow({
         {chart.valueFormulas.length < maxMetrics && (
           <button
             onClick={addMetric}
-            className="flex items-center gap-1 text-[10px] text-muted-foreground/70 hover:text-amber-400 transition mt-1 pl-1"
+            className="flex items-center gap-1 text-xs text-muted-foreground hover:text-amber-400 transition mt-1 pl-1"
           >
             <Plus className="w-3 h-3" /> Añadir métrica
           </button>
         )}
 
         {chart.type === 'scatter' && chart.valueFormulas.length < 2 && (
-          <p className="text-[9px] text-muted-foreground/70 mt-0.5 pl-1">
+          <p className="text-xs text-muted-foreground mt-0.5 pl-1">
             El gráfico de dispersión necesita exactamente 2 métricas (eje X e Y).
           </p>
         )}
       </div>
 
       {/* Row 3: Global Chart Settings */}
-      <div className="pl-6 pt-2 border-t border-border space-y-2 text-[10px]">
+      <div className="pl-6 pt-2 border-t border-border space-y-2 text-xs">
         {/* Periodicity & Show Data Labels */}
         <div className="flex flex-wrap items-center gap-4">
           <div className="flex flex-col gap-0.5">
-            <span className="text-muted-foreground/70 font-medium">Agrupación:</span>
+            <span className="text-muted-foreground font-medium">Agrupación:</span>
             <select
               value={chart.dimension || ''}
               onChange={(e) => {
@@ -1216,7 +801,7 @@ function DraggableChartRow({
                   ...(dim ? { sheetFilter: undefined } : {}),
                 });
               }}
-              className="bg-background border border-border text-foreground/90 rounded px-1.5 py-0.5 outline-none hover:border-muted-foreground/30 cursor-pointer text-[9px]"
+              className="bg-background border border-border text-foreground/90 rounded px-1.5 py-0.5 outline-none hover:border-muted-foreground/30 cursor-pointer text-xs"
             >
               <option value="">Temporal (Fecha)</option>
               <optgroup label="Meta">
@@ -1234,11 +819,11 @@ function DraggableChartRow({
 
           {chart.dimension && (
             <div className="flex flex-col gap-0.5">
-              <span className="text-muted-foreground/70 font-medium">Top N:</span>
+              <span className="text-muted-foreground font-medium">Top N:</span>
               <select
                 value={chart.topN || 10}
                 onChange={(e) => onUpdate({ ...chart, topN: Number(e.target.value) })}
-                className="bg-background border border-border text-foreground/90 rounded px-1.5 py-0.5 outline-none hover:border-muted-foreground/30 cursor-pointer text-[9px]"
+                className="bg-background border border-border text-foreground/90 rounded px-1.5 py-0.5 outline-none hover:border-muted-foreground/30 cursor-pointer text-xs"
               >
                 {[5, 10, 15, 20, 30].map((n) => (
                   <option key={n} value={n}>
@@ -1251,13 +836,11 @@ function DraggableChartRow({
 
           {isCartesian && !chart.dimension && (
             <div className="flex flex-col gap-0.5">
-              <span className="text-muted-foreground/70 font-medium">
-                Temporalidad por defecto:
-              </span>
+              <span className="text-muted-foreground font-medium">Temporalidad por defecto:</span>
               <select
                 value={chart.periodicity || 'day'}
                 onChange={(e) => onUpdate({ ...chart, periodicity: e.target.value as any })}
-                className="bg-background border border-border text-foreground/90 rounded px-1.5 py-0.5 outline-none hover:border-muted-foreground/30 cursor-pointer text-[9px]"
+                className="bg-background border border-border text-foreground/90 rounded px-1.5 py-0.5 outline-none hover:border-muted-foreground/30 cursor-pointer text-xs"
               >
                 <option value="day">Día</option>
                 <option value="week">Semana</option>
@@ -1309,7 +892,7 @@ function DraggableChartRow({
               />
             )}
             <div className="flex items-center gap-1 flex-shrink-0">
-              <span className="text-muted-foreground/70">Alto:</span>
+              <span className="text-muted-foreground">Alto:</span>
               <input
                 type="number"
                 value={chart.height || 240}
@@ -1320,7 +903,7 @@ function DraggableChartRow({
                 min={100}
                 max={600}
               />
-              <span className="text-muted-foreground/50 text-[9px]">px</span>
+              <span className="text-muted-foreground text-xs">px</span>
             </div>
           </div>
         </div>
@@ -1440,7 +1023,7 @@ export function CampaignFilterPicker({
 
   return (
     <div className="flex items-center gap-1.5 flex-shrink-0" title="Filtro de campaña (opcional)">
-      <span className="text-[10px] text-muted-foreground/70 flex-shrink-0">Campaña:</span>
+      <span className="text-xs text-muted-foreground flex-shrink-0">Campaña:</span>
 
       {/* Group selector */}
       {campaignGroups.length > 0 && (
@@ -1575,7 +1158,7 @@ export function CampaignFilterPicker({
             </div>
             <div className="max-h-52 overflow-y-auto custom-scrollbar py-1">
               {filteredMultiNames.length === 0 ? (
-                <p className="px-3 py-2 text-xs text-muted-foreground/70">Sin resultados</p>
+                <p className="px-3 py-2 text-xs text-muted-foreground">Sin resultados</p>
               ) : (
                 filteredMultiNames.map((name) => {
                   const checked = selectedMulti.includes(name);
@@ -1604,12 +1187,12 @@ export function CampaignFilterPicker({
             </div>
             {selectedMulti.length > 0 && (
               <div className="p-2 border-t border-border flex justify-between items-center">
-                <span className="text-[10px] text-muted-foreground/70">
+                <span className="text-xs text-muted-foreground">
                   {selectedMulti.length} seleccionada{selectedMulti.length > 1 ? 's' : ''}
                 </span>
                 <button
                   onClick={() => onChange(undefined)}
-                  className="text-[10px] text-red-600 dark:text-red-400 hover:text-red-300 transition"
+                  className="text-xs text-red-600 dark:text-red-400 hover:text-red-300 transition"
                 >
                   Limpiar
                 </button>
@@ -1628,7 +1211,7 @@ export function CampaignFilterPicker({
             setPendingOp('includes');
           }}
           title="Limpiar filtro de campaña"
-          className="text-muted-foreground/70 hover:text-red-400 transition flex-shrink-0"
+          className="text-muted-foreground hover:text-red-400 transition flex-shrink-0"
         >
           <X className="w-3 h-3" />
         </button>
@@ -1726,7 +1309,7 @@ export function SheetFilterPicker({
         type="button"
         onClick={() => setAbierto(true)}
         title="Filtrar por columna del Sheet"
-        className="flex-shrink-0 flex items-center justify-center w-6 h-7 rounded border bg-card border-border text-muted-foreground/70 hover:text-muted-foreground transition"
+        className="flex-shrink-0 flex items-center justify-center w-6 h-7 rounded border bg-card border-border text-muted-foreground hover:text-muted-foreground transition"
       >
         <SheetIcon className="w-3 h-3" />
       </button>
@@ -1738,7 +1321,7 @@ export function SheetFilterPicker({
       className="flex items-center gap-1.5 min-w-0 flex-wrap"
       title="Filtro de Google Sheets (opcional)"
     >
-      <span className="text-[10px] text-muted-foreground/70 flex-shrink-0">Sheet:</span>
+      <span className="text-xs text-muted-foreground flex-shrink-0">Sheet:</span>
 
       {/* Field selector */}
       <select
@@ -1829,7 +1412,7 @@ export function SheetFilterPicker({
           setAbierto(false);
         }}
         title={hasFilter ? 'Limpiar filtro de Sheet' : 'Cerrar filtro de Sheet'}
-        className="text-muted-foreground/70 hover:text-red-400 transition flex-shrink-0"
+        className="text-muted-foreground hover:text-red-400 transition flex-shrink-0"
       >
         <X className="w-3 h-3" />
       </button>
@@ -1856,6 +1439,7 @@ export function LayoutConfigModal({
   campaignNames = [],
   tiktokAccounts = [],
   leadAnswerCampos = [],
+  vistaPrevia,
 }: {
   clienteId: string;
   currentLayout: ReportLayout | null;
@@ -1876,6 +1460,8 @@ export function LayoutConfigModal({
   tiktokAccounts?: { id: string; label: string; advertiser_id: string }[];
   /** Preguntas de formulario: cada respuesta se ofrece como métrica `lf__*`. */
   leadAnswerCampos?: LeadAnswerCampoResumen[];
+  /** Cálculo del dashboard para previsualizar tarjetas y columnas mientras se editan. */
+  vistaPrevia?: VistaPreviaEditor;
 }) {
   const hayVentasOffline = useMemo(
     () => tieneVentasOffline(conversionesOfflineRaw),
@@ -1894,17 +1480,16 @@ export function LayoutConfigModal({
   const [workingLayout, setWorkingLayout] = useState<ReportLayout | null>(currentLayout);
   const [loading, setLoading] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [seccion, setSeccion] = useState<Seccion>('tarjetas');
 
   // DnD state
   const dragIndex = useRef<number | null>(null);
-  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
+  const [, setDragOverIndex] = useState<number | null>(null);
   const dragType = useRef<'col' | 'card' | null>(null);
   // Espejo en estado del arrastre en curso, solo para pintar el indicador de
   // destino: los refs de arriba no provocan re-render y leerlos durante el
   // render devuelve valores obsoletos.
-  const [dragOrigin, setDragOrigin] = useState<{ index: number; type: 'col' | 'card' } | null>(
-    null
-  );
+  const [, setDragOrigin] = useState<{ index: number; type: 'col' | 'card' } | null>(null);
 
   // ── Template selection ────────────────────────────────────────────────────
 
@@ -1994,36 +1579,6 @@ export function LayoutConfigModal({
 
   // ── Update handlers ───────────────────────────────────────────────────────
 
-  function updateCol(index: number, col: ColDef) {
-    if (!workingLayout) return;
-    const cols = [...workingLayout.columnas];
-    cols[index] = col;
-    setWorkingLayout({ ...workingLayout, columnas: cols });
-  }
-
-  function removeCol(index: number) {
-    if (!workingLayout) return;
-    setWorkingLayout({
-      ...workingLayout,
-      columnas: workingLayout.columnas.filter((_, i) => i !== index),
-    });
-  }
-
-  function updateCard(index: number, card: CardDef) {
-    if (!workingLayout) return;
-    const cards = [...workingLayout.tarjetas];
-    cards[index] = card;
-    setWorkingLayout({ ...workingLayout, tarjetas: cards });
-  }
-
-  function removeCard(index: number) {
-    if (!workingLayout) return;
-    setWorkingLayout({
-      ...workingLayout,
-      tarjetas: workingLayout.tarjetas.filter((_, i) => i !== index),
-    });
-  }
-
   function updateChart(index: number, chart: ChartDef) {
     if (!workingLayout) return;
     const charts = [...(workingLayout.graficos || [])];
@@ -2037,33 +1592,6 @@ export function LayoutConfigModal({
       ...workingLayout,
       graficos: (workingLayout.graficos || []).filter((_, i) => i !== index),
     });
-  }
-
-  function addPreset(p: (typeof PRESETS)[0], type: 'col' | 'card') {
-    if (!workingLayout) return;
-    if (type === 'col') {
-      const newCol: ColDef = {
-        id: crypto.randomUUID(),
-        label: p.label,
-        formula: p.formula,
-        prefix: p.prefix || '',
-        suffix: p.suffix || '',
-        decimals: 2,
-        align: 'right',
-      };
-      setWorkingLayout({ ...workingLayout, columnas: [...workingLayout.columnas, newCol] });
-    } else {
-      const newCard: CardDef = {
-        id: crypto.randomUUID(),
-        label: p.label,
-        formula: p.formula,
-        prefix: p.prefix || '',
-        suffix: p.suffix || '',
-        decimals: 2,
-        color: 'default',
-      };
-      setWorkingLayout({ ...workingLayout, tarjetas: [...workingLayout.tarjetas, newCard] });
-    }
   }
 
   function addManualMetric() {
@@ -2111,20 +1639,6 @@ export function LayoutConfigModal({
     const newBlocks = [...(workingLayout.text_blocks || [])];
     newBlocks[index] = { ...newBlocks[index], ...val };
     setWorkingLayout({ ...workingLayout, text_blocks: newBlocks });
-  }
-
-  function duplicateCard(index: number) {
-    if (!workingLayout) return;
-    const source = workingLayout.tarjetas[index];
-    if (!source) return;
-    const copy = { ...source, id: crypto.randomUUID(), label: `${source.label} (copia)` };
-    const cards = [...workingLayout.tarjetas];
-    cards.splice(index + 1, 0, copy);
-    const newOrder = [...(workingLayout.blocks_order || [])];
-    const pos = newOrder.indexOf(`card:${source.id}`);
-    if (pos >= 0) newOrder.splice(pos + 1, 0, `card:${copy.id}`);
-    else newOrder.push(`card:${copy.id}`);
-    setWorkingLayout({ ...workingLayout, tarjetas: cards, blocks_order: newOrder });
   }
 
   function duplicateChart(index: number) {
@@ -2339,764 +1853,735 @@ export function LayoutConfigModal({
     onClose();
   }
 
+  const secciones: { id: Seccion; label: string; n: string }[] = workingLayout
+    ? [
+        { id: 'tarjetas', label: 'Tarjetas', n: String(workingLayout.tarjetas.length) },
+        {
+          id: 'columnas',
+          label: 'Columnas',
+          n: `${workingLayout.columnas.filter((c) => !c.hidden).length}/${workingLayout.columnas.length}`,
+        },
+        { id: 'graficos', label: 'Gráficos', n: String((workingLayout.graficos || []).length) },
+        { id: 'titulos', label: 'Títulos', n: String((workingLayout.text_blocks || []).length) },
+        {
+          id: 'rankings',
+          label: 'Rankings',
+          n: String((workingLayout.ranking_tables || []).length),
+        },
+        {
+          id: 'respuestas',
+          label: 'Respuestas',
+          n: String((workingLayout.lead_answer_blocks || []).length),
+        },
+      ]
+    : [];
+  const esPestana = !!tabId && tabId !== 'general';
+
   return (
     <div
-      className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-8 bg-black/80 backdrop-blur-md"
+      className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-6 bg-black/60 backdrop-blur-sm"
       onClick={onClose}
     >
       <div
-        className="relative bg-[#0a0a0c] border border-border rounded-2xl shadow-2xl w-full max-w-6xl max-h-[95vh] flex flex-col overflow-hidden"
+        className="relative bg-background border border-border rounded-2xl shadow-2xl w-full max-w-6xl h-[92vh] flex flex-col overflow-hidden"
         onClick={(e) => e.stopPropagation()}
+        role="dialog"
+        aria-label={esPestana ? 'Editar vista de la pestaña' : 'Editar vista del cliente'}
       >
-        {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-border bg-background/60 flex-shrink-0">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-indigo-500/10 rounded-lg">
-              <LayoutDashboard className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
-            </div>
-            <div className="flex flex-col">
-              <h2 className="text-base font-bold text-foreground tracking-tight flex items-center gap-2">
-                {tabId && tabId !== 'general'
-                  ? 'Personalizar Vista de Pestaña'
-                  : 'Personalización de Layout'}
-                {isCustomized && (!tabId || tabId === 'general') && (
-                  <span className="text-[10px] bg-indigo-500/20 text-indigo-600 dark:text-indigo-300 font-bold px-2 py-0.5 rounded uppercase tracking-wide border border-indigo-500/30">
-                    Personalizado
-                  </span>
-                )}
-              </h2>
-              <p className="text-xs text-muted-foreground/70">
-                {tabId && tabId !== 'general'
-                  ? 'Los cambios se aplicarán UNICAMENTE a esta pestaña.'
-                  : 'Ajusta métricas, orden y visibilidad exclusivos para este cliente.'}
-              </p>
-            </div>
+        {/* Cabecera */}
+        <div className="flex flex-wrap items-center gap-3 px-5 py-3.5 border-b border-border flex-shrink-0">
+          <div className="min-w-0">
+            <h2 className="text-base font-semibold text-foreground flex items-center gap-2">
+              {esPestana ? 'Editar vista de la pestaña' : 'Editar vista del cliente'}
+              {isCustomized && !esPestana && (
+                <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-secondary text-primary dark:text-brand-blue-light">
+                  Personalizada
+                </span>
+              )}
+            </h2>
+            <p className="text-xs text-muted-foreground">
+              {esPestana
+                ? 'Los cambios solo afectan a esta pestaña.'
+                : 'Los cambios solo afectan a este cliente.'}
+            </p>
           </div>
-          <div className="flex items-center gap-3">
-            {step === 'edit' && isCustomized && (
-              <Button
-                size="sm"
-                variant="ghost"
-                onClick={handleReset}
-                disabled={loading}
-                className="text-muted-foreground/70 hover:text-red-400 gap-1.5 text-xs"
-              >
-                <RotateCcw className="w-3.5 h-3.5" /> Restablecer
-              </Button>
-            )}
-            <button
-              onClick={onClose}
-              className="text-muted-foreground/70 hover:text-foreground transition p-1.5 hover:bg-accent rounded-lg"
+          <span className="flex-1" />
+          {step === 'edit' && workingLayout && (
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => setStep('select')}
+              className="text-muted-foreground gap-1.5 text-xs"
             >
-              <X className="w-5 h-5" />
-            </button>
-          </div>
+              <LayoutDashboard className="w-3.5 h-3.5" /> Cambiar plantilla
+            </Button>
+          )}
+          {step === 'edit' && isCustomized && (
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={handleReset}
+              disabled={loading}
+              className="text-muted-foreground hover:text-bad gap-1.5 text-xs"
+            >
+              <RotateCcw className="w-3.5 h-3.5" /> Restablecer
+            </Button>
+          )}
+          <button
+            onClick={onClose}
+            aria-label="Cerrar"
+            className="text-muted-foreground hover:text-foreground transition p-1.5 hover:bg-accent rounded-lg"
+          >
+            <X className="w-5 h-5" />
+          </button>
         </div>
 
-        {/* Content */}
-        <div className="flex-1 overflow-y-auto custom-scrollbar p-6 space-y-8">
+        {/* Pestañas de sección */}
+        {step === 'edit' && workingLayout && (
+          <nav
+            className="flex gap-1 px-4 border-b border-border overflow-x-auto flex-shrink-0 custom-scrollbar"
+            aria-label="Qué editar"
+          >
+            {secciones.map((sec) => (
+              <button
+                key={sec.id}
+                type="button"
+                onClick={() => setSeccion(sec.id)}
+                className={`whitespace-nowrap border-b-2 px-3 py-2.5 text-sm font-medium transition ${seccion === sec.id ? 'border-primary text-foreground' : 'border-transparent text-muted-foreground hover:text-foreground'}`}
+              >
+                {sec.label}
+                <span className="ml-1.5 rounded-full bg-muted px-1.5 py-0.5 text-xs text-muted-foreground tabular-nums">
+                  {sec.n}
+                </span>
+              </button>
+            ))}
+          </nav>
+        )}
+
+        {/* Contenido */}
+        <div className="flex-1 min-h-0 flex flex-col">
           {step === 'select' ? (
-            <div className="max-w-2xl mx-auto space-y-4 py-8">
-              <div className="text-center mb-8">
-                <h3 className="text-xl font-semibold text-foreground">
-                  Elige una plantilla de inicio
-                </h3>
-                <p className="text-sm text-muted-foreground mt-2">
-                  Se creará una copia privada para que puedas editarla libremente.
-                </p>
+            <div className="flex-1 overflow-y-auto custom-scrollbar p-6">
+              <div className="max-w-2xl mx-auto space-y-4 py-8">
+                <div className="text-center mb-8">
+                  <h3 className="text-xl font-semibold text-foreground">
+                    Elige una plantilla de inicio
+                  </h3>
+                  <p className="text-sm text-muted-foreground mt-2">
+                    Se creará una copia privada para que puedas editarla libremente.
+                  </p>
+                </div>
+                {allLayouts.map((l) => (
+                  <button
+                    key={l.id}
+                    onClick={() => handleSelectTemplate(l.id)}
+                    className="w-full text-left bg-card hover:bg-accent border border-border hover:border-primary/50 rounded-xl p-5 group transition"
+                  >
+                    <div className="flex justify-between items-center">
+                      <span className="text-base font-semibold text-foreground group-hover:text-primary transition">
+                        {l.nombre}
+                      </span>
+                      <ChevronRight className="w-5 h-5 text-muted-foreground transition group-hover:translate-x-1 group-hover:text-primary" />
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-1">{l.descripcion}</p>
+                  </button>
+                ))}
               </div>
-              {allLayouts.map((l) => (
-                <button
-                  key={l.id}
-                  onClick={() => handleSelectTemplate(l.id)}
-                  className="w-full text-left bg-card hover:bg-accent border border-border hover:border-indigo-500/50 rounded-xl p-5 group transition"
-                >
-                  <div className="flex justify-between items-center">
-                    <span className="text-base font-semibold text-foreground group-hover:text-indigo-400 transition">
-                      {l.nombre}
-                    </span>
-                    <ChevronRight className="w-5 h-5 text-muted-foreground/70 transition group-hover:translate-x-1 group-hover:text-indigo-400" />
-                  </div>
-                  <p className="text-xs text-muted-foreground/70 mt-1">{l.descripcion}</p>
-                </button>
-              ))}
             </div>
           ) : (
             workingLayout && (
               <>
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 min-w-0">
-                  {/* Columns Section */}
-                  <div className="space-y-4 flex flex-col min-w-0">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <div className="w-1 h-4 bg-indigo-500 rounded-full" />
-                        <h3 className="text-sm font-bold text-foreground uppercase tracking-wider">
-                          Columnas de Tabla
-                        </h3>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <button
-                          onClick={addManualMetric}
-                          className="text-[10px] text-emerald-600 dark:text-emerald-400 hover:text-emerald-300 flex items-center gap-1 bg-emerald-500/10 px-2 py-1 rounded transition"
-                        >
-                          <Plus className="w-3 h-3" /> Input Manual
-                        </button>
-                        <button
-                          onClick={() => addPreset(PRESETS[0], 'col')}
-                          className="text-[10px] text-indigo-600 dark:text-indigo-400 hover:text-indigo-300 flex items-center gap-1 bg-indigo-500/10 px-2 py-1 rounded transition"
-                        >
-                          <Plus className="w-3 h-3" /> Nueva Columna
-                        </button>
-                      </div>
-                    </div>
-
-                    <div className="space-y-2 pb-2 custom-scrollbar pr-2">
-                      {workingLayout.columnas.map((col, i) => (
-                        <div
-                          key={col.id}
-                          className={`transition-all duration-150 ${dragOverIndex === i && dragOrigin?.type === 'col' && dragOrigin.index !== i ? 'pt-8 relative before:absolute before:top-0 before:left-0 before:right-0 before:h-1 before:bg-blue-500 before:rounded' : ''}`}
-                        >
-                          <DraggableColumnRow
-                            col={col}
-                            index={i}
-                            onDragStart={() => handleDragStart(i, 'col')}
-                            onDragOver={(e) => handleDragOver(e, i, 'col')}
-                            onDrop={() => handleDrop(i, 'col')}
-                            onUpdate={(v) => updateCol(i, v)}
-                            onRemove={() => removeCol(i)}
-                            availableMetrics={availableMetrics}
-                            campaignGroups={campaignGroups}
-                            campaignNames={campaignNames}
-                            googleSheetsConversiones={googleSheetsConversiones}
-                            conversionesOfflineRaw={conversionesOfflineRaw}
-                          />
-                        </div>
-                      ))}
-                    </div>
-
-                    <div className="pt-2">
-                      <p className="text-[10px] text-muted-foreground/70 font-bold uppercase mb-2">
-                        Añadir métrica rápida:
-                      </p>
-                      <div className="flex flex-wrap gap-1.5">
-                        {PRESETS.map((p) => (
-                          <button
-                            key={p.formula}
-                            onClick={() => addPreset(p, 'col')}
-                            className="text-[10px] bg-card border border-border hover:border-indigo-500/40 text-muted-foreground hover:text-indigo-300 px-2 py-1 rounded transition"
-                          >
-                            {p.label}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Cards Section */}
-                  <div className="space-y-4 flex flex-col min-w-0">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <div className="w-1 h-4 bg-emerald-500 rounded-full" />
-                        <h3 className="text-sm font-bold text-foreground uppercase tracking-wider">
-                          Tarjetas Superiores
-                        </h3>
-                      </div>
-                      <button
-                        onClick={() => addPreset(PRESETS[0], 'card')}
-                        className="text-[10px] text-emerald-600 dark:text-emerald-400 hover:text-emerald-300 flex items-center gap-1"
-                      >
-                        <Plus className="w-3 h-3" /> Nueva Tarjeta
-                      </button>
-                    </div>
-
-                    <div className="space-y-2 overflow-x-auto pb-2 min-w-0 custom-scrollbar pr-2">
-                      {workingLayout.tarjetas.map((card, i) => (
-                        <div key={card.id}>
-                          <DraggableCardRow
-                            card={card}
-                            index={i}
-                            onDragStart={() => handleDragStart(i, 'card')}
-                            onDragOver={(e) => handleDragOver(e, i, 'card')}
-                            onDrop={() => handleDrop(i, 'card')}
-                            onUpdate={(v) => updateCard(i, v)}
-                            onRemove={() => removeCard(i)}
-                            onDuplicate={() => duplicateCard(i)}
-                            availableMetrics={availableMetrics}
-                            campaignGroups={campaignGroups}
-                            campaignNames={campaignNames}
-                            tiktokAccounts={tiktokAccounts}
-                            googleSheetsConversiones={googleSheetsConversiones}
-                            conversionesOfflineRaw={conversionesOfflineRaw}
-                          />
-                        </div>
-                      ))}
-                      {workingLayout.tarjetas.length === 0 && (
-                        <div className="border border-border border-dashed rounded-xl p-8 text-center bg-background/20">
-                          <LayoutPanelTop className="w-6 h-6 text-muted-foreground/50 mx-auto mb-2 opacity-50" />
-                          <p className="text-xs text-muted-foreground/70">
-                            No hay tarjetas configuradas.
-                          </p>
-                        </div>
-                      )}
-                    </div>
-
-                    <div className="pt-2">
-                      <p className="text-[10px] text-muted-foreground/70 font-bold uppercase mb-2">
-                        Añadir tarjeta rápida:
-                      </p>
-                      <div className="flex flex-wrap gap-1.5">
-                        {PRESETS.map((p) => (
-                          <button
-                            key={p.formula}
-                            onClick={() => addPreset(p, 'card')}
-                            className="text-[10px] bg-card border border-border hover:border-emerald-500/40 text-muted-foreground hover:text-emerald-300 px-2 py-1 rounded transition"
-                          >
-                            {p.label}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Charts Section */}
-                <div className="pt-8 border-t border-border space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <div className="w-1 h-4 bg-amber-500 rounded-full" />
-                      <h3 className="text-sm font-bold text-foreground uppercase tracking-wider">
-                        Gráficos de Rendimiento
-                      </h3>
-                    </div>
-                    <button
-                      onClick={addChart}
-                      className="text-[10px] text-amber-600 dark:text-amber-400 hover:text-amber-300 flex items-center gap-1 bg-amber-500/10 px-2 py-1 rounded transition"
-                    >
-                      <Plus className="w-3 h-3" /> Añadir Gráfico
-                    </button>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {(workingLayout.graficos || []).map((chart, i) => (
-                      <DraggableChartRow
-                        key={chart.id}
-                        chart={chart}
-                        index={i}
-                        onDragStart={() => handleDragStart(i, 'chart' as any)}
-                        onDragOver={(e) => handleDragOver(e, i, 'chart' as any)}
-                        onDrop={() => handleDrop(i, 'chart' as any)}
-                        onUpdate={(v) => updateChart(i, v)}
-                        onRemove={() => removeChart(i)}
-                        onDuplicate={() => duplicateChart(i)}
-                        availableMetrics={availableMetrics}
-                        campaignGroups={campaignGroups}
-                        campaignNames={campaignNames}
-                        tiktokAccounts={tiktokAccounts}
-                        googleSheetsConversiones={googleSheetsConversiones}
-                        conversionesOfflineRaw={conversionesOfflineRaw}
-                      />
-                    ))}
-                    {(!workingLayout.graficos || workingLayout.graficos.length === 0) && (
-                      <div className="col-span-full border border-border border-dashed rounded-xl p-8 text-center bg-background/20">
-                        <BarChart3 className="w-6 h-6 text-muted-foreground/50 mx-auto mb-2 opacity-50" />
-                        <p className="text-xs text-muted-foreground/70">
-                          No hay gráficos configurados. Haz clic en &quot;Añadir Gráfico&quot; para
-                          crear uno.
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* Text Blocks / Titles Section */}
-                <div className="pt-8 border-t border-border space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <div className="w-1 h-4 bg-purple-500 rounded-full" />
-                      <h3 className="text-sm font-bold text-foreground uppercase tracking-wider">
-                        Títulos y Separadores
-                      </h3>
-                    </div>
-                    <button
-                      onClick={addTextBlock}
-                      className="text-[10px] text-purple-600 dark:text-purple-400 hover:text-purple-300 flex items-center gap-1 bg-purple-500/10 px-2 py-1 rounded transition"
-                    >
-                      <Plus className="w-3 h-3" /> Añadir Título
-                    </button>
-                  </div>
-
-                  <div className="space-y-3">
-                    {(workingLayout.text_blocks || []).map((block: any, i: number) => (
-                      <div
-                        key={block.id}
-                        className="flex flex-col gap-3 bg-card border border-border rounded-xl p-4"
-                      >
-                        <div className="flex items-start justify-between gap-4">
-                          <div className="flex-1 space-y-3">
-                            <Input
-                              value={block.content}
-                              onChange={(e) => updateTextBlock(i, { content: e.target.value })}
-                              className="h-9 text-sm font-bold bg-background border-border text-foreground placeholder:text-muted-foreground/70"
-                              placeholder="Escribe el título aquí..."
-                            />
-                            <div className="flex flex-wrap items-center gap-2">
-                              <select
-                                value={block.style}
-                                onChange={(e) =>
-                                  updateTextBlock(i, { style: e.target.value as any })
-                                }
-                                className="bg-background border border-border rounded px-2 py-1.5 text-xs text-foreground/90 outline-none hover:border-muted-foreground/30 cursor-pointer"
-                                title="Grosor (Jerarquía)"
-                              >
-                                <option value="h1">Grosor H1 (Bold)</option>
-                                <option value="h2">Grosor H2 (Semibold)</option>
-                                <option value="h3">Grosor H3 (Medium)</option>
-                                <option value="p">Grosor Normal</option>
-                              </select>
-                              <select
-                                value={block.fontSize || ''}
-                                onChange={(e) =>
-                                  updateTextBlock(i, { fontSize: e.target.value as any })
-                                }
-                                className="bg-background border border-border rounded px-2 py-1.5 text-xs text-foreground/90 outline-none hover:border-muted-foreground/30 cursor-pointer"
-                                title="Tamaño Personalizado"
-                              >
-                                <option value="">Tamaño Default</option>
-                                <option value="sm">Pequeño</option>
-                                <option value="base">Normal</option>
-                                <option value="xl">Extra Grande</option>
-                                <option value="2xl">2XL</option>
-                                <option value="4xl">4XL</option>
-                                <option value="6xl">6XL</option>
-                                <option value="8xl">8XL (Gigante)</option>
-                              </select>
-                              <select
-                                value={block.fontFamily || ''}
-                                onChange={(e) =>
-                                  updateTextBlock(i, { fontFamily: e.target.value as any })
-                                }
-                                className="bg-background border border-border rounded px-2 py-1.5 text-xs text-foreground/90 outline-none hover:border-muted-foreground/30 cursor-pointer"
-                                title="Tipografía"
-                              >
-                                <option value="">Fuente (Sans)</option>
-                                <option value="serif">Serif (Clásica)</option>
-                                <option value="mono">Monoespaciada</option>
-                              </select>
-                              <select
-                                value={block.color || 'white'}
-                                onChange={(e) =>
-                                  updateTextBlock(i, { color: e.target.value as any })
-                                }
-                                className="bg-background border border-border rounded px-2 py-1.5 text-xs text-foreground/90 outline-none hover:border-muted-foreground/30 cursor-pointer"
-                                title="Color del texto"
-                              >
-                                <option value="white">Blanco</option>
-                                <option value="zinc">Gris Zinc</option>
-                                <option value="indigo">Índigo</option>
-                                <option value="emerald">Verde Esmeralda</option>
-                                <option value="amber">Ámbar (Amarillo)</option>
-                                <option value="rose">Rosa / Rojo</option>
-                                <option value="cyan">Cyan</option>
-                                <option value="blue">Azul</option>
-                              </select>
-                              <select
-                                value={block.align || 'left'}
-                                onChange={(e) =>
-                                  updateTextBlock(i, {
-                                    align: e.target.value as 'left' | 'center' | 'right',
-                                  })
-                                }
-                                className="bg-background border border-border rounded px-2 py-1.5 text-xs text-foreground/90 outline-none hover:border-muted-foreground/30 cursor-pointer"
-                                title="Alineación"
-                              >
-                                <option value="left">Izquierda</option>
-                                <option value="center">Centro</option>
-                                <option value="right">Derecha</option>
-                              </select>
-                              <select
-                                value={block.backgroundColor || ''}
-                                onChange={(e) =>
-                                  updateTextBlock(i, { backgroundColor: e.target.value })
-                                }
-                                className="bg-background border border-border rounded px-2 py-1.5 text-xs text-foreground/90 outline-none hover:border-muted-foreground/30 cursor-pointer"
-                                title="Fondo de Tarjeta"
-                              >
-                                <option value="">Sin Fondo (Transparente)</option>
-                                <option value="bg-card/60 border-border">Gris Suave</option>
-                                <option value="bg-card border-border">Gris Sólido (Tarjeta)</option>
-                                <option value="bg-indigo-500/10 border-indigo-500/20">
-                                  Índigo Sutil
-                                </option>
-                                <option value="bg-emerald-500/10 border-emerald-500/20">
-                                  Verde Sutil
-                                </option>
-                                <option value="bg-amber-500/10 border-amber-500/20">
-                                  Ámbar Sutil
-                                </option>
-                                <option value="bg-rose-500/10 border-rose-500/20">
-                                  Rosa Sutil
-                                </option>
-                                <option value="bg-indigo-600 border-indigo-500 text-white">
-                                  Índigo Sólido
-                                </option>
-                              </select>
-                              <select
-                                value={block.borderRadius || 'xl'}
-                                onChange={(e) =>
-                                  updateTextBlock(i, { borderRadius: e.target.value as any })
-                                }
-                                className="bg-background border border-border rounded px-2 py-1.5 text-xs text-foreground/90 outline-none hover:border-muted-foreground/30 cursor-pointer"
-                                title="Redondeado"
-                              >
-                                <option value="none">Esquinas Rectas</option>
-                                <option value="sm">Redondeado SM</option>
-                                <option value="md">Redondeado MD</option>
-                                <option value="lg">Redondeado LG</option>
-                                <option value="xl">Redondeado XL (Default)</option>
-                                <option value="2xl">Redondeado 2XL</option>
-                                <option value="full">Cápsula (Full)</option>
-                              </select>
-                            </div>
+                {seccion === 'tarjetas' || seccion === 'columnas' ? (
+                  <EditorBloques
+                    key={seccion}
+                    tipo={seccion === 'tarjetas' ? 'card' : 'col'}
+                    items={seccion === 'tarjetas' ? workingLayout.tarjetas : workingLayout.columnas}
+                    onItemsChange={(items) =>
+                      setWorkingLayout((prev) =>
+                        prev
+                          ? seccion === 'tarjetas'
+                            ? { ...prev, tarjetas: items as CardDef[] }
+                            : { ...prev, columnas: items as ColDef[] }
+                          : prev
+                      )
+                    }
+                    availableMetrics={availableMetrics}
+                    presets={PRESETS}
+                    onAddManual={seccion === 'columnas' ? addManualMetric : undefined}
+                    vistaPrevia={vistaPrevia}
+                    campaignGroups={campaignGroups}
+                    campaignNames={campaignNames}
+                    tiktokAccounts={tiktokAccounts}
+                    googleSheetsConversiones={googleSheetsConversiones}
+                    conversionesOfflineRaw={conversionesOfflineRaw}
+                  />
+                ) : (
+                  <div className="flex-1 overflow-y-auto custom-scrollbar p-6">
+                    {/* Charts Section */}
+                    {seccion === 'graficos' && (
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <div className="w-1 h-4 bg-amber-500 rounded-full" />
+                            <h3 className="text-sm font-bold text-foreground uppercase tracking-wider">
+                              Gráficos de Rendimiento
+                            </h3>
                           </div>
                           <button
-                            onClick={() => duplicateTextBlock(i)}
-                            title="Duplicar título"
-                            className="text-muted-foreground/70 hover:text-purple-400 p-1.5 rounded bg-background border border-border transition flex-shrink-0"
+                            onClick={addChart}
+                            className="text-xs text-amber-600 dark:text-amber-400 hover:text-amber-300 flex items-center gap-1 bg-amber-500/10 px-2 py-1 rounded transition"
                           >
-                            <Copy className="w-4 h-4" />
-                          </button>
-                          <button
-                            onClick={() => removeTextBlock(i)}
-                            title="Eliminar título"
-                            className="text-muted-foreground/70 hover:text-red-400 p-1.5 rounded bg-background border border-border transition flex-shrink-0"
-                          >
-                            <X className="w-4 h-4" />
-                          </button>
-                        </div>
-                      </div>
-                    ))}
-                    {(!workingLayout.text_blocks || workingLayout.text_blocks.length === 0) && (
-                      <div className="border border-border border-dashed rounded-xl p-8 text-center bg-background/20">
-                        <p className="text-xs text-muted-foreground/70">
-                          No hay títulos configurados. Puedes usarlos para separar secciones en el
-                          Dashboard.
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                </div>
-                {/* Rankings Section */}
-                <div className="pt-8 border-t border-border space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <div className="w-1 h-4 bg-cyan-500 rounded-full" />
-                      <h3 className="text-sm font-bold text-foreground uppercase tracking-wider">
-                        Tablas de Ranking
-                      </h3>
-                    </div>
-                    <button
-                      onClick={addRankingTable}
-                      className="text-[10px] text-cyan-600 dark:text-cyan-400 hover:text-cyan-300 flex items-center gap-1 bg-cyan-500/10 px-2 py-1 rounded transition"
-                    >
-                      <Plus className="w-3 h-3" /> Agregar tabla
-                    </button>
-                  </div>
-
-                  <div className="space-y-4">
-                    {(workingLayout?.ranking_tables || []).map((table, ti) => (
-                      <div
-                        key={table.id}
-                        className="bg-card border border-border rounded-xl p-4 space-y-3"
-                      >
-                        {/* Table header row */}
-                        <div className="flex items-center gap-2">
-                          <Input
-                            value={table.title}
-                            onChange={(e) =>
-                              updateRankingTable(ti, { ...table, title: e.target.value })
-                            }
-                            className="h-7 text-xs bg-background border-border text-foreground flex-1"
-                            placeholder="Título de la tabla"
-                          />
-                          <button
-                            onClick={() => duplicateRankingTable(ti)}
-                            title="Duplicar tabla"
-                            className="flex-shrink-0 text-muted-foreground/50 hover:text-emerald-400 transition"
-                          >
-                            <Copy className="w-3.5 h-3.5" />
-                          </button>
-                          <button
-                            onClick={() => removeRankingTable(ti)}
-                            className="flex-shrink-0 text-muted-foreground/50 hover:text-red-400 transition"
-                          >
-                            <X className="w-3.5 h-3.5" />
+                            <Plus className="w-3 h-3" /> Añadir Gráfico
                           </button>
                         </div>
 
-                        {/* Settings row */}
-                        <div className="flex flex-wrap items-center gap-2 text-[10px]">
-                          <div className="flex items-center gap-1">
-                            <span className="text-muted-foreground/70">Dimensión:</span>
-                            <select
-                              value={table.dimension}
-                              onChange={(e) =>
-                                updateRankingTable(ti, {
-                                  ...table,
-                                  dimension: e.target.value as any,
-                                })
-                              }
-                              className="h-6 bg-background border border-border text-foreground/90 rounded px-1.5"
-                            >
-                              <optgroup label="Meta">
-                                <option value="campaigns">Campañas</option>
-                                <option value="ads">Anuncios</option>
-                                <option value="adsets">Conjuntos</option>
-                              </optgroup>
-                              <optgroup label="TikTok">
-                                <option value="tiktok_campaigns">Campañas</option>
-                                <option value="tiktok_ads">Anuncios</option>
-                                <option value="tiktok_adgroups">Grupos</option>
-                              </optgroup>
-                            </select>
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <span className="text-muted-foreground/70">Top:</span>
-                            <select
-                              value={table.topN}
-                              onChange={(e) =>
-                                updateRankingTable(ti, { ...table, topN: Number(e.target.value) })
-                              }
-                              className="h-6 bg-background border border-border text-foreground/90 rounded px-1.5"
-                            >
-                              {[5, 10, 20, 50].map((n) => (
-                                <option key={n} value={n}>
-                                  {n}
-                                </option>
-                              ))}
-                            </select>
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <span className="text-muted-foreground/70">Orden:</span>
-                            <select
-                              value={table.sortOrder}
-                              onChange={(e) =>
-                                updateRankingTable(ti, {
-                                  ...table,
-                                  sortOrder: e.target.value as 'desc' | 'asc',
-                                })
-                              }
-                              className="h-6 bg-background border border-border text-foreground/90 rounded px-1.5"
-                            >
-                              <option value="desc">Mayor → Menor</option>
-                              <option value="asc">Menor → Mayor</option>
-                            </select>
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <span className="text-muted-foreground/70">Columna de orden:</span>
-                            <select
-                              value={table.sortColumnIndex}
-                              onChange={(e) =>
-                                updateRankingTable(ti, {
-                                  ...table,
-                                  sortColumnIndex: Number(e.target.value),
-                                })
-                              }
-                              className="h-6 bg-background border border-border text-foreground/90 rounded px-1.5"
-                            >
-                              {table.columns.map((col, ci) => (
-                                <option key={ci} value={ci}>
-                                  {col.label || `Col ${ci + 1}`}
-                                </option>
-                              ))}
-                            </select>
-                          </div>
-                          <label className="flex items-center gap-1 cursor-pointer">
-                            <input
-                              type="checkbox"
-                              checked={table.showRank !== false}
-                              onChange={(e) =>
-                                updateRankingTable(ti, { ...table, showRank: e.target.checked })
-                              }
-                              className="w-3 h-3 accent-cyan-500"
-                            />
-                            <span className="text-muted-foreground">Mostrar #</span>
-                          </label>
-                        </div>
-
-                        {/* Campaign filter — Meta only */}
-                        {!table.dimension.startsWith('tiktok_') && (
-                          <div className="pl-1">
-                            <CampaignFilterPicker
-                              value={table.campaignFilter}
-                              onChange={(v) =>
-                                updateRankingTable(ti, { ...table, campaignFilter: v })
-                              }
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                          {(workingLayout.graficos || []).map((chart, i) => (
+                            <DraggableChartRow
+                              key={chart.id}
+                              chart={chart}
+                              index={i}
+                              onDragStart={() => handleDragStart(i, 'chart' as any)}
+                              onDragOver={(e) => handleDragOver(e, i, 'chart' as any)}
+                              onDrop={() => handleDrop(i, 'chart' as any)}
+                              onUpdate={(v) => updateChart(i, v)}
+                              onRemove={() => removeChart(i)}
+                              onDuplicate={() => duplicateChart(i)}
+                              availableMetrics={availableMetrics}
                               campaignGroups={campaignGroups}
                               campaignNames={campaignNames}
+                              tiktokAccounts={tiktokAccounts}
+                              googleSheetsConversiones={googleSheetsConversiones}
+                              conversionesOfflineRaw={conversionesOfflineRaw}
                             />
+                          ))}
+                          {(!workingLayout.graficos || workingLayout.graficos.length === 0) && (
+                            <div className="col-span-full border border-border border-dashed rounded-xl p-8 text-center bg-background/20">
+                              <BarChart3 className="w-6 h-6 text-muted-foreground mx-auto mb-2 opacity-50" />
+                              <p className="text-xs text-muted-foreground">
+                                No hay gráficos configurados. Haz clic en &quot;Añadir Gráfico&quot;
+                                para crear uno.
+                              </p>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                    {/* Text Blocks / Titles Section */}
+                    {seccion === 'titulos' && (
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <div className="w-1 h-4 bg-purple-500 rounded-full" />
+                            <h3 className="text-sm font-bold text-foreground uppercase tracking-wider">
+                              Títulos y Separadores
+                            </h3>
                           </div>
-                        )}
+                          <button
+                            onClick={addTextBlock}
+                            className="text-xs text-purple-600 dark:text-purple-400 hover:text-purple-300 flex items-center gap-1 bg-purple-500/10 px-2 py-1 rounded transition"
+                          >
+                            <Plus className="w-3 h-3" /> Añadir Título
+                          </button>
+                        </div>
 
-                        {/* TikTok account picker — visible for TikTok dimensions */}
-                        {table.dimension.startsWith('tiktok_') && (
-                          <div className="pl-1">
-                            <TikTokAccountPicker
-                              value={table.account_id}
-                              accounts={tiktokAccounts}
-                              onChange={(v) =>
-                                updateRankingTable(ti, { ...table, account_id: v || undefined })
-                              }
-                            />
-                          </div>
-                        )}
-
-                        {/* Columns list */}
-                        <div className="space-y-2 pt-1 border-t border-border">
-                          <p className="text-[10px] text-muted-foreground/70 font-medium uppercase">
-                            Columnas de métricas
-                          </p>
-                          {table.columns.map((col, ci) => (
-                            <div key={ci} className="flex items-center gap-1.5">
-                              <Input
-                                value={col.label}
-                                onChange={(e) => {
-                                  const cols = [...table.columns];
-                                  cols[ci] = { ...col, label: e.target.value };
-                                  updateRankingTable(ti, { ...table, columns: cols });
-                                }}
-                                className="h-6 text-xs bg-background border-border text-foreground w-24 flex-shrink-0"
-                                placeholder="Etiqueta"
-                              />
-                              <div className="flex-1">
-                                <FormulaInput
-                                  value={col.formula}
-                                  onChange={(val) => {
-                                    const cols = [...table.columns];
-                                    cols[ci] = { ...col, formula: val.trim() };
-                                    updateRankingTable(ti, { ...table, columns: cols });
-                                  }}
-                                  availableMetrics={availableMetrics}
-                                />
-                              </div>
-                              <MetricTypeSelector
-                                prefix={col.prefix}
-                                suffix={col.suffix}
-                                onChange={(vals) => {
-                                  const cols = [...table.columns];
-                                  cols[ci] = { ...col, ...vals };
-                                  updateRankingTable(ti, { ...table, columns: cols });
-                                }}
-                              />
-                              <button
-                                onClick={() => {
-                                  const cols = [...table.columns];
-                                  cols[ci] = { ...col, highlight: !col.highlight };
-                                  updateRankingTable(ti, { ...table, columns: cols });
-                                }}
-                                title="Heatmap"
-                                className={`flex-shrink-0 w-6 h-6 rounded border text-xs transition ${col.highlight ? 'bg-indigo-500/20 border-indigo-500/40 text-indigo-600 dark:text-indigo-400' : 'bg-card border-border text-muted-foreground/70 hover:text-muted-foreground'}`}
-                              >
-                                ✦
-                              </button>
-                              {table.columns.length > 1 && (
+                        <div className="space-y-3">
+                          {(workingLayout.text_blocks || []).map((block: any, i: number) => (
+                            <div
+                              key={block.id}
+                              className="flex flex-col gap-3 bg-card border border-border rounded-xl p-4"
+                            >
+                              <div className="flex items-start justify-between gap-4">
+                                <div className="flex-1 space-y-3">
+                                  <Input
+                                    value={block.content}
+                                    onChange={(e) =>
+                                      updateTextBlock(i, { content: e.target.value })
+                                    }
+                                    className="h-9 text-sm font-bold bg-background border-border text-foreground placeholder:text-muted-foreground"
+                                    placeholder="Escribe el título aquí..."
+                                  />
+                                  <div className="flex flex-wrap items-center gap-2">
+                                    <select
+                                      value={block.style}
+                                      onChange={(e) =>
+                                        updateTextBlock(i, { style: e.target.value as any })
+                                      }
+                                      className="bg-background border border-border rounded px-2 py-1.5 text-xs text-foreground/90 outline-none hover:border-muted-foreground/30 cursor-pointer"
+                                      title="Grosor (Jerarquía)"
+                                    >
+                                      <option value="h1">Grosor H1 (Bold)</option>
+                                      <option value="h2">Grosor H2 (Semibold)</option>
+                                      <option value="h3">Grosor H3 (Medium)</option>
+                                      <option value="p">Grosor Normal</option>
+                                    </select>
+                                    <select
+                                      value={block.fontSize || ''}
+                                      onChange={(e) =>
+                                        updateTextBlock(i, { fontSize: e.target.value as any })
+                                      }
+                                      className="bg-background border border-border rounded px-2 py-1.5 text-xs text-foreground/90 outline-none hover:border-muted-foreground/30 cursor-pointer"
+                                      title="Tamaño Personalizado"
+                                    >
+                                      <option value="">Tamaño Default</option>
+                                      <option value="sm">Pequeño</option>
+                                      <option value="base">Normal</option>
+                                      <option value="xl">Extra Grande</option>
+                                      <option value="2xl">2XL</option>
+                                      <option value="4xl">4XL</option>
+                                      <option value="6xl">6XL</option>
+                                      <option value="8xl">8XL (Gigante)</option>
+                                    </select>
+                                    <select
+                                      value={block.fontFamily || ''}
+                                      onChange={(e) =>
+                                        updateTextBlock(i, { fontFamily: e.target.value as any })
+                                      }
+                                      className="bg-background border border-border rounded px-2 py-1.5 text-xs text-foreground/90 outline-none hover:border-muted-foreground/30 cursor-pointer"
+                                      title="Tipografía"
+                                    >
+                                      <option value="">Fuente (Sans)</option>
+                                      <option value="serif">Serif (Clásica)</option>
+                                      <option value="mono">Monoespaciada</option>
+                                    </select>
+                                    <select
+                                      value={block.color || 'white'}
+                                      onChange={(e) =>
+                                        updateTextBlock(i, { color: e.target.value as any })
+                                      }
+                                      className="bg-background border border-border rounded px-2 py-1.5 text-xs text-foreground/90 outline-none hover:border-muted-foreground/30 cursor-pointer"
+                                      title="Color del texto"
+                                    >
+                                      <option value="white">Blanco</option>
+                                      <option value="zinc">Gris Zinc</option>
+                                      <option value="indigo">Índigo</option>
+                                      <option value="emerald">Verde Esmeralda</option>
+                                      <option value="amber">Ámbar (Amarillo)</option>
+                                      <option value="rose">Rosa / Rojo</option>
+                                      <option value="cyan">Cyan</option>
+                                      <option value="blue">Azul</option>
+                                    </select>
+                                    <select
+                                      value={block.align || 'left'}
+                                      onChange={(e) =>
+                                        updateTextBlock(i, {
+                                          align: e.target.value as 'left' | 'center' | 'right',
+                                        })
+                                      }
+                                      className="bg-background border border-border rounded px-2 py-1.5 text-xs text-foreground/90 outline-none hover:border-muted-foreground/30 cursor-pointer"
+                                      title="Alineación"
+                                    >
+                                      <option value="left">Izquierda</option>
+                                      <option value="center">Centro</option>
+                                      <option value="right">Derecha</option>
+                                    </select>
+                                    <select
+                                      value={block.backgroundColor || ''}
+                                      onChange={(e) =>
+                                        updateTextBlock(i, { backgroundColor: e.target.value })
+                                      }
+                                      className="bg-background border border-border rounded px-2 py-1.5 text-xs text-foreground/90 outline-none hover:border-muted-foreground/30 cursor-pointer"
+                                      title="Fondo de Tarjeta"
+                                    >
+                                      <option value="">Sin Fondo (Transparente)</option>
+                                      <option value="bg-card/60 border-border">Gris Suave</option>
+                                      <option value="bg-card border-border">
+                                        Gris Sólido (Tarjeta)
+                                      </option>
+                                      <option value="bg-indigo-500/10 border-indigo-500/20">
+                                        Índigo Sutil
+                                      </option>
+                                      <option value="bg-emerald-500/10 border-emerald-500/20">
+                                        Verde Sutil
+                                      </option>
+                                      <option value="bg-amber-500/10 border-amber-500/20">
+                                        Ámbar Sutil
+                                      </option>
+                                      <option value="bg-rose-500/10 border-rose-500/20">
+                                        Rosa Sutil
+                                      </option>
+                                      <option value="bg-indigo-600 border-indigo-500 text-white">
+                                        Índigo Sólido
+                                      </option>
+                                    </select>
+                                    <select
+                                      value={block.borderRadius || 'xl'}
+                                      onChange={(e) =>
+                                        updateTextBlock(i, { borderRadius: e.target.value as any })
+                                      }
+                                      className="bg-background border border-border rounded px-2 py-1.5 text-xs text-foreground/90 outline-none hover:border-muted-foreground/30 cursor-pointer"
+                                      title="Redondeado"
+                                    >
+                                      <option value="none">Esquinas Rectas</option>
+                                      <option value="sm">Redondeado SM</option>
+                                      <option value="md">Redondeado MD</option>
+                                      <option value="lg">Redondeado LG</option>
+                                      <option value="xl">Redondeado XL (Default)</option>
+                                      <option value="2xl">Redondeado 2XL</option>
+                                      <option value="full">Cápsula (Full)</option>
+                                    </select>
+                                  </div>
+                                </div>
                                 <button
-                                  onClick={() => {
-                                    const cols = table.columns.filter((_, i) => i !== ci);
-                                    const newSortIdx =
-                                      table.sortColumnIndex >= cols.length
-                                        ? cols.length - 1
-                                        : table.sortColumnIndex;
-                                    updateRankingTable(ti, {
-                                      ...table,
-                                      columns: cols,
-                                      sortColumnIndex: newSortIdx,
-                                    });
-                                  }}
-                                  className="flex-shrink-0 text-muted-foreground/50 hover:text-red-400 transition"
+                                  onClick={() => duplicateTextBlock(i)}
+                                  title="Duplicar título"
+                                  className="text-muted-foreground hover:text-purple-400 p-1.5 rounded bg-background border border-border transition flex-shrink-0"
                                 >
-                                  <X className="w-3 h-3" />
+                                  <Copy className="w-4 h-4" />
                                 </button>
-                              )}
+                                <button
+                                  onClick={() => removeTextBlock(i)}
+                                  title="Eliminar título"
+                                  className="text-muted-foreground hover:text-red-400 p-1.5 rounded bg-background border border-border transition flex-shrink-0"
+                                >
+                                  <X className="w-4 h-4" />
+                                </button>
+                              </div>
                             </div>
                           ))}
-                          <button
-                            onClick={() => {
-                              const cols = [
-                                ...table.columns,
-                                { formula: 'meta_spend', label: 'Nueva', prefix: '$', decimals: 2 },
-                              ];
-                              updateRankingTable(ti, { ...table, columns: cols });
-                            }}
-                            className="text-[10px] text-cyan-500 hover:text-cyan-400 flex items-center gap-1 mt-1"
-                          >
-                            <Plus className="w-3 h-3" /> Agregar columna
-                          </button>
+                          {(!workingLayout.text_blocks ||
+                            workingLayout.text_blocks.length === 0) && (
+                            <div className="border border-border border-dashed rounded-xl p-8 text-center bg-background/20">
+                              <p className="text-xs text-muted-foreground">
+                                No hay títulos configurados. Puedes usarlos para separar secciones
+                                en el Dashboard.
+                              </p>
+                            </div>
+                          )}
                         </div>
                       </div>
-                    ))}
-                    {(!workingLayout?.ranking_tables ||
-                      workingLayout.ranking_tables.length === 0) && (
-                      <div className="border border-border border-dashed rounded-xl p-8 text-center bg-background/20">
-                        <p className="text-xs text-muted-foreground/70">
-                          No hay tablas de ranking. Haz clic en &quot;Agregar tabla&quot; para crear
-                          una.
-                        </p>
+                    )}
+                    {/* Rankings Section */}
+                    {seccion === 'rankings' && (
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <div className="w-1 h-4 bg-cyan-500 rounded-full" />
+                            <h3 className="text-sm font-bold text-foreground uppercase tracking-wider">
+                              Tablas de Ranking
+                            </h3>
+                          </div>
+                          <button
+                            onClick={addRankingTable}
+                            className="text-xs text-cyan-600 dark:text-cyan-400 hover:text-cyan-300 flex items-center gap-1 bg-cyan-500/10 px-2 py-1 rounded transition"
+                          >
+                            <Plus className="w-3 h-3" /> Agregar tabla
+                          </button>
+                        </div>
+
+                        <div className="space-y-4">
+                          {(workingLayout?.ranking_tables || []).map((table, ti) => (
+                            <div
+                              key={table.id}
+                              className="bg-card border border-border rounded-xl p-4 space-y-3"
+                            >
+                              {/* Table header row */}
+                              <div className="flex items-center gap-2">
+                                <Input
+                                  value={table.title}
+                                  onChange={(e) =>
+                                    updateRankingTable(ti, { ...table, title: e.target.value })
+                                  }
+                                  className="h-7 text-xs bg-background border-border text-foreground flex-1"
+                                  placeholder="Título de la tabla"
+                                />
+                                <button
+                                  onClick={() => duplicateRankingTable(ti)}
+                                  title="Duplicar tabla"
+                                  className="flex-shrink-0 text-muted-foreground hover:text-emerald-400 transition"
+                                >
+                                  <Copy className="w-3.5 h-3.5" />
+                                </button>
+                                <button
+                                  onClick={() => removeRankingTable(ti)}
+                                  className="flex-shrink-0 text-muted-foreground hover:text-red-400 transition"
+                                >
+                                  <X className="w-3.5 h-3.5" />
+                                </button>
+                              </div>
+
+                              {/* Settings row */}
+                              <div className="flex flex-wrap items-center gap-2 text-xs">
+                                <div className="flex items-center gap-1">
+                                  <span className="text-muted-foreground">Dimensión:</span>
+                                  <select
+                                    value={table.dimension}
+                                    onChange={(e) =>
+                                      updateRankingTable(ti, {
+                                        ...table,
+                                        dimension: e.target.value as any,
+                                      })
+                                    }
+                                    className="h-6 bg-background border border-border text-foreground/90 rounded px-1.5"
+                                  >
+                                    <optgroup label="Meta">
+                                      <option value="campaigns">Campañas</option>
+                                      <option value="ads">Anuncios</option>
+                                      <option value="adsets">Conjuntos</option>
+                                    </optgroup>
+                                    <optgroup label="TikTok">
+                                      <option value="tiktok_campaigns">Campañas</option>
+                                      <option value="tiktok_ads">Anuncios</option>
+                                      <option value="tiktok_adgroups">Grupos</option>
+                                    </optgroup>
+                                  </select>
+                                </div>
+                                <div className="flex items-center gap-1">
+                                  <span className="text-muted-foreground">Top:</span>
+                                  <select
+                                    value={table.topN}
+                                    onChange={(e) =>
+                                      updateRankingTable(ti, {
+                                        ...table,
+                                        topN: Number(e.target.value),
+                                      })
+                                    }
+                                    className="h-6 bg-background border border-border text-foreground/90 rounded px-1.5"
+                                  >
+                                    {[5, 10, 20, 50].map((n) => (
+                                      <option key={n} value={n}>
+                                        {n}
+                                      </option>
+                                    ))}
+                                  </select>
+                                </div>
+                                <div className="flex items-center gap-1">
+                                  <span className="text-muted-foreground">Orden:</span>
+                                  <select
+                                    value={table.sortOrder}
+                                    onChange={(e) =>
+                                      updateRankingTable(ti, {
+                                        ...table,
+                                        sortOrder: e.target.value as 'desc' | 'asc',
+                                      })
+                                    }
+                                    className="h-6 bg-background border border-border text-foreground/90 rounded px-1.5"
+                                  >
+                                    <option value="desc">Mayor → Menor</option>
+                                    <option value="asc">Menor → Mayor</option>
+                                  </select>
+                                </div>
+                                <div className="flex items-center gap-1">
+                                  <span className="text-muted-foreground">Columna de orden:</span>
+                                  <select
+                                    value={table.sortColumnIndex}
+                                    onChange={(e) =>
+                                      updateRankingTable(ti, {
+                                        ...table,
+                                        sortColumnIndex: Number(e.target.value),
+                                      })
+                                    }
+                                    className="h-6 bg-background border border-border text-foreground/90 rounded px-1.5"
+                                  >
+                                    {table.columns.map((col, ci) => (
+                                      <option key={ci} value={ci}>
+                                        {col.label || `Col ${ci + 1}`}
+                                      </option>
+                                    ))}
+                                  </select>
+                                </div>
+                                <label className="flex items-center gap-1 cursor-pointer">
+                                  <input
+                                    type="checkbox"
+                                    checked={table.showRank !== false}
+                                    onChange={(e) =>
+                                      updateRankingTable(ti, {
+                                        ...table,
+                                        showRank: e.target.checked,
+                                      })
+                                    }
+                                    className="w-3 h-3 accent-cyan-500"
+                                  />
+                                  <span className="text-muted-foreground">Mostrar #</span>
+                                </label>
+                              </div>
+
+                              {/* Campaign filter — Meta only */}
+                              {!table.dimension.startsWith('tiktok_') && (
+                                <div className="pl-1">
+                                  <CampaignFilterPicker
+                                    value={table.campaignFilter}
+                                    onChange={(v) =>
+                                      updateRankingTable(ti, { ...table, campaignFilter: v })
+                                    }
+                                    campaignGroups={campaignGroups}
+                                    campaignNames={campaignNames}
+                                  />
+                                </div>
+                              )}
+
+                              {/* TikTok account picker — visible for TikTok dimensions */}
+                              {table.dimension.startsWith('tiktok_') && (
+                                <div className="pl-1">
+                                  <TikTokAccountPicker
+                                    value={table.account_id}
+                                    accounts={tiktokAccounts}
+                                    onChange={(v) =>
+                                      updateRankingTable(ti, {
+                                        ...table,
+                                        account_id: v || undefined,
+                                      })
+                                    }
+                                  />
+                                </div>
+                              )}
+
+                              {/* Columns list */}
+                              <div className="space-y-2 pt-1 border-t border-border">
+                                <p className="text-xs text-muted-foreground font-medium uppercase">
+                                  Columnas de métricas
+                                </p>
+                                {table.columns.map((col, ci) => (
+                                  <div key={ci} className="flex items-center gap-1.5">
+                                    <Input
+                                      value={col.label}
+                                      onChange={(e) => {
+                                        const cols = [...table.columns];
+                                        cols[ci] = { ...col, label: e.target.value };
+                                        updateRankingTable(ti, { ...table, columns: cols });
+                                      }}
+                                      className="h-6 text-xs bg-background border-border text-foreground w-24 flex-shrink-0"
+                                      placeholder="Etiqueta"
+                                    />
+                                    <div className="flex-1">
+                                      <FormulaInput
+                                        value={col.formula}
+                                        onChange={(val) => {
+                                          const cols = [...table.columns];
+                                          cols[ci] = { ...col, formula: val.trim() };
+                                          updateRankingTable(ti, { ...table, columns: cols });
+                                        }}
+                                        availableMetrics={availableMetrics}
+                                      />
+                                    </div>
+                                    <MetricTypeSelector
+                                      prefix={col.prefix}
+                                      suffix={col.suffix}
+                                      onChange={(vals) => {
+                                        const cols = [...table.columns];
+                                        cols[ci] = { ...col, ...vals };
+                                        updateRankingTable(ti, { ...table, columns: cols });
+                                      }}
+                                    />
+                                    <button
+                                      onClick={() => {
+                                        const cols = [...table.columns];
+                                        cols[ci] = { ...col, highlight: !col.highlight };
+                                        updateRankingTable(ti, { ...table, columns: cols });
+                                      }}
+                                      title="Heatmap"
+                                      className={`flex-shrink-0 w-6 h-6 rounded border text-xs transition ${col.highlight ? 'bg-indigo-500/20 border-indigo-500/40 text-indigo-600 dark:text-indigo-400' : 'bg-card border-border text-muted-foreground hover:text-muted-foreground'}`}
+                                    >
+                                      ✦
+                                    </button>
+                                    {table.columns.length > 1 && (
+                                      <button
+                                        onClick={() => {
+                                          const cols = table.columns.filter((_, i) => i !== ci);
+                                          const newSortIdx =
+                                            table.sortColumnIndex >= cols.length
+                                              ? cols.length - 1
+                                              : table.sortColumnIndex;
+                                          updateRankingTable(ti, {
+                                            ...table,
+                                            columns: cols,
+                                            sortColumnIndex: newSortIdx,
+                                          });
+                                        }}
+                                        className="flex-shrink-0 text-muted-foreground hover:text-red-400 transition"
+                                      >
+                                        <X className="w-3 h-3" />
+                                      </button>
+                                    )}
+                                  </div>
+                                ))}
+                                <button
+                                  onClick={() => {
+                                    const cols = [
+                                      ...table.columns,
+                                      {
+                                        formula: 'meta_spend',
+                                        label: 'Nueva',
+                                        prefix: '$',
+                                        decimals: 2,
+                                      },
+                                    ];
+                                    updateRankingTable(ti, { ...table, columns: cols });
+                                  }}
+                                  className="text-xs text-cyan-500 hover:text-cyan-400 flex items-center gap-1 mt-1"
+                                >
+                                  <Plus className="w-3 h-3" /> Agregar columna
+                                </button>
+                              </div>
+                            </div>
+                          ))}
+                          {(!workingLayout?.ranking_tables ||
+                            workingLayout.ranking_tables.length === 0) && (
+                            <div className="border border-border border-dashed rounded-xl p-8 text-center bg-background/20">
+                              <p className="text-xs text-muted-foreground">
+                                No hay tablas de ranking. Haz clic en &quot;Agregar tabla&quot; para
+                                crear una.
+                              </p>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                    {/* Respuestas de formulario */}
+                    {seccion === 'respuestas' && (
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <div className="w-1 h-4 bg-violet-500 rounded-full" />
+                            <h3 className="text-sm font-bold text-foreground uppercase tracking-wider">
+                              Respuestas de Formulario
+                            </h3>
+                          </div>
+                          <button
+                            onClick={addLeadAnswerBlock}
+                            className="text-xs text-violet-600 dark:text-violet-400 hover:text-violet-300 flex items-center gap-1 bg-violet-500/10 px-2 py-1 rounded transition"
+                          >
+                            <Plus className="w-3 h-3" /> Agregar bloque
+                          </button>
+                        </div>
+
+                        <div className="space-y-4">
+                          {(workingLayout?.lead_answer_blocks || []).map((bloque, bi) => (
+                            <div
+                              key={bloque.id}
+                              className="bg-card border border-border rounded-xl p-4 space-y-3"
+                            >
+                              <div className="flex items-start justify-end -mb-2">
+                                <button
+                                  onClick={() => removeLeadAnswerBlock(bi)}
+                                  className="flex-shrink-0 text-muted-foreground hover:text-red-400 transition"
+                                >
+                                  <X className="w-3.5 h-3.5" />
+                                </button>
+                              </div>
+                              <LeadAnswerEditor
+                                def={bloque}
+                                onChange={(b) => updateLeadAnswerBlock(bi, b)}
+                                clienteId={clienteId}
+                                campaignGroups={campaignGroups}
+                                campaignNames={campaignNames}
+                              />
+                            </div>
+                          ))}
+                          {(!workingLayout?.lead_answer_blocks ||
+                            workingLayout.lead_answer_blocks.length === 0) && (
+                            <div className="border border-border border-dashed rounded-xl p-8 text-center bg-background/20">
+                              <p className="text-xs text-muted-foreground">
+                                Desglosa los leads por lo que respondieron en el formulario: cuántos
+                                contestaron cada opción de una pregunta.
+                              </p>
+                            </div>
+                          )}
+                        </div>
                       </div>
                     )}
                   </div>
-                </div>
-
-                {/* Respuestas de formulario */}
-                <div className="pt-8 border-t border-border space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <div className="w-1 h-4 bg-violet-500 rounded-full" />
-                      <h3 className="text-sm font-bold text-foreground uppercase tracking-wider">
-                        Respuestas de Formulario
-                      </h3>
-                    </div>
-                    <button
-                      onClick={addLeadAnswerBlock}
-                      className="text-[10px] text-violet-600 dark:text-violet-400 hover:text-violet-300 flex items-center gap-1 bg-violet-500/10 px-2 py-1 rounded transition"
-                    >
-                      <Plus className="w-3 h-3" /> Agregar bloque
-                    </button>
-                  </div>
-
-                  <div className="space-y-4">
-                    {(workingLayout?.lead_answer_blocks || []).map((bloque, bi) => (
-                      <div
-                        key={bloque.id}
-                        className="bg-card border border-border rounded-xl p-4 space-y-3"
-                      >
-                        <div className="flex items-start justify-end -mb-2">
-                          <button
-                            onClick={() => removeLeadAnswerBlock(bi)}
-                            className="flex-shrink-0 text-muted-foreground/50 hover:text-red-400 transition"
-                          >
-                            <X className="w-3.5 h-3.5" />
-                          </button>
-                        </div>
-                        <LeadAnswerEditor
-                          def={bloque}
-                          onChange={(b) => updateLeadAnswerBlock(bi, b)}
-                          clienteId={clienteId}
-                          campaignGroups={campaignGroups}
-                          campaignNames={campaignNames}
-                        />
-                      </div>
-                    ))}
-                    {(!workingLayout?.lead_answer_blocks ||
-                      workingLayout.lead_answer_blocks.length === 0) && (
-                      <div className="border border-border border-dashed rounded-xl p-8 text-center bg-background/20">
-                        <p className="text-xs text-muted-foreground/70">
-                          Desglosa los leads por lo que respondieron en el formulario: cuántos
-                          contestaron cada opción de una pregunta.
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                </div>
+                )}
               </>
             )
           )}
@@ -3104,25 +2589,15 @@ export function LayoutConfigModal({
 
         {/* Footer */}
         {step === 'edit' && workingLayout && (
-          <div className="flex items-center justify-between px-6 py-4 border-t border-border bg-background/80 flex-shrink-0">
-            <button
-              onClick={() => setStep('select')}
-              className="text-xs text-muted-foreground/70 hover:text-foreground/90 flex items-center gap-1.5 transition"
-            >
-              <ChevronLeft className="w-4 h-4" /> Cambiar Plantilla
-            </button>
-            <div className="flex gap-3">
-              <Button
-                variant="outline"
-                onClick={onClose}
-                className="border-border text-muted-foreground hover:text-foreground text-xs px-6"
-              >
+          <div className="flex items-center justify-end px-5 py-3 border-t border-border flex-shrink-0">
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={onClose} className="text-sm px-5">
                 Cancelar
               </Button>
               <Button
                 onClick={handleSave}
                 disabled={loading || saved}
-                className="bg-indigo-600 hover:bg-indigo-700 text-white min-w-[160px] text-xs font-bold gap-2"
+                className="min-w-[140px] text-sm gap-2"
               >
                 {loading ? (
                   <Loader2 className="w-4 h-4 animate-spin" />
@@ -3131,7 +2606,7 @@ export function LayoutConfigModal({
                 ) : (
                   <Save className="w-4 h-4" />
                 )}
-                {saved ? '¡GUARDADO!' : 'APLICAR AL CLIENTE'}
+                {saved ? 'Guardado' : 'Guardar vista'}
               </Button>
             </div>
           </div>

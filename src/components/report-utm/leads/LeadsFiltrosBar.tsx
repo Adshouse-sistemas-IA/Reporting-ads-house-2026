@@ -103,7 +103,7 @@ export function LeadsFiltrosBar({
 
           return (
             <div key={campo} className="w-52">
-              <label className="block text-[11px] font-medium text-muted-foreground mb-1">
+              <label className="block text-xs font-medium text-muted-foreground mb-1">
                 {ETIQUETAS_CAMPO[campo] ?? campo}
               </label>
 
@@ -115,7 +115,7 @@ export function LeadsFiltrosBar({
                   value={e.op}
                   disabled={porPresencia}
                   onChange={(ev) => cambiar(campo, { op: ev.target.value as FilterOp, sel: '' })}
-                  className="grow min-w-0 px-2 py-1 text-[11px] rounded-lg border border-border bg-muted text-foreground disabled:opacity-40"
+                  className="grow min-w-0 px-2 py-1 text-xs rounded-lg border border-border bg-muted text-foreground disabled:opacity-40"
                 >
                   {OPS.map((o) => (
                     <option key={o.value} value={o.value}>
@@ -127,7 +127,7 @@ export function LeadsFiltrosBar({
                   aria-label={`Presencia de ${ETIQUETAS_CAMPO[campo] ?? campo}`}
                   value={e.presencia}
                   onChange={(ev) => cambiar(campo, { presencia: ev.target.value as Presencia })}
-                  className="w-20 shrink-0 px-1 py-1 text-[11px] rounded-lg border border-border bg-muted text-foreground"
+                  className="w-20 shrink-0 px-1 py-1 text-xs rounded-lg border border-border bg-muted text-foreground"
                 >
                   <option value="">cualquiera</option>
                   <option value="con">tiene dato</option>
@@ -136,7 +136,7 @@ export function LeadsFiltrosBar({
               </div>
 
               {porPresencia ? (
-                <p className="text-[10px] text-muted-foreground italic px-1 py-1">
+                <p className="text-xs text-muted-foreground italic px-1 py-1">
                   {e.presencia === 'sin'
                     ? 'Solo los que NO traen este dato'
                     : 'Solo los que sí lo traen'}
@@ -180,7 +180,7 @@ export function LeadsFiltrosBar({
 
       <div className="flex flex-wrap items-center gap-3">
         {!clienteId && (
-          <p className="text-[11px] text-amber-600 dark:text-amber-400">
+          <p className="text-xs text-amber-600 dark:text-amber-400">
             Elegí un cliente para elegir los valores de una lista en vez de escribirlos, y para
             poder filtrar por «tiene dato» / «está vacío».
           </p>
@@ -191,7 +191,7 @@ export function LeadsFiltrosBar({
           // que NO se están mirando. La 087 añadió el interruptor; aquí se pide
           // encendido y se dice, porque los recuentos dejan de cuadrar con los
           // del informe y eso hay que explicarlo, no esconderlo.
-          <p className="text-[11px] text-muted-foreground">
+          <p className="text-xs text-muted-foreground">
             En esta pestaña las listas cuentan también los leads excluidos, así que sus recuentos no
             coinciden con los del informe.
           </p>
@@ -200,7 +200,7 @@ export function LeadsFiltrosBar({
           <button
             type="button"
             onClick={limpiar}
-            className="inline-flex items-center gap-1 text-[11px] text-muted-foreground hover:text-foreground transition-colors"
+            className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
           >
             <Eraser className="h-3 w-3" />
             Vaciar estos filtros

@@ -128,7 +128,7 @@ export function CampoEditorDialog({
               </div>
             </div>
 
-            <p className="text-xs text-muted-foreground/60">
+            <p className="text-xs text-muted-foreground">
               Este nombre es el que verás en los informes, en el constructor de dashboards y en las
               tablas. En fórmulas se llama{' '}
               <span className="font-mono text-indigo-400">sf_{clavePrevia}</span>.
@@ -140,7 +140,7 @@ export function CampoEditorDialog({
           <div className="space-y-2">
             <div>
               <Label className="text-sm text-foreground">¿Dónde está este dato?</Label>
-              <p className="text-xs text-muted-foreground/70">
+              <p className="text-xs text-muted-foreground">
                 Marca la columna que contiene el dato en cada pestaña. Si en un formulario se llama
                 distinto que en otro, da igual: aquí se unifican.
               </p>
@@ -157,7 +157,7 @@ export function CampoEditorDialog({
             <div className="flex items-end justify-between gap-2">
               <div>
                 <Label className="text-sm text-foreground">Valores</Label>
-                <p className="text-xs text-muted-foreground/70">
+                <p className="text-xs text-muted-foreground">
                   Junta las formas distintas de escribir lo mismo bajo un solo nombre.
                 </p>
               </div>
@@ -194,7 +194,7 @@ export function CampoEditorDialog({
             <div className="space-y-2">
               <div>
                 <Label className="text-sm text-foreground">Vistas guardadas</Label>
-                <p className="text-xs text-muted-foreground/70">
+                <p className="text-xs text-muted-foreground">
                   Un recorte con nombre propio que se comporta como una métrica más. Por ejemplo
                   “Leads 20-100”: contar solo las filas de ese rango.
                 </p>
@@ -238,7 +238,7 @@ export function CampoEditorDialog({
                   onChange={(e) => set({ max_valores: Number(e.target.value) || 200 })}
                   className="h-8 text-xs bg-background border-input"
                 />
-                <p className="text-[10px] text-muted-foreground/60">
+                <p className="text-xs text-muted-foreground">
                   Al superarlo, el excedente se agrupa en (otros) y el campo deja de ofrecerse como
                   categoría.
                 </p>

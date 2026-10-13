@@ -364,7 +364,7 @@ export function TabConfigModal({
       <DialogContent className="bg-background border-border text-foreground max-h-[90vh] overflow-y-auto overflow-x-hidden">
         <DialogHeader>
           <DialogTitle>{tabToEdit ? 'Editar Pestaña' : 'Nueva Pestaña'}</DialogTitle>
-          <DialogDescription className="text-muted-foreground/70">
+          <DialogDescription className="text-muted-foreground">
             Configura un nombre, la palabra clave para filtrar campañas de Meta, y la plantilla de
             métricas a mostrar.
           </DialogDescription>
@@ -391,7 +391,7 @@ export function TabConfigModal({
                   ))}
                 </SelectContent>
               </Select>
-              <p className="text-[10px] text-muted-foreground/70">
+              <p className="text-xs text-muted-foreground">
                 Copia la visualización (tarjetas, gráficos, ranking, métricas) de una pestaña
                 guardada. El filtro de campaña lo defines abajo.
               </p>
@@ -418,7 +418,7 @@ export function TabConfigModal({
             {/* Selector Y/O (solo con 2+ condiciones) */}
             {conditions.length > 1 && (
               <div className="flex items-center gap-2">
-                <span className="text-[11px] text-muted-foreground/70">Cumplir</span>
+                <span className="text-xs text-muted-foreground">Cumplir</span>
                 <div className="inline-flex rounded-md border border-border overflow-hidden">
                   <button
                     type="button"
@@ -435,7 +435,7 @@ export function TabConfigModal({
                     Alguna (O)
                   </button>
                 </div>
-                <span className="text-[11px] text-muted-foreground/70">las condiciones</span>
+                <span className="text-xs text-muted-foreground">las condiciones</span>
               </div>
             )}
 
@@ -486,7 +486,7 @@ export function TabConfigModal({
             >
               <Plus className="w-3.5 h-3.5" /> Añadir condición
             </button>
-            <p className="text-[10px] text-muted-foreground/70">
+            <p className="text-xs text-muted-foreground">
               Filtra las campañas de esta pestaña por su nombre. Combina varias condiciones para
               afinar (ej. <span className="font-mono">Contiene «LSP»</span> y{' '}
               <span className="font-mono">Contiene «LAGORANCOII»</span>).
@@ -554,7 +554,7 @@ export function TabConfigModal({
                   ))}
                 </SelectContent>
               </Select>
-              <p className="text-[11px] text-muted-foreground/70">
+              <p className="text-xs text-muted-foreground">
                 Sin esto, el agente no sabe qué métricas importan en esta pestaña ni cuáles no
                 aplican, y analiza a ciegas.
               </p>
@@ -626,15 +626,15 @@ export function TabConfigModal({
                   <Zap className="w-4 h-4 text-orange-600 dark:text-orange-400" />
                   <span className="text-sm font-semibold text-foreground">Funnel Hotmart</span>
                   {funnelEnabled && (
-                    <span className="text-[10px] bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 px-2 py-0.5 rounded-full">
+                    <span className="text-xs bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 px-2 py-0.5 rounded-full">
                       Activo
                     </span>
                   )}
                 </div>
                 {funnelExpanded ? (
-                  <ChevronDown className="w-4 h-4 text-muted-foreground/70" />
+                  <ChevronDown className="w-4 h-4 text-muted-foreground" />
                 ) : (
-                  <ChevronRight className="w-4 h-4 text-muted-foreground/70" />
+                  <ChevronRight className="w-4 h-4 text-muted-foreground" />
                 )}
               </button>
 
@@ -666,7 +666,7 @@ export function TabConfigModal({
                           </span>
                           {cobertura && (
                             <span
-                              className={`text-[10px] px-1.5 py-0.5 rounded ${cobertura.pct >= 95 ? 'bg-emerald-500/15 text-emerald-500' : 'bg-amber-500/15 text-amber-500'}`}
+                              className={`text-xs px-1.5 py-0.5 rounded ${cobertura.pct >= 95 ? 'bg-emerald-500/15 text-emerald-500' : 'bg-amber-500/15 text-amber-500'}`}
                             >
                               {cobertura.pct}% clasificado
                             </span>
@@ -674,11 +674,11 @@ export function TabConfigModal({
                         </div>
 
                         {cargandoOfertas && (
-                          <p className="text-[11px] text-muted-foreground/70">Buscando ofertas…</p>
+                          <p className="text-xs text-muted-foreground">Buscando ofertas…</p>
                         )}
 
                         {!cargandoOfertas && ofertas.length === 0 && (
-                          <p className="text-[11px] text-muted-foreground/70 leading-relaxed">
+                          <p className="text-xs text-muted-foreground leading-relaxed">
                             Todavía no hay ventas registradas para este cliente. En cuanto entren,
                             sus ofertas aparecerán aquí y podrás asignarlas sin escribir códigos a
                             mano. Mientras tanto, usa los nombres de producto de abajo.
@@ -693,13 +693,13 @@ export function TabConfigModal({
                                 return (
                                   <div
                                     key={codigo ?? `n:${o.producto_nombre}`}
-                                    className="flex items-center gap-2 text-[11px]"
+                                    className="flex items-center gap-2 text-xs"
                                   >
                                     <div className="min-w-0 flex-1">
                                       <div className="truncate text-foreground/90">
                                         {o.producto_nombre || '(sin nombre)'}
                                       </div>
-                                      <div className="text-muted-foreground/60 font-mono truncate">
+                                      <div className="text-muted-foreground font-mono truncate">
                                         {codigo ?? 'sin código de oferta'} · {o.ventas} venta(s) ·
                                         USD {o.bruto_usd.toFixed(0)}
                                       </div>
@@ -713,7 +713,7 @@ export function TabConfigModal({
                                             [codigo]: e.target.value as RolFunnel,
                                           }))
                                         }
-                                        className="bg-card border border-border rounded px-1.5 py-1 text-[11px] shrink-0"
+                                        className="bg-card border border-border rounded px-1.5 py-1 text-xs shrink-0"
                                       >
                                         {ROLES_FUNNEL.map((r) => (
                                           <option key={r.valor} value={r.valor}>
@@ -723,7 +723,7 @@ export function TabConfigModal({
                                       </select>
                                     ) : (
                                       // Hotmart no mandó código: solo se puede clasificar por nombre.
-                                      <span className="text-[10px] text-muted-foreground/60 shrink-0">
+                                      <span className="text-xs text-muted-foreground shrink-0">
                                         por nombre
                                       </span>
                                     )}
@@ -731,7 +731,7 @@ export function TabConfigModal({
                                 );
                               })}
                             </div>
-                            <p className="text-[10px] text-muted-foreground/70 leading-relaxed">
+                            <p className="text-xs text-muted-foreground leading-relaxed">
                               Al guardar se reclasifica el histórico completo. No se llama a la API
                               de Hotmart: se reescribe la clasificación de las ventas ya guardadas.
                             </p>
@@ -739,7 +739,7 @@ export function TabConfigModal({
                         )}
                       </div>
 
-                      <p className="text-xs text-muted-foreground/70 leading-relaxed">
+                      <p className="text-xs text-muted-foreground leading-relaxed">
                         Nombres de producto (red de seguridad para las ventas sin oferta asignada).
                         Separa por comas. Soporta wildcards SQL{' '}
                         <code className="bg-card px-1 rounded">%</code> (cualquier secuencia) y{' '}
@@ -771,7 +771,7 @@ export function TabConfigModal({
                           onChange={(e) => setPrincipalPriceUsd(e.target.value)}
                           className="bg-card border-border"
                         />
-                        <p className="text-[10px] text-muted-foreground/70">
+                        <p className="text-xs text-muted-foreground">
                           Precio de venta en USD. Se usa para calcular la Facturación Bruta (ventas
                           × precio). Si no se configura, se usa el valor de la transacción reportado
                           por Hotmart.
@@ -812,14 +812,14 @@ export function TabConfigModal({
                           onChange={(e) => setDownsellNames(e.target.value)}
                           className="bg-card border-border"
                         />
-                        <p className="text-[10px] text-muted-foreground/70">
+                        <p className="text-xs text-muted-foreground">
                           La oferta alternativa que se muestra a quien rechaza el upsell. Hasta
                           ahora se contaba como venta principal o se perdía en «productos extras».
                         </p>
                       </div>
 
                       <div className="border-t border-border pt-3 space-y-3">
-                        <p className="text-xs text-muted-foreground/70">
+                        <p className="text-xs text-muted-foreground">
                           Páginas en GA4 (las visitas/sesiones se cuentan desde Analytics, no desde
                           Hotmart):
                         </p>
@@ -834,7 +834,7 @@ export function TabConfigModal({
                             onChange={(e) => setLandingPageUrls(e.target.value)}
                             className="bg-card border-border font-mono text-xs"
                           />
-                          <p className="text-[10px] text-muted-foreground/70">
+                          <p className="text-xs text-muted-foreground">
                             Separá por comas. Si empieza con{' '}
                             <code className="bg-card px-1 rounded">/</code> filtra por URL, si no
                             por título de página (pageTitle en GA4). Para A/B tests podés poner
@@ -854,7 +854,7 @@ export function TabConfigModal({
                             onChange={(e) => setPaymentPageUrl(e.target.value)}
                             className="bg-card border-border font-mono text-xs"
                           />
-                          <p className="text-[10px] text-muted-foreground/70">
+                          <p className="text-xs text-muted-foreground">
                             Si empieza con <code className="bg-card px-1 rounded">/</code> se busca
                             por URL (pagePath). Si no, se busca por título de página (pageTitle) tal
                             como aparece en GA4.
@@ -871,7 +871,7 @@ export function TabConfigModal({
                             onChange={(e) => setUpsellPageUrl(e.target.value)}
                             className="bg-card border-border font-mono text-xs"
                           />
-                          <p className="text-[10px] text-muted-foreground/70">
+                          <p className="text-xs text-muted-foreground">
                             Si empieza con <code className="bg-card px-1 rounded">/</code> se busca
                             por URL (pagePath). Si no, se busca por título de página (pageTitle).
                           </p>

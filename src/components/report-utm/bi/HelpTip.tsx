@@ -54,7 +54,7 @@ export function HelpTip({ text, size = 13, className }: Props) {
           else open();
         }}
         aria-label="Ayuda"
-        className={`inline-flex items-center justify-center text-muted-foreground/60 hover:text-emerald-500 transition-colors cursor-help align-middle ${className ?? ''}`}
+        className={`inline-flex items-center justify-center text-muted-foreground hover:text-emerald-500 transition-colors cursor-help align-middle ${className ?? ''}`}
       >
         <HelpCircle style={{ width: size, height: size }} />
       </span>
@@ -69,7 +69,7 @@ export function HelpTip({ text, size = 13, className }: Props) {
               width: 260,
               zIndex: 100,
             }}
-            className="rounded-lg border border-border bg-card text-foreground shadow-xl px-3 py-2 text-[11px] leading-relaxed pointer-events-none"
+            className="rounded-lg border border-border bg-card text-foreground shadow-xl px-3 py-2 text-xs leading-relaxed pointer-events-none"
           >
             {text}
           </div>,

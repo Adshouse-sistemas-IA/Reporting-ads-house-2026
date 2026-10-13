@@ -70,7 +70,7 @@ export function ClienteCard({ cliente, puesta }: ClienteCardProps) {
               <span className="truncate text-foreground group-hover:text-foreground/90 transition-colors">
                 {cliente.nombre}
                 {archivado && (
-                  <span className="ml-2 align-middle text-[10px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded bg-muted text-muted-foreground">
+                  <span className="ml-2 align-middle text-xs font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded bg-muted text-muted-foreground">
                     Archivado
                   </span>
                 )}
@@ -99,10 +99,10 @@ export function ClienteCard({ cliente, puesta }: ClienteCardProps) {
                 Puesta en marcha: {puesta.resueltos} de {puesta.total}
               </p>
             )}
-            {error && <p className="text-[11px] text-red-500 mt-2">{error}</p>}
+            {error && <p className="text-xs text-red-500 mt-2">{error}</p>}
           </CardContent>
           <CardFooter className="pt-2 border-t border-border mt-2 flex justify-between items-center gap-2">
-            <span className="text-muted-foreground/70 text-xs uppercase flex-1">
+            <span className="text-muted-foreground text-xs uppercase flex-1">
               {new Date(cliente.created_at).toLocaleDateString()}
             </span>
             <button

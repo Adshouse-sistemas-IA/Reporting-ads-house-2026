@@ -57,7 +57,7 @@ export function ReportActions({ report, className }: Props) {
           <button
             onClick={handleDelete}
             disabled={deleting}
-            className="px-2 py-1 rounded-lg bg-red-500 text-white text-[10px] font-medium shadow-sm flex items-center gap-1"
+            className="px-2 py-1 rounded-lg bg-red-500 text-white text-xs font-medium shadow-sm flex items-center gap-1"
           >
             {deleting ? <Loader2 className="h-3 w-3 animate-spin" /> : null}
             Confirmar

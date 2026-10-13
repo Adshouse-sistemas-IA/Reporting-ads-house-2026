@@ -180,7 +180,7 @@ export function TabArchiveView({
         </button>
         <div className="h-4 w-px bg-muted-foreground/30" />
         <h1 className="text-sm font-semibold text-foreground">🗂 Archivo de Pestañas</h1>
-        <span className="text-xs text-muted-foreground/70">
+        <span className="text-xs text-muted-foreground">
           {tabs.filter((t) => t.archived).length} ocultas · {tabs.filter((t) => !t.archived).length}{' '}
           visibles
         </span>
@@ -190,7 +190,7 @@ export function TabArchiveView({
       <div className="flex h-[calc(100vh-65px)]">
         {/* Left column — tab list */}
         <div className="w-[40%] border-r border-border overflow-y-auto custom-scrollbar p-4 space-y-2">
-          <p className="text-xs text-muted-foreground/70 mb-3 uppercase tracking-wider font-medium">
+          <p className="text-xs text-muted-foreground mb-3 uppercase tracking-wider font-medium">
             Todas las pestañas
           </p>
           {sortedTabs.map((tab) => {
@@ -206,7 +206,7 @@ export function TabArchiveView({
                 <div className="flex items-center gap-2 px-3 py-2.5">
                   <button
                     onClick={() => toggleExpand(tab.id)}
-                    className="text-muted-foreground/70 hover:text-foreground/90 transition flex-shrink-0"
+                    className="text-muted-foreground hover:text-foreground/90 transition flex-shrink-0"
                   >
                     {expanded ? (
                       <ChevronDown className="w-4 h-4" />
@@ -221,12 +221,12 @@ export function TabArchiveView({
                         {tab.nombre}
                       </span>
                       {tab.keyword_meta && (
-                        <span className="text-[10px] bg-muted px-1.5 py-0.5 rounded text-muted-foreground font-mono">
+                        <span className="text-xs bg-muted px-1.5 py-0.5 rounded text-muted-foreground font-mono">
                           {tab.keyword_meta}
                         </span>
                       )}
                       {tab.archived && (
-                        <span className="text-[10px] bg-muted px-1.5 py-0.5 rounded text-muted-foreground/70">
+                        <span className="text-xs bg-muted px-1.5 py-0.5 rounded text-muted-foreground">
                           oculta
                         </span>
                       )}
@@ -237,14 +237,14 @@ export function TabArchiveView({
                         type="date"
                         value={override?.from ?? tab.fecha_inicio ?? ''}
                         onChange={(e) => setTabOverride(tab.id, 'from', e.target.value, tab)}
-                        className="text-[10px] bg-muted text-muted-foreground border-none rounded px-1 py-0.5 w-[100px] cursor-pointer"
+                        className="text-xs bg-muted text-muted-foreground border-none rounded px-1 py-0.5 w-[100px] cursor-pointer"
                       />
-                      <span className="text-[10px] text-muted-foreground/70">→</span>
+                      <span className="text-xs text-muted-foreground">→</span>
                       <input
                         type="date"
                         value={override?.to ?? tab.fecha_finalizacion ?? ''}
                         onChange={(e) => setTabOverride(tab.id, 'to', e.target.value, tab)}
-                        className="text-[10px] bg-muted text-muted-foreground border-none rounded px-1 py-0.5 w-[100px] cursor-pointer"
+                        className="text-xs bg-muted text-muted-foreground border-none rounded px-1 py-0.5 w-[100px] cursor-pointer"
                       />
                     </div>
                   </div>
@@ -254,7 +254,7 @@ export function TabArchiveView({
                       onClick={() => handleToggle(tab)}
                       disabled={togglingId === tab.id}
                       title={tab.archived ? 'Mostrar en barra' : 'Ocultar de barra'}
-                      className="flex-shrink-0 text-muted-foreground/70 hover:text-foreground transition disabled:opacity-40"
+                      className="flex-shrink-0 text-muted-foreground hover:text-foreground transition disabled:opacity-40"
                     >
                       {tab.archived ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                     </button>
@@ -265,7 +265,7 @@ export function TabArchiveView({
                 {expanded && (
                   <div className="border-t border-border px-3 py-2 space-y-1">
                     {cards.length === 0 ? (
-                      <p className="text-xs text-muted-foreground/70 py-1">
+                      <p className="text-xs text-muted-foreground py-1">
                         No hay tarjetas configuradas en esta pestaña.
                       </p>
                     ) : (
@@ -284,7 +284,7 @@ export function TabArchiveView({
                             {card.label}
                           </span>
                           {(card.prefix || card.suffix) && (
-                            <span className="text-[10px] text-muted-foreground/70 font-mono">
+                            <span className="text-xs text-muted-foreground font-mono">
                               {card.prefix}
                               {card.suffix}
                             </span>
@@ -304,17 +304,17 @@ export function TabArchiveView({
           {selectedCards.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full text-center">
               <div className="text-4xl mb-4">📊</div>
-              <p className="text-sm text-muted-foreground/70 max-w-xs">
+              <p className="text-sm text-muted-foreground max-w-xs">
                 Expande una pestaña a la izquierda y selecciona las tarjetas que quieres comparar.
               </p>
             </div>
           ) : (
             <div className="space-y-8">
-              <p className="text-xs text-muted-foreground/70 uppercase tracking-wider font-medium">
+              <p className="text-xs text-muted-foreground uppercase tracking-wider font-medium">
                 Vista Comparativa
               </p>
               {isLoadingArchive ? (
-                <div className="flex items-center gap-2 text-sm text-muted-foreground/70">
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   <Loader2 className="w-4 h-4 animate-spin" />
                   Cargando historial completo…
                 </div>
@@ -330,7 +330,7 @@ export function TabArchiveView({
                       <p className="text-xs font-semibold text-indigo-600 dark:text-indigo-400 mb-3 flex items-center gap-1.5">
                         📌 {group.tabName}
                         {tab?.keyword_meta && (
-                          <span className="font-mono text-muted-foreground/70">
+                          <span className="font-mono text-muted-foreground">
                             {tab.keyword_meta}
                           </span>
                         )}
@@ -361,14 +361,12 @@ export function TabArchiveView({
                             >
                               <button
                                 onClick={() => toggleCard(tab, sel.card)}
-                                className="absolute top-2 right-2 text-muted-foreground/50 hover:text-red-400 transition"
+                                className="absolute top-2 right-2 text-muted-foreground hover:text-red-400 transition"
                                 title="Quitar"
                               >
                                 ×
                               </button>
-                              <p className="text-[11px] text-muted-foreground/70 mb-1">
-                                {sel.card.label}
-                              </p>
+                              <p className="text-xs text-muted-foreground mb-1">{sel.card.label}</p>
                               <p className="text-xl font-bold text-foreground font-mono">
                                 {formatted}
                               </p>

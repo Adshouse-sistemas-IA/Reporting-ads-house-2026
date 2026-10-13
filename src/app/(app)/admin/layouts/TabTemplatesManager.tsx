@@ -147,7 +147,7 @@ export function TabTemplatesManager({
                   {t.descripcion && (
                     <p className="text-xs text-muted-foreground truncate">{t.descripcion}</p>
                   )}
-                  <p className="text-[11px] text-muted-foreground/70 mt-0.5">{countBlocks(t)}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">{countBlocks(t)}</p>
                 </div>
                 {isAdmin && (
                   <div className="flex items-center gap-1.5 shrink-0">

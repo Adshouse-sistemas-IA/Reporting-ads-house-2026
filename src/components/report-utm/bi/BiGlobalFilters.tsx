@@ -382,7 +382,7 @@ export function BiGlobalFilters({
         <span className="text-xs font-medium text-muted-foreground">Filtros globales</span>
         <HelpTip text="Estos filtros afectan a TODOS los widgets del informe a la vez. Elige cliente y rango de fechas, o usa los atajos Hoy/Ayer/Este mes/7d/14d/30d/90d. Pulsa Aplicar para refrescar." />
         {pinnedCampaign && (
-          <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 text-[10px] font-medium">
+          <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 text-xs font-medium">
             <Lock className="h-2.5 w-2.5" />
             Campaña: {pinnedCampaign}
             {!readonly && (
@@ -403,7 +403,7 @@ export function BiGlobalFilters({
               <button
                 key={p.key}
                 onClick={() => applyPreset(p)}
-                className={`px-2 py-1 rounded-md text-[10px] font-medium transition-colors ${
+                className={`px-2 py-1 rounded-md text-xs font-medium transition-colors ${
                   activePreset === p.key
                     ? 'bg-emerald-500 text-white'
                     : 'bg-muted text-muted-foreground hover:bg-accent hover:text-foreground'
@@ -417,7 +417,7 @@ export function BiGlobalFilters({
 
       <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
         <div>
-          <label className="flex items-center gap-1 text-[10px] font-medium text-muted-foreground mb-1">
+          <label className="flex items-center gap-1 text-xs font-medium text-muted-foreground mb-1">
             Cliente
             {clienteLocked && <Lock className="h-2.5 w-2.5 text-emerald-500" />}
           </label>
@@ -449,14 +449,14 @@ export function BiGlobalFilters({
             </select>
           )}
           {!clienteLocked && onClienteChange && (
-            <p className="text-[9px] text-emerald-600 dark:text-emerald-400 mt-1">
+            <p className="text-xs text-emerald-600 dark:text-emerald-400 mt-1">
               Queda fijo al informe
             </p>
           )}
         </div>
 
         <div>
-          <label className="flex items-center gap-1 text-[10px] font-medium text-muted-foreground mb-1">
+          <label className="flex items-center gap-1 text-xs font-medium text-muted-foreground mb-1">
             Desde
             {datesLocked && <Lock className="h-2.5 w-2.5 text-emerald-500" />}
           </label>
@@ -482,7 +482,7 @@ export function BiGlobalFilters({
         </div>
 
         <div>
-          <label className="flex items-center gap-1 text-[10px] font-medium text-muted-foreground mb-1">
+          <label className="flex items-center gap-1 text-xs font-medium text-muted-foreground mb-1">
             Hasta
             {datesLocked && <Lock className="h-2.5 w-2.5 text-emerald-500" />}
           </label>
@@ -522,13 +522,13 @@ export function BiGlobalFilters({
       <div className="border-t border-border pt-3">
         <button
           onClick={() => setShowFilters((v) => !v)}
-          className="flex items-center gap-1.5 text-[11px] font-medium text-muted-foreground hover:text-foreground transition-colors"
+          className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors"
         >
           <SlidersHorizontal className="h-3.5 w-3.5" />
           Filtros del informe
           <HelpTip text="Define condiciones sobre las variables (UTMs, país, formulario, campos…). Dentro de un grupo se unen con O (cualquiera); los grupos entre sí con Y (todas). Ej: (Source = facebook O Source = instagram) Y (Campaña contiene verano). Guarda para que se apliquen siempre al abrir el informe." />
           {condCount > 0 && (
-            <span className="px-1.5 py-0.5 rounded-full bg-emerald-500 text-white text-[9px] font-semibold">
+            <span className="px-1.5 py-0.5 rounded-full bg-emerald-500 text-white text-xs font-semibold">
               {condCount}
             </span>
           )}
@@ -539,7 +539,7 @@ export function BiGlobalFilters({
 
         {showFilters &&
           (readonly ? (
-            <div className="mt-3 text-[11px] text-muted-foreground">
+            <div className="mt-3 text-xs text-muted-foreground">
               {condCount > 0 ? (
                 <p className="font-mono leading-relaxed">{describe}</p>
               ) : (
@@ -549,7 +549,7 @@ export function BiGlobalFilters({
           ) : (
             <div className="mt-3 space-y-2">
               {groups.length === 0 && (
-                <p className="text-[11px] text-muted-foreground">
+                <p className="text-xs text-muted-foreground">
                   Sin condiciones. Agrega un grupo para empezar a filtrar.
                 </p>
               )}
@@ -558,7 +558,7 @@ export function BiGlobalFilters({
                 <div key={gi}>
                   {gi > 0 && (
                     <div className="flex items-center gap-2 my-1.5">
-                      <span className="px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-700 dark:text-amber-300 text-[10px] font-bold tracking-wider">
+                      <span className="px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-700 dark:text-amber-300 text-xs font-bold tracking-wider">
                         Y
                       </span>
                       <div className="flex-1 h-px bg-border" />
@@ -568,7 +568,7 @@ export function BiGlobalFilters({
                     {g.conditions.map((c, ci) => (
                       <div key={ci} className="flex items-center gap-1.5 flex-wrap">
                         {ci > 0 && (
-                          <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 w-4 text-center">
+                          <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 w-4 text-center">
                             O
                           </span>
                         )}
@@ -639,13 +639,13 @@ export function BiGlobalFilters({
                     <div className="flex items-center gap-3 pl-5 pt-0.5">
                       <button
                         onClick={() => addCondition(gi)}
-                        className="flex items-center gap-1 text-[11px] font-medium text-emerald-600 dark:text-emerald-400 hover:underline"
+                        className="flex items-center gap-1 text-xs font-medium text-emerald-600 dark:text-emerald-400 hover:underline"
                       >
                         <Plus className="h-3 w-3" /> Condición (O)
                       </button>
                       <button
                         onClick={() => removeGroup(gi)}
-                        className="flex items-center gap-1 text-[11px] font-medium text-muted-foreground hover:text-red-500"
+                        className="flex items-center gap-1 text-xs font-medium text-muted-foreground hover:text-red-500"
                       >
                         <X className="h-3 w-3" /> Eliminar grupo
                       </button>
@@ -657,14 +657,14 @@ export function BiGlobalFilters({
               <div className="flex items-center gap-2 flex-wrap pt-1">
                 <button
                   onClick={addGroup}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium bg-muted text-foreground hover:bg-accent transition-colors"
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-muted text-foreground hover:bg-accent transition-colors"
                 >
                   <Plus className="h-3 w-3" /> Agregar grupo (Y)
                 </button>
                 <button
                   onClick={onAdvancedSave}
                   disabled={savingAdvanced}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium text-white nav-active-emerald disabled:opacity-50"
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-white nav-active-emerald disabled:opacity-50"
                 >
                   {advancedSaved ? <Check className="h-3 w-3" /> : <Save className="h-3 w-3" />}
                   {savingAdvanced ? 'Guardando…' : advancedSaved ? 'Guardado' : 'Guardar filtros'}
@@ -672,12 +672,12 @@ export function BiGlobalFilters({
                 {condCount > 0 && (
                   <button
                     onClick={clearAll}
-                    className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] font-medium text-muted-foreground hover:bg-accent transition-colors"
+                    className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium text-muted-foreground hover:bg-accent transition-colors"
                   >
                     <X className="h-3 w-3" /> Limpiar
                   </button>
                 )}
-                <p className="text-[10px] text-muted-foreground ml-auto">
+                <p className="text-xs text-muted-foreground ml-auto">
                   Se aplican en vivo. Guarda para que queden fijos al informe.
                 </p>
               </div>

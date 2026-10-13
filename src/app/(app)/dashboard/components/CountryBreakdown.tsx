@@ -56,7 +56,7 @@ function CountryRow({
         onClick={() => setExpanded((v) => !v)}
       >
         {/* Rank badge */}
-        <span className="text-xs font-bold text-muted-foreground/70 w-5 shrink-0">#{rank + 1}</span>
+        <span className="text-xs font-bold text-muted-foreground w-5 shrink-0">#{rank + 1}</span>
 
         {/* Country name */}
         <span className="font-medium text-foreground w-28 shrink-0 truncate" title={cm.country}>
@@ -76,28 +76,28 @@ function CountryRow({
         {/* Key metrics */}
         <div className="hidden md:flex items-center gap-6 shrink-0">
           <div className="text-right">
-            <p className="text-xs text-muted-foreground/70">Gasto</p>
+            <p className="text-xs text-muted-foreground">Gasto</p>
             <p className="text-sm font-semibold text-foreground">
               {fmt(cm.spend, pre, '', dec(2))}
             </p>
           </div>
           <div className="text-right">
-            <p className="text-xs text-muted-foreground/70">Leads</p>
+            <p className="text-xs text-muted-foreground">Leads</p>
             <p className="text-sm font-semibold text-foreground">{cm.leads.toLocaleString()}</p>
           </div>
           <div className="text-right">
-            <p className="text-xs text-muted-foreground/70">CPL</p>
+            <p className="text-xs text-muted-foreground">CPL</p>
             <p className="text-sm font-semibold text-foreground">
               {cm.cpl !== null ? fmt(cm.cpl, pre, '', dec(2)) : '-'}
             </p>
           </div>
           <div className="text-right">
-            <p className="text-xs text-muted-foreground/70">Resultados</p>
+            <p className="text-xs text-muted-foreground">Resultados</p>
             <p className="text-sm font-semibold text-foreground">{cm.results.toLocaleString()}</p>
           </div>
         </div>
 
-        <span className="text-muted-foreground/70 shrink-0 ml-2">
+        <span className="text-muted-foreground shrink-0 ml-2">
           {expanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
         </span>
       </button>
@@ -114,7 +114,7 @@ function CountryRow({
               </span>
             </div>
             {cm.topAdsByResults.length === 0 ? (
-              <p className="text-xs text-muted-foreground/70">Sin datos</p>
+              <p className="text-xs text-muted-foreground">Sin datos</p>
             ) : (
               <div className="space-y-1.5">
                 {cm.topAdsByResults.map((ad, i) => (
@@ -126,7 +126,7 @@ function CountryRow({
                       <span className="text-emerald-600 dark:text-emerald-400 font-medium">
                         {ad.results} res.
                       </span>
-                      <span className="text-muted-foreground/70">{fmt(ad.spend, pre, '', 0)}</span>
+                      <span className="text-muted-foreground">{fmt(ad.spend, pre, '', 0)}</span>
                     </div>
                   </div>
                 ))}
@@ -143,7 +143,7 @@ function CountryRow({
               </span>
             </div>
             {cm.topAdsByCost.length === 0 ? (
-              <p className="text-xs text-muted-foreground/70">Sin datos</p>
+              <p className="text-xs text-muted-foreground">Sin datos</p>
             ) : (
               <div className="space-y-1.5">
                 {cm.topAdsByCost.map((ad, i) => (
@@ -155,7 +155,7 @@ function CountryRow({
                       <span className="text-amber-600 dark:text-amber-400 font-medium">
                         {fmt(ad.spend, pre, '', 0)}
                       </span>
-                      <span className="text-muted-foreground/70">{ad.results} res.</span>
+                      <span className="text-muted-foreground">{ad.results} res.</span>
                     </div>
                   </div>
                 ))}
@@ -165,13 +165,13 @@ function CountryRow({
 
           {/* Mobile fallback for key metrics */}
           <div className="md:hidden col-span-1 flex gap-4 flex-wrap text-xs">
-            <span className="text-muted-foreground/70">
+            <span className="text-muted-foreground">
               Gasto: <strong className="text-foreground">{fmt(cm.spend, pre, '', dec(2))}</strong>
             </span>
-            <span className="text-muted-foreground/70">
+            <span className="text-muted-foreground">
               Leads: <strong className="text-foreground">{cm.leads}</strong>
             </span>
-            <span className="text-muted-foreground/70">
+            <span className="text-muted-foreground">
               CPL:{' '}
               <strong className="text-foreground">
                 {cm.cpl !== null ? fmt(cm.cpl, pre, '', dec(2)) : '-'}
@@ -207,7 +207,7 @@ export function CountryBreakdown({
   if (countries.length === 0) {
     return (
       <Card className="bg-card/60 border-border">
-        <CardContent className="flex flex-col items-center justify-center py-10 text-muted-foreground/70 gap-2">
+        <CardContent className="flex flex-col items-center justify-center py-10 text-muted-foreground gap-2">
           <Globe className="w-8 h-8" />
           <p className="text-sm">No hay datos de países detectados.</p>
           <p className="text-xs">
@@ -225,7 +225,7 @@ export function CountryBreakdown({
         <CardTitle className="flex items-center gap-2 text-foreground text-base">
           <Globe className="w-4 h-4 text-blue-600 dark:text-blue-400" />
           Desglose por País
-          <span className="ml-auto text-xs font-normal text-muted-foreground/70">
+          <span className="ml-auto text-xs font-normal text-muted-foreground">
             {countries.length} países · $
             {totalSpend.toLocaleString('en-US', {
               minimumFractionDigits: 2,

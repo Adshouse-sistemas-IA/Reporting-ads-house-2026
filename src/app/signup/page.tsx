@@ -89,7 +89,7 @@ export default function SignupPage() {
         </div>
         <div className="flex flex-col leading-tight default-logo-element">
           <span className="text-2xl font-bold tracking-tight text-foreground">{appName}</span>
-          <span className="text-xs font-medium text-muted-foreground/70 tracking-widest uppercase">
+          <span className="text-xs font-medium text-muted-foreground tracking-widest uppercase">
             {appTag}
           </span>
         </div>
@@ -143,7 +143,7 @@ export default function SignupPage() {
                   placeholder="Juan Pérez"
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
-                  className="bg-muted/60 border-input text-foreground placeholder:text-muted-foreground/70"
+                  className="bg-muted/60 border-input text-foreground placeholder:text-muted-foreground"
                   required
                 />
               </div>
@@ -157,7 +157,7 @@ export default function SignupPage() {
                   placeholder="tu@empresa.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="bg-muted/60 border-input text-foreground placeholder:text-muted-foreground/70"
+                  className="bg-muted/60 border-input text-foreground placeholder:text-muted-foreground"
                   required
                 />
               </div>
@@ -188,7 +188,7 @@ export default function SignupPage() {
               >
                 {loading ? 'Creando cuenta...' : 'Registrarse'}
               </Button>
-              <p className="text-sm text-muted-foreground/70 text-center">
+              <p className="text-sm text-muted-foreground text-center">
                 ¿Ya tienes cuenta?{' '}
                 <Link
                   href="/login"

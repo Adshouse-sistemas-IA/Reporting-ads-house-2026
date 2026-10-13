@@ -385,7 +385,7 @@ export function LeadsConfigCard({ clienteId }: { clienteId: string }) {
 
       {/* ── 1. Preguntas medidas ─────────────────────────────────────── */}
       <section className="space-y-2">
-        <h4 className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+        <h4 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
           Preguntas medidas ({campos.filter((c) => c.activo).length})
         </h4>
         {!cargando && ordenados.length === 0 && (
@@ -421,10 +421,10 @@ export function LeadsConfigCard({ clienteId }: { clienteId: string }) {
       <section className="space-y-2">
         <div className="flex items-end justify-between gap-2">
           <div>
-            <h4 className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+            <h4 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
               Preguntas detectadas sin medir ({sinMedir.length})
             </h4>
-            <p className="text-[11px] text-muted-foreground/80">
+            <p className="text-xs text-muted-foreground/80">
               {leadsVistos > 0 && `Sobre ${nf.format(leadsVistos)} leads del último año. `}
               {conPlataforma
                 ? 'Incluye las preguntas y opciones que publican Meta, GHL y el plugin web.'
@@ -434,7 +434,7 @@ export function LeadsConfigCard({ clienteId }: { clienteId: string }) {
           {ocultasTexto > 0 && (
             <button
               onClick={() => setVerTexto((v) => !v)}
-              className="text-[11px] text-muted-foreground hover:text-foreground flex items-center gap-1 shrink-0"
+              className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1 shrink-0"
             >
               {verTexto ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
               {verTexto ? 'Solo desplegables' : `Ver también texto libre (${ocultasTexto})`}
@@ -453,25 +453,25 @@ export function LeadsConfigCard({ clienteId }: { clienteId: string }) {
                   {p.fuentes.map((f) => (
                     <span
                       key={f}
-                      className="text-[9px] uppercase tracking-wide rounded px-1 py-0.5 bg-muted text-muted-foreground"
+                      className="text-xs uppercase tracking-wide rounded px-1 py-0.5 bg-muted text-muted-foreground"
                     >
                       {FUENTE_LABEL[f] ?? f}
                     </span>
                   ))}
                   {p.tipo && (
-                    <span className="text-[9px] uppercase tracking-wide text-sky-600 dark:text-sky-400">
+                    <span className="text-xs uppercase tracking-wide text-sky-600 dark:text-sky-400">
                       {TIPO_LABEL[p.tipo] ?? p.tipo}
                     </span>
                   )}
                 </div>
-                <p className="text-[11px] text-muted-foreground mt-0.5 break-words">
+                <p className="text-xs text-muted-foreground mt-0.5 break-words">
                   {nf.format(p.leads)} leads ·{' '}
                   {p.opciones.length > 0
                     ? `${p.opciones.length} opciones`
                     : `${p.distintos} respuestas distintas`}
                   {p.formularios.length > 0 && ` · ${p.formularios.slice(0, 3).join(', ')}`}
                 </p>
-                <p className="text-[11px] text-muted-foreground/70 mt-0.5 break-words">
+                <p className="text-xs text-muted-foreground mt-0.5 break-words">
                   {(p.opciones.length > 0
                     ? p.opciones.map((o) => o.etiqueta || o.valor)
                     : p.valores.map((v) => v.valor_crudo)
@@ -485,7 +485,7 @@ export function LeadsConfigCard({ clienteId }: { clienteId: string }) {
                   <select
                     value=""
                     onChange={(e) => e.target.value && void unirACampo(p, e.target.value)}
-                    className="h-7 text-[11px] rounded-md border border-input bg-background px-1.5 text-muted-foreground"
+                    className="h-7 text-xs rounded-md border border-input bg-background px-1.5 text-muted-foreground"
                     title="Es la misma pregunta que otra ya medida (p. ej. la versión web de una de Meta)"
                   >
                     <option value="">Es la misma que…</option>
@@ -624,20 +624,20 @@ function CampoFila({
           className="min-w-0 flex-1 bg-transparent text-sm font-medium text-foreground outline-none focus:underline"
           title="Nombre de la pregunta en pestañas e informes (renombrarla no rompe nada)"
         />
-        <span className="text-[11px] text-muted-foreground shrink-0">
+        <span className="text-xs text-muted-foreground shrink-0">
           {respuestas.filter((r) => r.leads > 0).length} respuestas · {nf.format(total)} leads
         </span>
         {fuentes.map((f) => (
           <span
             key={f}
-            className="text-[9px] uppercase tracking-wide rounded px-1 py-0.5 bg-muted text-muted-foreground shrink-0"
+            className="text-xs uppercase tracking-wide rounded px-1 py-0.5 bg-muted text-muted-foreground shrink-0"
           >
             {FUENTE_LABEL[f] ?? f}
           </span>
         ))}
         {referencias.length > 0 && (
           <span
-            className="text-[10px] text-muted-foreground shrink-0"
+            className="text-xs text-muted-foreground shrink-0"
             title={referencias.map((r) => `${r.origen}: ${r.nombre}`).join('\n')}
           >
             en {resumirReferencias(referencias)}
@@ -676,11 +676,11 @@ function CampoFila({
       {abierto && (
         <div className="border-t border-border px-3 py-3 space-y-3">
           {/* Barra de acciones sobre la selección */}
-          <div className="flex items-center gap-2 flex-wrap text-[11px]">
+          <div className="flex items-center gap-2 flex-wrap text-xs">
             <Button
               variant="outline"
               size="sm"
-              className="h-6 text-[11px] gap-1"
+              className="h-6 text-xs gap-1"
               disabled={seleccion.size < 2}
               onClick={() => {
                 const n = prompt('Nombre de la respuesta unida:', [...seleccion][0]);
@@ -695,7 +695,7 @@ function CampoFila({
             <Button
               variant="outline"
               size="sm"
-              className="h-6 text-[11px] gap-1"
+              className="h-6 text-xs gap-1"
               onClick={() => onGuardar({ valores_orden: ordenAutomatico(campo) }, 'Ordenado')}
               title="Ordena los rangos numéricos de menor a mayor"
             >
@@ -704,7 +704,7 @@ function CampoFila({
             <Button
               variant="outline"
               size="sm"
-              className="h-6 text-[11px] gap-1"
+              className="h-6 text-xs gap-1"
               onClick={() => setNuevoSeg({ nombre: '', valores: new Set(seleccion) })}
               title="Un segmento suma varias respuestas bajo un nombre («Desde 2M»)"
             >
@@ -778,7 +778,7 @@ function CampoFila({
           </DndContext>
 
           {(sinClasificar.length > 0 || crudasTalCual.length > 0) && (
-            <div className="flex items-center gap-2 rounded-md bg-amber-500/10 px-2 py-1.5 text-[11px] text-amber-700 dark:text-amber-300">
+            <div className="flex items-center gap-2 rounded-md bg-amber-500/10 px-2 py-1.5 text-xs text-amber-700 dark:text-amber-300">
               <AlertCircle className="w-3 h-3 shrink-0" />
               <span className="flex-1">
                 {sinClasificar.length + crudasTalCual.length} respuestas sin nombre propio (
@@ -791,7 +791,7 @@ function CampoFila({
               <Button
                 size="sm"
                 variant="outline"
-                className="h-6 text-[11px]"
+                className="h-6 text-xs"
                 onClick={() =>
                   onGuardar(anadirSinClasificar(campo, valores), 'Respuestas añadidas')
                 }
@@ -802,7 +802,7 @@ function CampoFila({
           )}
 
           {apartados.length > 0 && (
-            <div className="text-[11px] text-muted-foreground">
+            <div className="text-xs text-muted-foreground">
               <span className="font-medium">Cuentan como sin respuesta:</span>{' '}
               {apartados.map((v) => (
                 <span key={v.valor_crudo} className="inline-flex items-center gap-0.5 mr-2">
@@ -822,7 +822,7 @@ function CampoFila({
           {/* Segmentos */}
           {(segmentos.length > 0 || nuevoSeg) && (
             <div className="space-y-1">
-              <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+              <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                 Segmentos
               </p>
               {segmentos.map((s) => (
@@ -847,7 +847,7 @@ function CampoFila({
                     {respuestas.map((r) => (
                       <label
                         key={r.etiqueta}
-                        className="flex items-center gap-1 text-[11px] rounded border border-border px-1.5 py-0.5"
+                        className="flex items-center gap-1 text-xs rounded border border-border px-1.5 py-0.5"
                       >
                         <input
                           type="checkbox"
@@ -867,14 +867,14 @@ function CampoFila({
                     <Button
                       size="sm"
                       variant="ghost"
-                      className="h-6 text-[11px]"
+                      className="h-6 text-xs"
                       onClick={() => setNuevoSeg(null)}
                     >
                       Cancelar
                     </Button>
                     <Button
                       size="sm"
-                      className="h-6 text-[11px]"
+                      className="h-6 text-xs"
                       disabled={!nuevoSeg.nombre.trim() || nuevoSeg.valores.size === 0}
                       onClick={() => {
                         onGuardarSegmento({
@@ -893,7 +893,7 @@ function CampoFila({
             </div>
           )}
 
-          <p className="text-[10px] text-muted-foreground/70">
+          <p className="text-xs text-muted-foreground">
             Preguntas de origen: {campo.claves_origen.join(', ')}. Cada respuesta se usa en fórmulas
             y en los selectores de métricas con su nombre; no hace falta crear un segmento por
             respuesta.
@@ -944,7 +944,7 @@ function RespuestaFila({
       <button
         {...attributes}
         {...listeners}
-        className="cursor-grab text-muted-foreground/50 hover:text-muted-foreground"
+        className="cursor-grab text-muted-foreground hover:text-muted-foreground"
         title="Arrastra para reordenar"
       >
         <GripVertical className="w-3.5 h-3.5" />
@@ -982,17 +982,17 @@ function RespuestaFila({
           style={{ width: `${Math.max(pct, leads > 0 ? 2 : 0)}%` }}
         />
       </div>
-      <span className="text-[11px] tabular-nums text-muted-foreground w-10 text-right shrink-0">
+      <span className="text-xs tabular-nums text-muted-foreground w-10 text-right shrink-0">
         {pct.toFixed(0)}%
       </span>
-      <span className="text-[11px] tabular-nums text-foreground w-14 text-right shrink-0">
+      <span className="text-xs tabular-nums text-foreground w-14 text-right shrink-0">
         {nf.format(leads)}
       </span>
       <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 shrink-0">
         {onDesdeAqui && (
           <button
             onClick={onDesdeAqui}
-            className="text-[10px] px-1 rounded hover:bg-accent text-muted-foreground"
+            className="text-xs px-1 rounded hover:bg-accent text-muted-foreground"
             title="Crea el segmento «Desde esta respuesta en adelante»"
           >
             ≥
@@ -1000,7 +1000,7 @@ function RespuestaFila({
         )}
         <button
           onClick={onApartar}
-          className="text-[10px] px-1 rounded hover:bg-accent text-muted-foreground"
+          className="text-xs px-1 rounded hover:bg-accent text-muted-foreground"
           title="Contarla como sin respuesta (p. ej. «Seleccione una opción»)"
         >
           Apartar
@@ -1026,7 +1026,7 @@ function SegmentoFila({
   const [valores, setValores] = useState<Set<string>>(new Set(seg.valores));
   if (!editando) {
     return (
-      <div className="flex items-center gap-2 text-[11px]">
+      <div className="flex items-center gap-2 text-xs">
         <Layers className="w-3 h-3 text-muted-foreground shrink-0" />
         <span className="font-medium text-foreground">{seg.nombre}</span>
         <span className="text-muted-foreground truncate">
@@ -1056,7 +1056,7 @@ function SegmentoFila({
         {respuestas.map((r) => (
           <label
             key={r}
-            className="flex items-center gap-1 text-[11px] rounded border border-border px-1.5 py-0.5"
+            className="flex items-center gap-1 text-xs rounded border border-border px-1.5 py-0.5"
           >
             <input
               type="checkbox"
@@ -1076,14 +1076,14 @@ function SegmentoFila({
         <Button
           size="sm"
           variant="ghost"
-          className="h-6 text-[11px]"
+          className="h-6 text-xs"
           onClick={() => setEditando(false)}
         >
           Cancelar
         </Button>
         <Button
           size="sm"
-          className="h-6 text-[11px]"
+          className="h-6 text-xs"
           disabled={!nombre.trim() || (seg.operador === 'in' && valores.size === 0)}
           onClick={() => {
             onGuardar({ nombre: nombre.trim(), valores: [...valores] });
