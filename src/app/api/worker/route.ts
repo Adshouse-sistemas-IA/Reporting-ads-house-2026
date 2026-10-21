@@ -2136,7 +2136,8 @@ async function sincronizar(request: Request) {
       const { data: existingHashRows } = await adminSupabase
         .from('metricas_diarias')
         .select(
-          'fecha, sync_hash, meta_spend, tiktok_spend, meta_campaigns, tiktok_campaigns, ventas_principal, ventas_bump, ventas_upsell, ventas_downsell, ventas_principal_count, ventas_bump_count, ventas_upsell_count, ventas_downsell_count, ventas_reembolsado, ventas_reembolsado_count, ga_sessions, source_synced_at'
+          // meta_ads/meta_adsets: los necesita la guarda de niveles (`nivelEmpeora`).
+          'fecha, sync_hash, meta_spend, tiktok_spend, meta_campaigns, meta_ads, meta_adsets, tiktok_campaigns, ventas_principal, ventas_bump, ventas_upsell, ventas_downsell, ventas_principal_count, ventas_bump_count, ventas_upsell_count, ventas_downsell_count, ventas_reembolsado, ventas_reembolsado_count, ga_sessions, source_synced_at'
         )
         .eq('cliente_id', cliente.id)
         .in('fecha', datesToSync);
@@ -2402,6 +2403,23 @@ async function sincronizar(request: Request) {
           const metaFailed =
             !metaFetched || metaApiFailed || metaInconsistent || metaDesgloseIncompleto;
 
+          // Los niveles de anuncio y conjunto se piden en llamadas propias y
+          // Meta también los devuelve vacíos por separado (19-21 oct 2026: la
+          // campaña cuadraba y los anuncios sumaban 252 de 755.540). Mismo
+          // criterio que el desglose por campaña, contra el gasto de la cuenta.
+          const referenciaNiveles =
+            Number(metaRecord.account_spend) || Number(metaRecord.spend) || 0;
+          const nivelEmpeora = (nuevo: unknown, previo: unknown) =>
+            desgloseEmpeora(
+              referenciaNiveles,
+              sumarCampanas(nuevo).total,
+              sumarCampanas(previo).total
+            );
+          const metaAdsEmpeora =
+            !metaFailed && nivelEmpeora(metaRecord.meta_ads, prevRow?.meta_ads);
+          const metaAdsetsEmpeora =
+            !metaFailed && nivelEmpeora(metaRecord.meta_adsets, prevRow?.meta_adsets);
+
           // Control de integridad del desglose: el gasto que la plataforma
           // reporta a nivel de CUENTA/ANUNCIANTE es la fuente de verdad. Si la
           // suma por campaña no lo alcanza, el array quedó incompleto y el
@@ -2615,6 +2633,11 @@ async function sincronizar(request: Request) {
               `[Meta] ${targetDate} ${metaApiFailed ? 'API falló' : metaDesgloseIncompleto ? `desglose por campaña incompleto (cuenta=${(Number(metaRecord.account_spend) || 0).toFixed(2)}, campañas=${(Number(metaRecord.spend) || 0).toFixed(2)}, guardado=${sumarCampanas(prevRow?.meta_campaigns).total.toFixed(2)})` : 'devolvió cero con datos previos'} — se omiten campos Meta del upsert para preservar datos existentes`
             );
           }
+          if (metaAdsEmpeora || metaAdsetsEmpeora) {
+            log(
+              `[Meta] ${targetDate} nivel ${[metaAdsEmpeora && 'anuncio', metaAdsetsEmpeora && 'conjunto'].filter(Boolean).join(' y ')} incompleto frente a la cuenta (${referenciaNiveles.toFixed(2)}) — se conserva el de BD`
+            );
+          }
           if (tiktokFailed && tiktokFetched) {
             log(
               `[TikTok] ${targetDate} ${tiktokApiFailed ? 'API falló' : tiktokDesgloseIncompleto ? `desglose por campaña incompleto (cuenta=${(Number(tiktokRecord.account_spend) || 0).toFixed(2)}, campañas=${(Number(tiktokRecord.spend) || 0).toFixed(2)}, guardado=${sumarCampanas(prevRow?.tiktok_campaigns).total.toFixed(2)})` : 'devolvió cero con datos previos'} — se omiten campos TikTok del upsert para preservar datos existentes`
@@ -2658,8 +2681,9 @@ async function sincronizar(request: Request) {
               meta_campaigns: metaRecord.campaigns,
               // Un nivel cuya descarga falló se OMITE (se conserva el de BD) en vez
               // de escribirse vacío: un `[]` aquí borraba el espejo de ads_daily.
-              ...(metaResult.nivelesOk.ad && { meta_ads: metaRecord.meta_ads }),
-              ...(metaResult.nivelesOk.adset && { meta_adsets: metaRecord.meta_adsets }),
+              ...(metaResult.nivelesOk.ad && !metaAdsEmpeora && { meta_ads: metaRecord.meta_ads }),
+              ...(metaResult.nivelesOk.adset &&
+                !metaAdsetsEmpeora && { meta_adsets: metaRecord.meta_adsets }),
               meta_forms: metaRecord.forms,
             }),
             // Only include TikTok fields when the API call actually succeeded.
