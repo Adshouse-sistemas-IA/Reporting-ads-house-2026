@@ -18,6 +18,8 @@ import {
 import { applyCompoundFilter } from '../src/lib/campaign-filter';
 import {
   desgloseEmpeora,
+  desgloseIncompletoDia,
+  elegirDesgloseDia,
   importesCuadran,
   sumarCampanas,
   compararDias,
@@ -202,6 +204,35 @@ sec('reconcile — desglose incompleto peor que el guardado');
   check('sin gasto de cuenta no se juzga', !desgloseEmpeora(0, 0, 500));
   check('guardado casi igual al nuevo → escribir', !desgloseEmpeora(1000, 500, 502));
   check('día sin fila previa (guardado 0) → escribir', !desgloseEmpeora(1000, 500, 0));
+}
+
+sec('reconcile — reintento por día del desglose incompleto');
+
+{
+  const camp = (spend: number) => [{ spend }];
+  // 19 oct 2026, Sur Profundo: rango → anuncios 252 y conjuntos 0; día suelto → completo.
+  const enRango = {
+    account_spend: 755571,
+    spend: 755540,
+    meta_ads: camp(252),
+    meta_adsets: camp(0),
+  };
+  const suelto = {
+    account_spend: 755571,
+    spend: 755571,
+    meta_ads: camp(755571),
+    meta_adsets: camp(755571),
+  };
+  check('rango con anuncios vacíos → incompleto', desgloseIncompletoDia(enRango));
+  check('día suelto completo → no incompleto', !desgloseIncompletoDia(suelto));
+  check('sin gasto de cuenta → no se reintenta', !desgloseIncompletoDia({ account_spend: 0 }));
+  const e = elegirDesgloseDia(enRango, suelto, { ad: true, adset: true });
+  check('toma anuncio y conjunto del día suelto', e.anuncios && e.conjuntos);
+  check('campaña casi igual → se queda la del rango', !e.campanas);
+  const sinNiveles = elegirDesgloseDia(enRango, suelto, { ad: false, adset: true });
+  check('nivel anuncio del día suelto falló → no se toma', !sinNiveles.anuncios);
+  const peor = elegirDesgloseDia(suelto, enRango, { ad: true, adset: true });
+  check('día suelto peor → no se toma nada', !peor.campanas && !peor.anuncios && !peor.conjuntos);
 }
 
 sec('reconcile — suma de campañas');

@@ -23,7 +23,13 @@ import { evaluateAlertRules } from '@/lib/notifications/rules-engine';
 // La conversión de moneda de Hotmart se hace ahora en `src/lib/hotmart/moneda.ts`,
 // en lote y con el mismo invariante de siempre: sin tasa el importe es NULL,
 // nunca 0.
-import { desgloseEmpeora, importesCuadran, sumarCampanas } from '@/lib/sync/reconcile';
+import {
+  desgloseEmpeora,
+  desgloseIncompletoDia,
+  elegirDesgloseDia,
+  importesCuadran,
+  sumarCampanas,
+} from '@/lib/sync/reconcile';
 import { FORMAS, expandirFila } from '@/lib/ads/ads-daily-writer';
 import { agruparPorForma, plataformasOmitidas } from '@/lib/sync/upsert-batches';
 import { hotmartConectado, obtenerToken } from '@/lib/hotmart/cliente';
@@ -2259,6 +2265,55 @@ async function sincronizar(request: Request) {
       ]);
       const metaByDate = metaResult.byDate as Map<string, any>;
       const tiktokByDate = tiktokResult.byDate as Map<string, any>;
+
+      // ─── Reintento día a día del desglose incompleto ───
+      // Meta devuelve a veces vacío el desglose (campaña, conjunto o anuncio) de
+      // días pasados en la consulta de rango y completo si se pide el día suelto
+      // (oct 2026). Los días cuyo desglose no cuadra con el gasto de la cuenta se
+      // vuelven a pedir uno a uno y cada nivel se queda con la versión que más se
+      // acerca a la cuenta. Acotado para no comerse el presupuesto del sync.
+      if (metaStart && metaResult.apiSuccess) {
+        const MAX_DIAS_REINTENTO = 3;
+        const diasIncompletos = [...metaByDate.entries()]
+          .filter(([dia, rec]) => dia >= metaStart && desgloseIncompletoDia(rec))
+          .map(([dia]) => dia)
+          .sort()
+          .reverse();
+        for (const dia of diasIncompletos.slice(0, MAX_DIAS_REINTENTO)) {
+          if (Date.now() - runStartedAt > WORKER_BUDGET_MS / 2) {
+            log(`[Meta] Reintento por día cortado por presupuesto (quedan ${dia} y anteriores)`);
+            break;
+          }
+          const suelto = await fetchMetaRange(dia, dia);
+          const recSuelto = suelto.byDate.get(dia);
+          if (!suelto.apiSuccess || !recSuelto) continue;
+          const enRango = metaByDate.get(dia);
+          const eleccion = elegirDesgloseDia(enRango, recSuelto, suelto.nivelesOk);
+          if (eleccion.campanas) {
+            for (const k of [
+              'spend',
+              'impressions',
+              'clicks',
+              'campaigns',
+              'forms',
+              'account_reach',
+              'account_spend',
+            ]) {
+              enRango[k] = recSuelto[k];
+            }
+          }
+          if (eleccion.anuncios) enRango.meta_ads = recSuelto.meta_ads;
+          if (eleccion.conjuntos) enRango.meta_adsets = recSuelto.meta_adsets;
+          const tomados = [
+            eleccion.campanas && 'campaña',
+            eleccion.conjuntos && 'conjunto',
+            eleccion.anuncios && 'anuncio',
+          ].filter(Boolean);
+          log(
+            `[Meta] ${dia} desglose incompleto en el rango — pedido suelto: ${tomados.length > 0 ? `se toma ${tomados.join(', ')} del día suelto` : 'no mejoró'}`
+          );
+        }
+      }
       if (metaStart && metaStart !== datesToSync[0])
         log(
           `[Meta] No re-descarga: se piden desde ${metaStart} (rango pedido empezaba en ${datesToSync[0]})`

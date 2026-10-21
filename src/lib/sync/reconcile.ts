@@ -139,6 +139,55 @@ export function desgloseEmpeora(cuenta: number, nuevo: number, previo: number): 
   return previo > nuevo && !importesCuadran(previo, nuevo);
 }
 
+/** Lo que importa de un día de Meta para juzgar su desglose. */
+export type DesgloseDia = {
+  account_spend?: number;
+  spend?: number;
+  meta_ads?: unknown;
+  meta_adsets?: unknown;
+};
+
+/**
+ * ¿Algún nivel del día (campaña, conjunto, anuncio) no cuadra con el gasto de
+ * la cuenta? Es la señal para volver a pedir ese día suelto: Meta devuelve el
+ * desglose vacío en consultas de varios días y completo en la de un solo día
+ * (cuenta 226938112764088, oct 2026).
+ */
+export function desgloseIncompletoDia(dia: DesgloseDia): boolean {
+  const cuenta = Number(dia.account_spend) || 0;
+  if (cuenta <= 0) return false;
+  return (
+    !importesCuadran(cuenta, Number(dia.spend) || 0) ||
+    !importesCuadran(cuenta, sumarCampanas(dia.meta_ads).total) ||
+    !importesCuadran(cuenta, sumarCampanas(dia.meta_adsets).total)
+  );
+}
+
+/**
+ * Entre el día bajado en el rango y el mismo día pedido suelto, qué nivel se
+ * queda con la versión suelta: la que más se acerca al gasto de la cuenta.
+ * `nivelesSueltosOk` dice si las llamadas de anuncio/conjunto del día suelto
+ * respondieron (si no, su array vacío no significa nada).
+ */
+export function elegirDesgloseDia(
+  enRango: DesgloseDia,
+  suelto: DesgloseDia,
+  nivelesSueltosOk: { ad: boolean; adset: boolean }
+): { campanas: boolean; anuncios: boolean; conjuntos: boolean } {
+  const cuenta = Number(enRango.account_spend) || Number(suelto.account_spend) || 0;
+  const mejor = (a: number, b: number) =>
+    Math.abs(cuenta - b) < Math.abs(cuenta - a) && !importesCuadran(a, b);
+  return {
+    campanas: mejor(Number(enRango.spend) || 0, Number(suelto.spend) || 0),
+    anuncios:
+      nivelesSueltosOk.ad &&
+      mejor(sumarCampanas(enRango.meta_ads).total, sumarCampanas(suelto.meta_ads).total),
+    conjuntos:
+      nivelesSueltosOk.adset &&
+      mejor(sumarCampanas(enRango.meta_adsets).total, sumarCampanas(suelto.meta_adsets).total),
+  };
+}
+
 /** Suma el `spend` de un array de campañas tal como lo hace el dashboard. */
 export function sumarCampanas(metaCampaigns: unknown): { total: number; count: number } {
   if (!Array.isArray(metaCampaigns)) return { total: 0, count: 0 };
