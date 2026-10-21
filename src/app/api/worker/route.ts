@@ -23,7 +23,7 @@ import { evaluateAlertRules } from '@/lib/notifications/rules-engine';
 // La conversión de moneda de Hotmart se hace ahora en `src/lib/hotmart/moneda.ts`,
 // en lote y con el mismo invariante de siempre: sin tasa el importe es NULL,
 // nunca 0.
-import { importesCuadran, sumarCampanas } from '@/lib/sync/reconcile';
+import { desgloseEmpeora, importesCuadran, sumarCampanas } from '@/lib/sync/reconcile';
 import { FORMAS, expandirFila } from '@/lib/ads/ads-daily-writer';
 import { agruparPorForma, plataformasOmitidas } from '@/lib/sync/upsert-batches';
 import { hotmartConectado, obtenerToken } from '@/lib/hotmart/cliente';
@@ -2364,7 +2364,20 @@ async function sincronizar(request: Request) {
             !tiktokApiFailed &&
             tiktokRecord.spend === 0 &&
             hasTikTokData(prevRow);
-          const tiktokFailed = !tiktokFetched || tiktokApiFailed || tiktokInconsistent;
+          // Desglose por campaña peor que el guardado: se conserva el de BD
+          // (ver `desgloseEmpeora`). Cubre el caso que el cero absoluto no ve.
+          const tiktokDesgloseIncompleto =
+            tiktokFetched &&
+            hasAnyTikTokConfig &&
+            !tiktokApiFailed &&
+            !tiktokInconsistent &&
+            desgloseEmpeora(
+              Number(tiktokRecord.account_spend) || 0,
+              Number(tiktokRecord.spend) || 0,
+              sumarCampanas(prevRow?.tiktok_campaigns).total
+            );
+          const tiktokFailed =
+            !tiktokFetched || tiktokApiFailed || tiktokInconsistent || tiktokDesgloseIncompleto;
 
           const hasAnyMetaConfig =
             (Array.isArray(config.meta_accounts) && config.meta_accounts.length > 0) ||
@@ -2376,7 +2389,18 @@ async function sincronizar(request: Request) {
             !metaApiFailed &&
             metaRecord.spend === 0 &&
             hasMetaData(prevRow);
-          const metaFailed = !metaFetched || metaApiFailed || metaInconsistent;
+          const metaDesgloseIncompleto =
+            metaFetched &&
+            hasAnyMetaConfig &&
+            !metaApiFailed &&
+            !metaInconsistent &&
+            desgloseEmpeora(
+              Number(metaRecord.account_spend) || 0,
+              Number(metaRecord.spend) || 0,
+              sumarCampanas(prevRow?.meta_campaigns).total
+            );
+          const metaFailed =
+            !metaFetched || metaApiFailed || metaInconsistent || metaDesgloseIncompleto;
 
           // Control de integridad del desglose: el gasto que la plataforma
           // reporta a nivel de CUENTA/ANUNCIANTE es la fuente de verdad. Si la
@@ -2454,6 +2478,22 @@ async function sincronizar(request: Request) {
               platform: 'Meta',
               fecha: targetDate,
               reason: metaApiFailed ? 'api_disconnected' : 'zero_vs_previous',
+            });
+          }
+          if (metaDesgloseIncompleto) {
+            inconsistencyAlerts.push({
+              cliente: cliente.nombre,
+              platform: 'Meta',
+              fecha: targetDate,
+              reason: 'desglose_incompleto_preservado',
+            });
+          }
+          if (tiktokDesgloseIncompleto) {
+            inconsistencyAlerts.push({
+              cliente: cliente.nombre,
+              platform: 'TikTok',
+              fecha: targetDate,
+              reason: 'desglose_incompleto_preservado',
             });
           }
           if ((tiktokApiFailed || tiktokInconsistent) && hasTikTokData(prevRow)) {
@@ -2572,12 +2612,12 @@ async function sincronizar(request: Request) {
 
           if (metaFailed && metaFetched) {
             log(
-              `[Meta] ${targetDate} ${metaApiFailed ? 'API falló' : 'devolvió cero con datos previos'} — se omiten campos Meta del upsert para preservar datos existentes`
+              `[Meta] ${targetDate} ${metaApiFailed ? 'API falló' : metaDesgloseIncompleto ? `desglose por campaña incompleto (cuenta=${(Number(metaRecord.account_spend) || 0).toFixed(2)}, campañas=${(Number(metaRecord.spend) || 0).toFixed(2)}, guardado=${sumarCampanas(prevRow?.meta_campaigns).total.toFixed(2)})` : 'devolvió cero con datos previos'} — se omiten campos Meta del upsert para preservar datos existentes`
             );
           }
           if (tiktokFailed && tiktokFetched) {
             log(
-              `[TikTok] ${targetDate} ${tiktokApiFailed ? 'API falló' : 'devolvió cero con datos previos'} — se omiten campos TikTok del upsert para preservar datos existentes`
+              `[TikTok] ${targetDate} ${tiktokApiFailed ? 'API falló' : tiktokDesgloseIncompleto ? `desglose por campaña incompleto (cuenta=${(Number(tiktokRecord.account_spend) || 0).toFixed(2)}, campañas=${(Number(tiktokRecord.spend) || 0).toFixed(2)}, guardado=${sumarCampanas(prevRow?.tiktok_campaigns).total.toFixed(2)})` : 'devolvió cero con datos previos'} — se omiten campos TikTok del upsert para preservar datos existentes`
             );
           }
           if (hotmartFailed) {
@@ -2848,6 +2888,22 @@ async function sincronizar(request: Request) {
           .update({ synced_at: new Date().toISOString() })
           .eq('cliente_id', cliente.id)
           .in('fecha', freshnessOnlyDates);
+
+        // Un día que se escribió mientras era «hoy» quedó con is_partial=true.
+        // Si al cerrarse su contenido no cambia (p. ej. un día sin gasto), el
+        // hash coincide, no se reescribe y la marca se quedaba para siempre.
+        const yaCerradas = freshnessOnlyDates.filter((f) => f !== todayStr);
+        if (yaCerradas.length > 0) {
+          const { error: parcialError } = await adminSupabase
+            .from('metricas_diarias')
+            .update({ is_partial: false })
+            .eq('cliente_id', cliente.id)
+            .in('fecha', yaCerradas)
+            .eq('is_partial', true);
+          if (parcialError) {
+            log(`[DB] No se pudo limpiar is_partial: ${parcialError.message}`);
+          }
+        }
       }
 
       if (budgetCut) {

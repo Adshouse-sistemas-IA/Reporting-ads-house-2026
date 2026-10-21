@@ -17,6 +17,7 @@ import {
 } from '../src/lib/formula-engine';
 import { applyCompoundFilter } from '../src/lib/campaign-filter';
 import {
+  desgloseEmpeora,
   importesCuadran,
   sumarCampanas,
   compararDias,
@@ -185,6 +186,22 @@ sec('reconcile — tolerancia de importes');
   check('céntimos en importes pequeños cuadran (piso de 1)', importesCuadran(10, 10.5));
   check('ambos en cero cuadran', importesCuadran(0, 0));
   check('gasto real vs cero NO cuadra', !importesCuadran(31000, 0));
+}
+
+sec('reconcile — desglose incompleto peor que el guardado');
+
+{
+  // Caso real (Somos rentable, 20 oct 2026): la cuenta compartida devolvió sus
+  // campañas en 0 y solo quedó el gasto de la otra cuenta.
+  check(
+    'cuenta 1.114.701, nuevo 98.550, guardado 870.839 → conservar',
+    desgloseEmpeora(1114701, 98550, 870839)
+  );
+  check('lo nuevo cuadra con la cuenta → escribir', !desgloseEmpeora(1000, 995, 1200));
+  check('lo guardado tampoco es mejor → escribir', !desgloseEmpeora(1000, 500, 400));
+  check('sin gasto de cuenta no se juzga', !desgloseEmpeora(0, 0, 500));
+  check('guardado casi igual al nuevo → escribir', !desgloseEmpeora(1000, 500, 502));
+  check('día sin fila previa (guardado 0) → escribir', !desgloseEmpeora(1000, 500, 0));
 }
 
 sec('reconcile — suma de campañas');

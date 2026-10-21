@@ -119,6 +119,26 @@ export function importesCuadran(a: number, b: number): boolean {
   return Math.abs(a - b) <= tolerancia(Math.max(Math.abs(a), Math.abs(b)));
 }
 
+/**
+ * ¿El desglose por campaña recién bajado es PEOR que el que ya está guardado?
+ *
+ * Meta a veces devuelve las campañas de una cuenta con gasto 0 en días ya
+ * cerrados mientras el total de la cuenta sigue bien (21 oct 2026, cuenta
+ * compartida de Sur Profundo y Somos rentable). Si el cliente tiene otra cuenta
+ * con gasto, el día no queda en cero, la guarda de «cero con datos previos» no
+ * salta y el upsert pisaba el desglose bueno con uno al que le faltaba casi
+ * todo. Aquí se detecta: el total de la cuenta no cuadra con lo nuevo y lo
+ * guardado cubre más gasto. En ese caso hay que conservar lo guardado.
+ *
+ * Si lo nuevo cuadra con la cuenta, o lo guardado no es mejor, se escribe lo
+ * nuevo: sigue siendo la mejor información disponible.
+ */
+export function desgloseEmpeora(cuenta: number, nuevo: number, previo: number): boolean {
+  if (!(cuenta > 0)) return false;
+  if (importesCuadran(cuenta, nuevo)) return false;
+  return previo > nuevo && !importesCuadran(previo, nuevo);
+}
+
 /** Suma el `spend` de un array de campañas tal como lo hace el dashboard. */
 export function sumarCampanas(metaCampaigns: unknown): { total: number; count: number } {
   if (!Array.isArray(metaCampaigns)) return { total: 0, count: 0 };

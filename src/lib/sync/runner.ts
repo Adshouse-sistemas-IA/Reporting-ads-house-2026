@@ -351,6 +351,19 @@ async function recordRun(
 const MIN_JOB_MS = 60_000;
 
 /**
+ * Techo mínimo de la llamada para tipos que, sanos, tardan más que el general.
+ *
+ * `meta_leads` recorre todas las integraciones de Lead Ads en una sola petición
+ * y tarda 77-118 s (oct 2026). Con el techo general de 120 s el primer intento
+ * se abortaba casi a diario y solo el reintento llegaba a terminar: cada día se
+ * quemaba un intento y se registraba un error que no lo era. Sigue acotado por
+ * lo que quede de presupuesto del ciclo (`timeoutAplicado`).
+ */
+const TIMEOUT_MINIMO_POR_TIPO: Partial<Record<string, number>> = {
+  meta_leads: 240_000,
+};
+
+/**
  * Drena la cola hasta agotar el presupuesto o quedarse sin jobs.
  * Devuelve el resumen de lo procesado.
  */
@@ -434,9 +447,10 @@ export async function runJobs(db: any, opts: RunnerOptions): Promise<RunnerResul
      * 39 de su presupuesto de 40 s y esperar por él otros 55, muriendo sin
      * poder marcar el fallo y dejando el job 'running' hasta vencer el lease.
      */
-    const timeoutAplicado = Math.min(requestTimeoutMs, restante());
+    const timeoutDelTipo = Math.max(requestTimeoutMs, TIMEOUT_MINIMO_POR_TIPO[job.tipo] ?? 0);
+    const timeoutAplicado = Math.min(timeoutDelTipo, restante());
     /** El corte lo impondría nuestro presupuesto, no el timeout configurado. */
-    const cortaElPresupuesto = timeoutAplicado < requestTimeoutMs;
+    const cortaElPresupuesto = timeoutAplicado < timeoutDelTipo;
 
     try {
       const exec = await executeJob(job, opts, timeoutAplicado);
