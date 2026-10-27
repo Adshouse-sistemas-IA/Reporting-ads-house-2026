@@ -90,7 +90,7 @@ export async function updatePreference(
   return { ok: !error };
 }
 
-// Solo para verificar el flujo end-to-end (realtime + toast). Admin-only.
+// Solo para verificar el flujo end-to-end (sondeo + toast). Admin-only.
 export async function sendTestNotification(): Promise<{ ok: boolean; inserted: number }> {
   const supabase = await createClient();
   const {

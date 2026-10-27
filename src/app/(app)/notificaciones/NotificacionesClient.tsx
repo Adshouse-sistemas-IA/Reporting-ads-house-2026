@@ -19,6 +19,7 @@ import {
   XCircle,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { actualizarCampanita } from '@/components/notifications/NotificationBell';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Select,
@@ -130,6 +131,7 @@ export function NotificacionesClient({
             size="sm"
             onClick={async () => {
               await sendTestNotification();
+              actualizarCampanita();
             }}
           >
             <Send className="h-4 w-4 mr-2" />

@@ -53,7 +53,7 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
               backgroundPosition: 'center',
             }}
           />
-          {userId ? <NotificationBell userId={userId} /> : <span className="w-9" aria-hidden />}
+          {userId ? <NotificationBell /> : <span className="w-9" aria-hidden />}
         </header>
 
         {/* Dynamic Page Content Wrapper */}
