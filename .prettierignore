@@ -42,3 +42,4 @@ scripts/_tmp-*
 # se comparan byte a byte con la guía en scripts/verify-skill-informes.ts.
 .claude/skills/informes-bi
 skills/informes-bi-mcp
+.agents/skills/informes-bi
