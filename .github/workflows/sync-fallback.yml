@@ -136,6 +136,8 @@ jobs:
         if: failure()
         env:
           GH_TOKEN: ${{ github.token }}
+          # Sin checkout no hay .git: `gh` necesita saber el repo explícitamente.
+          GH_REPO: ${{ github.repository }}
         run: |
           if [ "$MOTIVO" = "base" ]; then
             titulo="Salud de la base en estado crítico"
