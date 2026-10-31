@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { exigirAccesoCliente, guardaRuta } from '@/lib/acceso/clientes';
 import { createClient } from '@supabase/supabase-js';
 import { listarValoresCrudos } from '@/lib/sheets/campos-db';
 import { requireAdminRole } from '@/lib/report-utm/auth';
@@ -32,6 +33,8 @@ export async function GET(request: NextRequest) {
       { status: 400 }
     );
   }
+  const denegado = await guardaRuta(() => exigirAccesoCliente(clienteId, 'lectura'));
+  if (denegado) return denegado;
 
   try {
     const db = createClient(

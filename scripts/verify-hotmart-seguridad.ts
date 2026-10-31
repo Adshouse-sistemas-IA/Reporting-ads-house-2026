@@ -195,7 +195,12 @@ for (const [prov, otro] of [
 
   // ── Estáticos: que las rutas usen de verdad el helper ──────
   const ini = readFileSync(`src/app/api/auth/${prov}/route.ts`, 'utf8');
-  check(`${prov}: iniciar exige rol admin`, ini.includes('requireAdminRole()'));
+  // El callback escribe el token en ESE cliente con la service role: iniciar
+  // exige poder administrarlo (guarda de @/lib/acceso), no solo el rol.
+  check(
+    `${prov}: iniciar exige administrar ese cliente`,
+    ini.includes("exigirAccesoCliente(clientId, 'admin')")
+  );
   check(`${prov}: iniciar firma el state`, ini.includes(`firmarStateCliente('${prov}'`));
   check(`${prov}: ya no manda el cliente_id como state`, !/state\s*=\s*clientId/.test(ini));
   const cb = readFileSync(`src/app/api/auth/${prov}/callback/route.ts`, 'utf8');

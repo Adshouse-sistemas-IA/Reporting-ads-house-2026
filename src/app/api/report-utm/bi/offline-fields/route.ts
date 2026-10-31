@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { exigirAccesoClienteUtm, guardaRuta } from '@/lib/acceso/clientes';
 import { createClient, createAdminClient } from '@/utils/supabase/server';
 import { columnasOfflineDeConfig } from '@/lib/report-utm/bi/campos-cliente';
 
@@ -24,6 +25,8 @@ export async function GET(req: NextRequest) {
 
   const clienteId = req.nextUrl.searchParams.get('cliente_id');
   if (!clienteId) return NextResponse.json({ data: [] });
+  const denegado = await guardaRuta(() => exigirAccesoClienteUtm(clienteId, 'lectura'));
+  if (denegado) return denegado;
 
   try {
     const admin = await createAdminClient();

@@ -55,6 +55,7 @@ import {
   type ConversionDescubierta,
 } from '@/lib/meta/conversiones-personalizadas-sync';
 import { extraerConversionesPersonalizadas } from '@/lib/meta/conversiones-personalizadas';
+import { abrirToken } from '@/lib/credenciales-ads';
 
 /**
  * Presupuesto por petición: al agotarse se persiste lo hecho. Los rangos amplios
@@ -1384,10 +1385,12 @@ async function sincronizar(request: Request) {
             .filter((a: any) => a.account_id)
             .map((a: any) => ({
               account_id: a.account_id,
-              token: a.token || config.meta_token || '',
+              token: abrirToken(a.token) || abrirToken(config.meta_token),
             }));
         } else if (config.meta_token && config.meta_account_id) {
-          accountsToFetch = [{ account_id: config.meta_account_id, token: config.meta_token }];
+          accountsToFetch = [
+            { account_id: config.meta_account_id, token: abrirToken(config.meta_token) },
+          ];
         }
 
         // Dedup por account_id normalizado (con/sin prefijo act_): la misma cuenta
@@ -1768,11 +1771,14 @@ async function sincronizar(request: Request) {
             .filter((a: any) => a.advertiser_id)
             .map((a: any) => ({
               advertiser_id: a.advertiser_id,
-              token: a.access_token || config.tiktok_access_token || '',
+              token: abrirToken(a.access_token) || abrirToken(config.tiktok_access_token),
             }));
         } else if (config.tiktok_access_token && config.tiktok_advertiser_id) {
           accountsToFetch = [
-            { advertiser_id: config.tiktok_advertiser_id, token: config.tiktok_access_token },
+            {
+              advertiser_id: config.tiktok_advertiser_id,
+              token: abrirToken(config.tiktok_access_token),
+            },
           ];
         }
 

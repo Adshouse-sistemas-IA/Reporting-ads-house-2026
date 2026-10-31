@@ -1,8 +1,8 @@
 'use server';
 
+import { exigirAccesoClienteUtm } from '@/lib/acceso/clientes';
 import { revalidatePath } from 'next/cache';
-import { reportUtmClient } from '@/lib/report-utm/client';
-import { createClient } from '@/utils/supabase/server';
+import { createAdminClient } from '@/utils/supabase/server';
 import { getUserRole, REPORT_UTM_WRITE_ROLES } from '@/lib/report-utm/auth';
 import { generateWebhookSecret } from '@/lib/report-utm/webhook-auth';
 import { encrypt } from '@/lib/report-utm/encryption';
@@ -15,6 +15,19 @@ import {
 } from '@/lib/report-utm/meta-leads';
 import { syncGhlLeadsForCliente, type GhlIntegrationRow } from '@/lib/report-utm/ghl-leads';
 import { testConnection as testGhlConnection } from '@/lib/report-utm/ghl-client';
+import { sellarPaginas } from '@/lib/credenciales-ads';
+
+/**
+ * `report_utm` con la service role. Las integraciones y los webhooks salientes
+ * guardan secretos (hottok, token S2S, tokens de GHL/Google Ads/CAPI, secreto
+ * de firma), así que la sesión del usuario solo puede LEER sus columnas sin
+ * secretos (migración de permisos finales). Toda acción de este archivo empieza
+ * por `exigirAccesoClienteUtm(clienteId, …)` y filtra por ese `cliente_id`:
+ * esa guarda es la autorización (verify-acceso-clientes.ts lo comprueba).
+ */
+async function rtmServidor() {
+  return (await createAdminClient()).schema('report_utm');
+}
 
 type ActionResult =
   { ok: true; secret?: string; events_received?: number } | { ok: false; error: string };
@@ -32,11 +45,12 @@ const S2S_ALLOWED_ROLES = REPORT_UTM_WRITE_ROLES;
 // Las tres acciones de Hotmart no comprobaban el rol (las de S2S y GHL sí):
 // cualquier sesión podía rotar el secreto o pausar la ingesta de un cliente.
 export async function activateHotmartIntegrationAction(clienteId: string): Promise<ActionResult> {
+  await exigirAccesoClienteUtm(clienteId, 'operacion');
   const role = await getUserRole();
   if (!role || !S2S_ALLOWED_ROLES.has(role))
     return { ok: false, error: `Sin permisos para activar Hotmart (rol: ${role ?? 'ninguno'})` };
 
-  const supabase = await reportUtmClient();
+  const supabase = await rtmServidor();
   const secret = generateWebhookSecret();
 
   const { error } = await supabase.from('integrations').upsert(
@@ -71,6 +85,7 @@ export async function guardarHottokHotmartAction(
   clienteId: string,
   hottok: string
 ): Promise<SimpleResult> {
+  await exigirAccesoClienteUtm(clienteId, 'operacion');
   const role = await getUserRole();
   if (!role || !S2S_ALLOWED_ROLES.has(role))
     return {
@@ -93,7 +108,7 @@ export async function guardarHottokHotmartAction(
   }
   const claves = { hottok_enc: hottokEnc, hottok_final: valor.slice(-4) };
 
-  const supabase = await reportUtmClient();
+  const supabase = await rtmServidor();
   const { data: actual, error: lecturaError } = await supabase
     .from('integrations')
     .select('id, config')
@@ -132,11 +147,12 @@ export async function guardarHottokHotmartAction(
 }
 
 export async function rotateHotmartSecretAction(clienteId: string): Promise<ActionResult> {
+  await exigirAccesoClienteUtm(clienteId, 'operacion');
   const role = await getUserRole();
   if (!role || !S2S_ALLOWED_ROLES.has(role))
     return { ok: false, error: `Sin permisos para rotar el secreto (rol: ${role ?? 'ninguno'})` };
 
-  const supabase = await reportUtmClient();
+  const supabase = await rtmServidor();
   const secret = generateWebhookSecret();
 
   const { error } = await supabase
@@ -155,11 +171,12 @@ export async function setHotmartIntegrationStatusAction(
   clienteId: string,
   status: 'active' | 'inactive'
 ): Promise<ActionResult> {
+  await exigirAccesoClienteUtm(clienteId, 'operacion');
   const role = await getUserRole();
   if (!role || !S2S_ALLOWED_ROLES.has(role))
     return { ok: false, error: `Sin permisos para cambiar el estado (rol: ${role ?? 'ninguno'})` };
 
-  const supabase = await reportUtmClient();
+  const supabase = await rtmServidor();
   const { error } = await supabase
     .from('integrations')
     .update({ status })
@@ -178,11 +195,12 @@ export async function setHotmartIntegrationStatusAction(
 // ── S2S (server-to-server pixel) ──────────────────────────────────
 
 export async function activateS2SIntegrationAction(clienteId: string): Promise<ActionResult> {
+  await exigirAccesoClienteUtm(clienteId, 'operacion');
   const role = await getUserRole();
   if (!role || !S2S_ALLOWED_ROLES.has(role))
     return { ok: false, error: `Sin permisos para activar S2S (rol: ${role ?? 'ninguno'})` };
 
-  const supabase = await reportUtmClient();
+  const supabase = await rtmServidor();
   const token = generateWebhookSecret();
 
   const { error } = await supabase.from('integrations').upsert(
@@ -203,11 +221,12 @@ export async function activateS2SIntegrationAction(clienteId: string): Promise<A
 }
 
 export async function rotateS2STokenAction(clienteId: string): Promise<ActionResult> {
+  await exigirAccesoClienteUtm(clienteId, 'operacion');
   const role = await getUserRole();
   if (!role || !S2S_ALLOWED_ROLES.has(role))
     return { ok: false, error: `Sin permisos para rotar el token S2S (rol: ${role ?? 'ninguno'})` };
 
-  const supabase = await reportUtmClient();
+  const supabase = await rtmServidor();
   const token = generateWebhookSecret();
 
   const { error } = await supabase
@@ -226,6 +245,7 @@ export async function setS2SIntegrationStatusAction(
   clienteId: string,
   status: 'active' | 'inactive'
 ): Promise<SimpleResult> {
+  await exigirAccesoClienteUtm(clienteId, 'operacion');
   const role = await getUserRole();
   if (!role || !S2S_ALLOWED_ROLES.has(role))
     return {
@@ -233,7 +253,7 @@ export async function setS2SIntegrationStatusAction(
       error: `Sin permisos para cambiar el estado S2S (rol: ${role ?? 'ninguno'})`,
     };
 
-  const supabase = await reportUtmClient();
+  const supabase = await rtmServidor();
   const { error } = await supabase
     .from('integrations')
     .update({ status })
@@ -257,7 +277,8 @@ export async function saveGoogleAdsConfigAction(
     accessToken: string | null;
   }
 ): Promise<ActionResult> {
-  const supabase = await reportUtmClient();
+  await exigirAccesoClienteUtm(clienteId, 'operacion');
+  const supabase = await rtmServidor();
 
   const updates: Record<string, unknown> = {
     cliente_id: clienteId,
@@ -290,7 +311,8 @@ export async function saveGoogleAdsConfigAction(
 }
 
 export async function testGoogleAdsAction(clienteId: string): Promise<ActionResult> {
-  const supabase = await reportUtmClient();
+  await exigirAccesoClienteUtm(clienteId, 'operacion');
+  const supabase = await rtmServidor();
 
   const { data: integration } = await supabase
     .from('integrations')
@@ -345,7 +367,8 @@ export async function saveMetaCAPIConfigAction(
   clienteId: string,
   args: { pixelId: string; accessToken: string | null; testEventCode: string | null }
 ): Promise<ActionResult> {
-  const supabase = await reportUtmClient();
+  await exigirAccesoClienteUtm(clienteId, 'operacion');
+  const supabase = await rtmServidor();
 
   const updates: Record<string, unknown> = {
     cliente_id: clienteId,
@@ -377,7 +400,8 @@ export async function saveMetaCAPIConfigAction(
 }
 
 export async function testMetaCAPIAction(clienteId: string): Promise<ActionResult> {
-  const supabase = await reportUtmClient();
+  await exigirAccesoClienteUtm(clienteId, 'operacion');
+  const supabase = await rtmServidor();
 
   const { data: integration } = await supabase
     .from('integrations')
@@ -421,6 +445,7 @@ export async function createOutboundWebhookAction(
   clienteId: string,
   formData: FormData
 ): Promise<ActionResult> {
+  await exigirAccesoClienteUtm(clienteId, 'operacion');
   const nombre = String(formData.get('nombre') ?? '').trim();
   const url = String(formData.get('url') ?? '').trim();
   const eventTypesRaw = formData.getAll('event_types').map(String);
@@ -443,7 +468,7 @@ export async function createOutboundWebhookAction(
   }
 
   const secret = generateWebhookSecret();
-  const supabase = await reportUtmClient();
+  const supabase = await rtmServidor();
   const { error } = await supabase.from('outbound_webhooks').insert({
     cliente_id: clienteId,
     nombre,
@@ -464,8 +489,13 @@ export async function toggleOutboundWebhookAction(
   clienteId: string,
   enabled: boolean
 ): Promise<SimpleResult> {
-  const supabase = await reportUtmClient();
-  const { error } = await supabase.from('outbound_webhooks').update({ enabled }).eq('id', id);
+  await exigirAccesoClienteUtm(clienteId, 'operacion');
+  const supabase = await rtmServidor();
+  const { error } = await supabase
+    .from('outbound_webhooks')
+    .update({ enabled })
+    .eq('id', id)
+    .eq('cliente_id', clienteId);
   if (error) return { ok: false, error: error.message };
   revalidatePath('/admin/settings/[id]', 'page');
   return { ok: true };
@@ -473,12 +503,16 @@ export async function toggleOutboundWebhookAction(
 
 export async function deleteOutboundWebhookAction(
   id: string,
-  // La firma la fija la tarjeta que la llama; el id ya no hace falta para
-  // revalidar desde que la ficha del cliente vive en /admin/settings/[id].
+  // Cliente del webhook: autoriza la operación y acota el borrado a él.
   _clienteId: string
 ): Promise<SimpleResult> {
-  const supabase = await reportUtmClient();
-  const { error } = await supabase.from('outbound_webhooks').delete().eq('id', id);
+  await exigirAccesoClienteUtm(_clienteId, 'operacion');
+  const supabase = await rtmServidor();
+  const { error } = await supabase
+    .from('outbound_webhooks')
+    .delete()
+    .eq('id', id)
+    .eq('cliente_id', _clienteId);
   if (error) return { ok: false, error: error.message };
   revalidatePath('/admin/settings/[id]', 'page');
   return { ok: true };
@@ -488,9 +522,14 @@ export async function rotateOutboundSecretAction(
   id: string,
   _clienteId: string
 ): Promise<ActionResult> {
+  await exigirAccesoClienteUtm(_clienteId, 'operacion');
   const secret = generateWebhookSecret();
-  const supabase = await reportUtmClient();
-  const { error } = await supabase.from('outbound_webhooks').update({ secret }).eq('id', id);
+  const supabase = await rtmServidor();
+  const { error } = await supabase
+    .from('outbound_webhooks')
+    .update({ secret })
+    .eq('id', id)
+    .eq('cliente_id', _clienteId);
   if (error) return { ok: false, error: error.message };
   revalidatePath('/admin/settings/[id]', 'page');
   return { ok: true, secret };
@@ -499,7 +538,10 @@ export async function rotateOutboundSecretAction(
 // ── Meta Lead Ads (formularios instantáneos) ──────────────────────
 
 export async function activateMetaLeadsAction(clienteId: string): Promise<SimpleResult> {
-  const base = await createClient();
+  await exigirAccesoClienteUtm(clienteId, 'operacion');
+  // Service role tras la guarda: la sincronización escribe leads, que con la
+  // sesión del usuario solo son de lectura (RLS). La autorización es la guarda.
+  const base = await createAdminClient();
   // Precondición: el cliente debe tener Meta conectado (token + cuenta).
   const { error: metaError } = await getMetaAccountsForCliente(base, clienteId);
   if (metaError) return { ok: false, error: metaError };
@@ -514,7 +556,8 @@ export async function activateMetaLeadsAction(clienteId: string): Promise<Simple
       tipo: 'meta_lead_ads',
       status: 'active',
       last_error: null,
-      config: { backfill_done: false, pages },
+      // Page tokens cifrados en reposo (src/lib/credenciales-ads.ts).
+      config: { backfill_done: false, pages: sellarPaginas(pages) },
     },
     { onConflict: 'cliente_id,tipo' }
   );
@@ -529,7 +572,8 @@ export async function setMetaLeadsStatusAction(
   clienteId: string,
   status: 'active' | 'inactive'
 ): Promise<SimpleResult> {
-  const supabase = await reportUtmClient();
+  await exigirAccesoClienteUtm(clienteId, 'operacion');
+  const supabase = await rtmServidor();
   const { error } = await supabase
     .from('integrations')
     .update({ status })
@@ -543,7 +587,10 @@ export async function setMetaLeadsStatusAction(
 }
 
 export async function syncMetaLeadsNowAction(clienteId: string): Promise<SyncResult> {
-  const base = await createClient();
+  await exigirAccesoClienteUtm(clienteId, 'operacion');
+  // Service role tras la guarda: la sincronización escribe leads, que con la
+  // sesión del usuario solo son de lectura (RLS). La autorización es la guarda.
+  const base = await createAdminClient();
   const supabase = base.schema('report_utm');
 
   const { data: integration } = await supabase
@@ -586,6 +633,7 @@ export async function saveGhlIntegrationAction(
   clienteId: string,
   args: { locationId: string; token: string; tags?: string[]; excluirTags?: string[] }
 ): Promise<GhlSaveResult> {
+  await exigirAccesoClienteUtm(clienteId, 'operacion');
   const role = await getUserRole();
   if (!role || !S2S_ALLOWED_ROLES.has(role)) {
     return {
@@ -609,7 +657,7 @@ export async function saveGhlIntegrationAction(
     return { ok: false, error: e instanceof Error ? e.message : String(e) };
   }
 
-  const supabase = await reportUtmClient();
+  const supabase = await rtmServidor();
   const secret = generateWebhookSecret();
 
   const filtro = {
@@ -660,12 +708,13 @@ export async function saveGhlIntegrationAction(
 }
 
 export async function rotateGhlWebhookSecretAction(clienteId: string): Promise<ActionResult> {
+  await exigirAccesoClienteUtm(clienteId, 'operacion');
   const role = await getUserRole();
   if (!role || !S2S_ALLOWED_ROLES.has(role)) {
     return { ok: false, error: `Sin permisos para rotar el secreto (rol: ${role ?? 'ninguno'})` };
   }
 
-  const supabase = await reportUtmClient();
+  const supabase = await rtmServidor();
   const secret = generateWebhookSecret();
   const { error } = await supabase
     .from('integrations')
@@ -683,12 +732,13 @@ export async function setGhlStatusAction(
   clienteId: string,
   status: 'active' | 'inactive'
 ): Promise<SimpleResult> {
+  await exigirAccesoClienteUtm(clienteId, 'operacion');
   const role = await getUserRole();
   if (!role || !S2S_ALLOWED_ROLES.has(role)) {
     return { ok: false, error: `Sin permisos para cambiar el estado (rol: ${role ?? 'ninguno'})` };
   }
 
-  const supabase = await reportUtmClient();
+  const supabase = await rtmServidor();
   const { error } = await supabase
     .from('integrations')
     .update({ status })
@@ -706,12 +756,13 @@ export async function saveGhlFiltroAction(
   clienteId: string,
   args: { tags?: string[]; excluirTags?: string[] }
 ): Promise<SimpleResult> {
+  await exigirAccesoClienteUtm(clienteId, 'operacion');
   const role = await getUserRole();
   if (!role || !S2S_ALLOWED_ROLES.has(role)) {
     return { ok: false, error: `Sin permisos para cambiar el filtro (rol: ${role ?? 'ninguno'})` };
   }
 
-  const supabase = await reportUtmClient();
+  const supabase = await rtmServidor();
   const { data: integration } = await supabase
     .from('integrations')
     .select('id, config')
@@ -742,7 +793,10 @@ export async function saveGhlFiltroAction(
 }
 
 export async function syncGhlLeadsNowAction(clienteId: string): Promise<GhlSyncResult> {
-  const base = await createClient();
+  await exigirAccesoClienteUtm(clienteId, 'operacion');
+  // Service role tras la guarda: la sincronización escribe leads, que con la
+  // sesión del usuario solo son de lectura (RLS). La autorización es la guarda.
+  const base = await createAdminClient();
   const supabase = base.schema('report_utm');
 
   const { data: integration } = await supabase

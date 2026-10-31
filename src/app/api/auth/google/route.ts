@@ -1,8 +1,8 @@
 import { NextResponse } from 'next/server';
-import { createClient } from '@/utils/supabase/server';
 import { getGoogleOAuthClient, GOOGLE_OAUTH_SCOPES } from '@/lib/integrations/google-auth';
 import { firmarState, VENTANA_STATE_MS } from '@/lib/hotmart/oauth-state';
 import { COOKIE_STATE_GOOGLE, STATE_AGENCIA_GOOGLE } from '@/lib/integrations/google-oauth-state';
+import { exigirAjustePlataforma, guardaRuta } from '@/lib/acceso/clientes';
 
 /**
  * Inicia el flujo OAuth de Google (Analytics + Sheets) a nivel AGENCIA.
@@ -18,21 +18,10 @@ import { COOKIE_STATE_GOOGLE, STATE_AGENCIA_GOOGLE } from '@/lib/integrations/go
  * una cookie httpOnly de este navegador (mismo mecanismo que Hotmart).
  */
 export async function GET() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) {
-    return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
-  }
-  const { data: perfil } = await supabase
-    .from('user_profiles')
-    .select('role')
-    .eq('id', user.id)
-    .single();
-  if (!['admin', 'superadmin'].includes(perfil?.role ?? '')) {
-    return NextResponse.json({ error: 'Sin permiso para conectar integraciones' }, { status: 403 });
-  }
+  // La conexión de Google es de TODA la instalación (GA4 y Sheets de todos los
+  // clientes se leen con ella): ajuste de plataforma.
+  const denegado = await guardaRuta(() => exigirAjustePlataforma('admin'));
+  if (denegado) return denegado;
 
   let firmado: ReturnType<typeof firmarState>;
   try {

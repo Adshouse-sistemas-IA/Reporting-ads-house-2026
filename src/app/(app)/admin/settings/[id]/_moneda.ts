@@ -1,5 +1,6 @@
 'use server';
 
+import { exigirAccesoClienteUtm } from '@/lib/acceso/clientes';
 import { revalidatePath } from 'next/cache';
 import { reportUtmAdminClient } from '@/lib/report-utm/client';
 import { checkWriteRole } from '@/lib/report-utm/auth';
@@ -17,6 +18,7 @@ export async function guardarMonedaReporteAction(
   rtmClienteId: string,
   moneda: string
 ): Promise<{ ok: boolean; error?: string }> {
+  await exigirAccesoClienteUtm(rtmClienteId, 'operacion');
   const { ok } = await checkWriteRole();
   if (!ok) return { ok: false, error: 'No tienes permisos para cambiar la moneda.' };
   const automatica = moneda === '';

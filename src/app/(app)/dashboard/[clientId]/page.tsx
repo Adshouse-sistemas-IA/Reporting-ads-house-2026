@@ -7,7 +7,7 @@ import { PublicLinkButton } from '../components/PublicLinkButton';
 import { BitacorasSidebar } from '../components/BitacorasSidebar';
 import { getBitacoras } from '../../admin/settings/[id]/_actions';
 import { rangoPorDefectoCliente } from '@/lib/colombia-date';
-import { createClient, createAdminClient } from '@/utils/supabase/server';
+import { accesoClienteONull } from '@/lib/acceso/clientes';
 import { resolveRtmClienteId } from '@/lib/report-utm/campaign-resolver';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
@@ -29,40 +29,14 @@ export default async function DashboardPage(props: {
   const fromStr = typeof searchParams.from === 'string' ? searchParams.from : fallbackFrom;
   const toStr = typeof searchParams.to === 'string' ? searchParams.to : fallbackTo;
 
-  const supabase = await createClient();
-  const adminSupabase = await createAdminClient();
-
-  // Auth check and data fetch run in parallel to cut latency
-  const authCheck = async (): Promise<{
-    userRole: string;
-    allowed: boolean;
-    userId: string | null;
-  }> => {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    if (!user) return { userRole: 'viewer', allowed: false, userId: null };
-
-    const { data: profile } = await adminSupabase
-      .from('user_profiles')
-      .select('role')
-      .eq('id', user.id)
-      .single();
-    const role = profile?.role ?? 'viewer';
-
-    // Admins/superadmins can access any client
-    if (['superadmin', 'admin'].includes(role))
-      return { userRole: role, allowed: true, userId: user.id };
-
-    // All other roles (trafficker, viewer, …) must have an explicit assignment
-    const { data: assignment } = await adminSupabase
-      .from('user_client_assignments')
-      .select('id')
-      .eq('user_id', user.id)
-      .eq('client_id', clientId)
-      .maybeSingle();
-    return { userRole: role, allowed: !!assignment, userId: user.id };
-  };
+  // Acceso con el mismo criterio que el RLS y que las acciones: admin o
+  // asignado al cliente. Va ANTES de cargar datos:
+  // getDashboardData también lo exige y, si fallara en paralelo, se vería un
+  // error en vez de volver al listado.
+  const acceso = await accesoClienteONull(clientId, 'lectura');
+  if (!acceso) redirect('/dashboard');
+  const userRole: string = acceso.rol;
+  const userId: string | null = acceso.userId;
 
   // Los clientes del dashboard (public.clientes) y los de report_utm son entidades
   // distintas: el puente es report_utm.clientes.public_cliente_id. Sin enlace no hay
@@ -70,15 +44,11 @@ export default async function DashboardPage(props: {
   const resolveInformesClienteId = async (): Promise<string | null> =>
     resolveRtmClienteId(clientId);
 
-  const [{ userRole, allowed, userId }, dashboardData, initialBitacoras, informesClienteId] =
-    await Promise.all([
-      authCheck(),
-      getDashboardData(clientId, fromStr, toStr),
-      getBitacoras(clientId),
-      resolveInformesClienteId(),
-    ]);
-
-  if (!allowed) redirect('/dashboard');
+  const [dashboardData, initialBitacoras, informesClienteId] = await Promise.all([
+    getDashboardData(clientId, fromStr, toStr),
+    getBitacoras(clientId),
+    resolveInformesClienteId(),
+  ]);
 
   return (
     <div className="space-y-6">

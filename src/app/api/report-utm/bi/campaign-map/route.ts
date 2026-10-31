@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { exigirAccesoClienteUtm, guardaRuta } from '@/lib/acceso/clientes';
 import { createClient } from '@/utils/supabase/server';
 import { reportUtmAdminClient } from '@/lib/report-utm/client';
 import { checkWriteRole } from '@/lib/report-utm/auth';
@@ -40,6 +41,8 @@ export async function GET(req: NextRequest) {
   const sp = req.nextUrl.searchParams;
   const cliente_id = sp.get('cliente_id') ?? undefined;
   if (!cliente_id) return NextResponse.json({ error: 'cliente_id requerido' }, { status: 400 });
+  const denegado = await guardaRuta(() => exigirAccesoClienteUtm(cliente_id, 'lectura'));
+  if (denegado) return denegado;
   if (!(await clienteVisible(cliente_id))) {
     return NextResponse.json({ error: 'Cliente no encontrado' }, { status: 404 });
   }
@@ -99,6 +102,8 @@ export async function POST(req: NextRequest) {
   if (!cliente_id || !match_value) {
     return NextResponse.json({ error: 'cliente_id y match_value son requeridos' }, { status: 400 });
   }
+  const denegado = await guardaRuta(() => exigirAccesoClienteUtm(String(cliente_id), 'operacion'));
+  if (denegado) return denegado;
   // Una corrección de campaña necesita la campaña; una de conjunto o anuncio,
   // la entidad. La campaña de esta última es opcional: el índice la deduce.
   if (nivel === 'campaign' && !campaign_name) {
@@ -212,6 +217,10 @@ export async function DELETE(req: NextRequest) {
     .eq('id', id)
     .maybeSingle();
   const clienteId = (fila as { cliente_id?: string } | null)?.cliente_id;
+  if (clienteId) {
+    const denegado = await guardaRuta(() => exigirAccesoClienteUtm(clienteId, 'operacion'));
+    if (denegado) return denegado;
+  }
   if (!clienteId || !(await clienteVisible(clienteId))) {
     return NextResponse.json({ error: 'Corrección no encontrada' }, { status: 404 });
   }

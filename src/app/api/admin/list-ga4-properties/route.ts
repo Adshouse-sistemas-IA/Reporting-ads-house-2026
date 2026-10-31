@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { hasAgencyGoogleConnection } from '@/lib/integrations/google-auth';
 import { listGA4Properties } from '@/lib/integrations/google-analytics';
-import { requireAdminRole } from '@/lib/report-utm/auth';
+import { exigirAjustePlataforma, guardaRuta } from '@/lib/acceso/clientes';
 
 /**
  * GET /api/admin/list-ga4-properties
@@ -9,8 +9,9 @@ import { requireAdminRole } from '@/lib/report-utm/auth';
  * Usa el scope analytics.readonly ya incluido en el OAuth de agencia.
  */
 export async function GET() {
-  // Guard de rol: el proxy ya exige sesión en /api/admin, esto añade el rol.
-  const denied = await requireAdminRole();
+  // Usa la cuenta de Google de la PLATAFORMA (ve las hojas y propiedades de
+  // todos los clientes): ajuste de plataforma (admin).
+  const denied = await guardaRuta(() => exigirAjustePlataforma('admin'));
   if (denied) return denied;
 
   try {

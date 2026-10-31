@@ -1,5 +1,6 @@
 'use server';
 
+import { exigirAccesoCliente } from '@/lib/acceso/clientes';
 /**
  * Perfil del cliente para el agente.
  *
@@ -37,6 +38,7 @@ async function exigirSesion(): Promise<string | null> {
 }
 
 export async function leerPerfilIA(clienteId: string): Promise<PerfilIA> {
+  await exigirAccesoCliente(clienteId, 'lectura');
   const db = await createAdminClient();
 
   const [perfilRes, clienteRes, feedbackRes] = await Promise.all([
@@ -87,6 +89,7 @@ export async function guardarPerfilIA(
     fuentes_ausentes: string[];
   }
 ): Promise<Resultado> {
+  await exigirAccesoCliente(clienteId, 'operacion');
   const userId = await exigirSesion();
   if (!userId) return { error: 'No tienes permiso para editar este perfil.' };
 

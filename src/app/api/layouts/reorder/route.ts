@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { exigirAccesoCliente, guardaRuta } from '@/lib/acceso/clientes';
 import { createClient } from '@/utils/supabase/server';
 
 export async function POST(request: NextRequest) {
@@ -22,6 +23,8 @@ export async function POST(request: NextRequest) {
   if (!clienteId || !tabOrder || !Array.isArray(tabOrder)) {
     return NextResponse.json({ error: 'Datos inválidos' }, { status: 400 });
   }
+  const denegado = await guardaRuta(() => exigirAccesoCliente(clienteId, 'operacion'));
+  if (denegado) return denegado;
 
   // Verify user has access to this client
   const { data: cliente } = await supabase

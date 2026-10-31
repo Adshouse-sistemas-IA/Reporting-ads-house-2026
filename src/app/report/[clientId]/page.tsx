@@ -3,7 +3,7 @@ import { DateRangeSelector } from '@/app/(app)/dashboard/components/DateRangeSel
 import { SearchX } from 'lucide-react';
 import { DashboardClient } from '@/app/(app)/dashboard/components/DashboardClient';
 import { rangoPorDefectoCliente } from '@/lib/colombia-date';
-import { createAdminClient } from '@/utils/supabase/server';
+import { accesoClienteONull } from '@/lib/acceso/clientes';
 import { getSesionActual } from '@/lib/auth-session';
 import { redirect } from 'next/navigation';
 
@@ -31,25 +31,14 @@ export default async function PublicReportPage(props: {
   const fromStr = typeof searchParams.from === 'string' ? searchParams.from : fallbackFrom;
   const toStr = typeof searchParams.to === 'string' ? searchParams.to : fallbackTo;
 
-  const { userId, role } = await getSesionActual();
+  const { userId } = await getSesionActual();
   if (!userId) redirect('/login');
 
-  const esAdmin = ['superadmin', 'admin'].includes(role);
-  const adminSupabase = await createAdminClient();
+  // Mismo criterio que el dashboard: admin o asignado al cliente.
+  const acceso = await accesoClienteONull(clientId, 'lectura');
+  if (!acceso) redirect('/dashboard');
 
-  const [asignacion, dashboardData] = await Promise.all([
-    esAdmin
-      ? Promise.resolve({ data: { id: 'admin' } })
-      : adminSupabase
-          .from('user_client_assignments')
-          .select('id')
-          .eq('user_id', userId)
-          .eq('client_id', clientId)
-          .maybeSingle(),
-    getDashboardData(clientId, fromStr, toStr),
-  ]);
-
-  if (!esAdmin && !asignacion.data) redirect('/dashboard');
+  const dashboardData = await getDashboardData(clientId, fromStr, toStr);
 
   if (!dashboardData?.cliente) {
     return (

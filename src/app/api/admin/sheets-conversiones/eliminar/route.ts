@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { exigirAccesoCliente, guardaRuta } from '@/lib/acceso/clientes';
 import { createClient } from '@supabase/supabase-js';
 import { normalizeSheetConfigs } from '@/lib/integrations/google-sheets-conversiones';
 import { loadCamposCliente } from '@/lib/sheets/campos-db';
@@ -61,6 +62,8 @@ export async function GET(request: NextRequest) {
       { status: 400 }
     );
   }
+  const denegado = await guardaRuta(() => exigirAccesoCliente(clientId, 'operacion'));
+  if (denegado) return denegado;
 
   try {
     const db = admin();
@@ -107,6 +110,8 @@ export async function POST(request: NextRequest) {
     if (!clientId || !sheetId) {
       return NextResponse.json({ error: 'clientId y sheetId son obligatorios' }, { status: 400 });
     }
+    const denegado = await guardaRuta(() => exigirAccesoCliente(clientId, 'operacion'));
+    if (denegado) return denegado;
 
     const db = admin();
     let borradas = 0;

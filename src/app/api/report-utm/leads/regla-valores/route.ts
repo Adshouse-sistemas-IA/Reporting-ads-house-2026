@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { exigirAccesoClienteUtm, guardaRuta } from '@/lib/acceso/clientes';
 import { checkWriteRole } from '@/lib/report-utm/auth';
 import { reportUtmAdminClient } from '@/lib/report-utm/client';
 import { cargarValoresRegla, type ValoresRegla } from '@/lib/report-utm/lead-regla-valores';
@@ -34,6 +35,8 @@ export async function GET(req: NextRequest) {
   if (!UUID.test(clienteId)) {
     return NextResponse.json({ error: 'cliente_id inválido' }, { status: 400 });
   }
+  const denegado = await guardaRuta(() => exigirAccesoClienteUtm(clienteId, 'lectura'));
+  if (denegado) return denegado;
 
   const enCache = cache.get(clienteId);
   if (enCache && Date.now() - enCache.ts < CACHE_MS) {

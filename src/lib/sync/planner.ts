@@ -11,6 +11,7 @@ import { colombiaToday, colombiaYesterday, COLOMBIA_UTC_OFFSET_MS } from '../dat
 import { hotmartConectado } from '../hotmart/cliente';
 import { normalizeSheetConfigs } from '../integrations/google-sheets-conversiones';
 import { registrarMantenimiento, MANTENIMIENTO_LOG_RETENCION_DIAS } from '../salud/base';
+import { archivarLeadsAntiguos } from '../report-utm/archivo-leads';
 
 /** ¿El cliente tiene alguna cuenta publicitaria de Meta? */
 export function tieneMeta(configApi: unknown): boolean {
@@ -466,29 +467,58 @@ export async function ensurePlanDiario(
  */
 export async function limpiarHistorial(db: any, dias = 30): Promise<void> {
   const corte = new Date(Date.now() - dias * 86_400_000).toISOString();
-  await db
-    .from('sync_jobs')
-    .delete()
-    .in('estado', ['done', 'cancelled', 'error'])
-    .lt('updated_at', corte);
-  await db.from('sync_runs').delete().lt('started_at', corte);
+  // Cada borrado comprueba su error: un DELETE que no cabe en el timeout y se
+  // descarta en silencio es justo cómo se acumularon 295 MB de basura en
+  // agosto (docs/00 §4.2). El fallo de uno no impide intentar los demás.
+  const errores: string[] = [];
+  const anotar = (donde: string, error: { message: string } | null) => {
+    if (!error) return;
+    console.error(`[planner] limpiarHistorial ${donde}:`, error.message);
+    errores.push(`${donde}: ${error.message}`);
+  };
+  anotar(
+    'sync_jobs',
+    (
+      await db
+        .from('sync_jobs')
+        .delete()
+        .in('estado', ['done', 'cancelled', 'error'])
+        .lt('updated_at', corte)
+    ).error
+  );
+  anotar('sync_runs', (await db.from('sync_runs').delete().lt('started_at', corte)).error);
   const pixelEvents = await purgarPixelEvents(db);
   const adsDaily = await purgarAdsDaily(db);
   const hotmart = await purgarHotmart(db);
+  // Leads de los clientes con retención: a CSV en Storage y fuera de la base.
+  const archivoLeads = await archivarLeadsAntiguos(db);
+  for (const e of archivoLeads.errores) anotar('archivo_leads', { message: e });
 
   // Latido: `/api/worker/health` alerta si pasa día y medio sin esta fila. Sin
   // ella, que las purgas dejaran de correr no tenía síntoma hasta faltar espacio.
-  await db
-    .from('mantenimiento_log')
-    .delete()
-    .lt(
-      'ocurrido_at',
-      new Date(Date.now() - MANTENIMIENTO_LOG_RETENCION_DIAS * 86_400_000).toISOString()
-    );
+  anotar(
+    'mantenimiento_log',
+    (
+      await db
+        .from('mantenimiento_log')
+        .delete()
+        .lt(
+          'ocurrido_at',
+          new Date(Date.now() - MANTENIMIENTO_LOG_RETENCION_DIAS * 86_400_000).toISOString()
+        )
+    ).error
+  );
   await registrarMantenimiento(db, 'purga', {
     pixel_events: pixelEvents,
     ads_daily: adsDaily,
     hotmart,
+    archivo_leads: {
+      archivados: archivoLeads.archivados,
+      borrados: archivoLeads.borrados,
+      archivos: archivoLeads.archivos,
+      pendiente: archivoLeads.pendiente,
+    },
+    ...(errores.length > 0 ? { errores } : {}),
   });
 }
 

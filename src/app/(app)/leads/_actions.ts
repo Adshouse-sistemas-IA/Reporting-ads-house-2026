@@ -1,5 +1,6 @@
 'use server';
 
+import { exigirAccesoClienteUtm } from '@/lib/acceso/clientes';
 import { revalidatePath } from 'next/cache';
 import { createClient } from '@/utils/supabase/server';
 import { reportUtmAdminClient } from '@/lib/report-utm/client';
@@ -53,13 +54,30 @@ export async function marcarLeadsAction(
   const db = await reportUtmAdminClient();
   if (!(await columnaExcluidoDisponible(db))) return { ok: false, error: SIN_MIGRACION };
 
+  // Los ids llegan del navegador: se autoriza por el cliente REAL de cada lead
+  // (antes cualquier rol de escritura marcaba leads de cualquier cliente).
+  const { data: duenos, error: eDuenos } = await db
+    .from('lead_events')
+    .select('cliente_id')
+    .in('id', limpios);
+  if (eDuenos) return { ok: false, error: eDuenos.message };
+  const clientes = [
+    ...new Set((duenos ?? []).map((r) => (r as { cliente_id: string }).cliente_id)),
+  ];
+  for (const c of clientes) await exigirAccesoClienteUtm(c, 'operacion');
+  if (clientes.length === 0) return { ok: true, n: 0 };
+
   const quien = await usuarioActual();
   const ahora = new Date().toISOString();
   const patch = excluir
     ? { excluido: true, excluido_motivo: 'manual', excluido_at: ahora, excluido_por: quien }
     : { excluido: false, excluido_motivo: null, excluido_at: ahora, excluido_por: quien };
 
-  const { error } = await db.from('lead_events').update(patch).in('id', limpios);
+  const { error } = await db
+    .from('lead_events')
+    .update(patch)
+    .in('id', limpios)
+    .in('cliente_id', clientes);
   if (error) return { ok: false, error: error.message };
 
   revalidatePath('/leads');
@@ -107,6 +125,7 @@ export async function marcarLeadsPorFiltroAction(
   if (!f.clienteId) {
     return { ok: false, error: 'Elegí un cliente antes de marcar todos los que coinciden.' };
   }
+  await exigirAccesoClienteUtm(f.clienteId, 'operacion');
   if (!hayFiltros(f)) {
     // Sin filtros esto marcaría TODOS los leads del cliente. Es casi siempre un
     // error, y deshacerlo a mano no es viable.
@@ -177,6 +196,7 @@ export async function guardarReglaExclusionAction(
   clienteId: string,
   regla: ReglaExclusion
 ): Promise<{ ok: boolean; error?: string }> {
+  await exigirAccesoClienteUtm(clienteId, 'operacion');
   const { ok } = await checkWriteRole();
   if (!ok) return { ok: false, error: 'No tienes permisos para cambiar la regla.' };
 
@@ -214,6 +234,7 @@ export async function reclasificarLeadsAction(
   aplicar: boolean,
   reglaPrevisualizada?: ReglaExclusion
 ): Promise<{ ok: boolean; resultado?: ResultadoReclasificacion; error?: string }> {
+  await exigirAccesoClienteUtm(clienteId, 'operacion');
   const { ok } = await checkWriteRole();
   if (!ok) return { ok: false, error: 'No tienes permisos para reclasificar leads.' };
 

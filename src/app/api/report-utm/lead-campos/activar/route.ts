@@ -9,6 +9,7 @@
 // ordenados de menor a mayor. Ver `activarPregunta`.
 
 import { NextRequest, NextResponse } from 'next/server';
+import { exigirAccesoClienteUtm, guardaRuta } from '@/lib/acceso/clientes';
 import { reportUtmAdminClient } from '@/lib/report-utm/client';
 import { checkWriteRole } from '@/lib/report-utm/auth';
 import { activarPregunta } from '@/lib/leads/respuestas/activar-db';
@@ -22,6 +23,8 @@ export async function POST(req: NextRequest) {
   const body = await req.json().catch(() => null);
   const clienteId = String(body?.cliente_id ?? '');
   if (!clienteId) return NextResponse.json({ error: 'cliente_id requerido' }, { status: 400 });
+  const denegado = await guardaRuta(() => exigirAccesoClienteUtm(clienteId, 'operacion'));
+  if (denegado) return denegado;
 
   try {
     const rtm = await reportUtmAdminClient();

@@ -23,6 +23,7 @@ import {
   failJob,
   enqueueJob,
   releaseJob,
+  ESPERA_CLIENTE_OCUPADO_MS,
   type SyncJob,
 } from './queue';
 import { notifyUsers } from '../notifications/notify';
@@ -399,7 +400,7 @@ export async function runJobs(db: any, opts: RunnerOptions): Promise<RunnerResul
     if (job.intentos > job.max_intentos) {
       const message = `Lease vencido ${job.intentos} veces sin respuesta del ejecutor (máx. ${job.max_intentos})`;
       // `failJob` ya lo da por agotado: `intentos > max_intentos` cumple su `>=`.
-      await failJob(db, job, message);
+      await failJob(db, job, message, { worker: opts.workerId });
       result.failed++;
       result.details.push({ jobId: job.id, tipo: job.tipo, estado: 'error', message });
       await notifyExhausted(db, job, message);
@@ -424,7 +425,12 @@ export async function runJobs(db: any, opts: RunnerOptions): Promise<RunnerResul
        * moría en dos pasadas (~15 s) acusando un lease vencido que nunca
        * existió, y el dashboard pintaba en rojo un sync que estaba yendo bien.
        */
-      await releaseJob(db, job.id, job.intentos - 1);
+      // Y no vuelve a entregarse en unos segundos: sin la espera, el bucle lo
+      // recuperaba en la vuelta siguiente y giraba sobre él hasta agotar el ciclo.
+      await releaseJob(db, job.id, job.intentos - 1, {
+        worker: opts.workerId,
+        esperaMs: ESPERA_CLIENTE_OCUPADO_MS,
+      });
       if (liberados.has(job.id)) break;
       liberados.add(job.id);
       result.details.push({
@@ -456,7 +462,9 @@ export async function runJobs(db: any, opts: RunnerOptions): Promise<RunnerResul
       const exec = await executeJob(job, opts, timeoutAplicado);
 
       if (!exec.ok) {
-        const exhausted = await failJob(db, job, exec.message ?? 'error desconocido');
+        const exhausted = await failJob(db, job, exec.message ?? 'error desconocido', {
+          worker: opts.workerId,
+        });
         result.failed++;
         result.details.push({
           jobId: job.id,
@@ -472,7 +480,7 @@ export async function runJobs(db: any, opts: RunnerOptions): Promise<RunnerResul
       if (exec.partial && exec.resumeFrom && job.fecha_fin && exec.resumeFrom <= job.fecha_fin) {
         // Se hizo una parte: cerrar este job y encolar el resto. Sin esto el
         // rango restante se daría por sincronizado y quedaría un hueco.
-        await completeJob(db, job.id);
+        await completeJob(db, job.id, { worker: opts.workerId });
         await enqueueJob(db, {
           tipo: job.tipo,
           clienteId: job.cliente_id,
@@ -494,7 +502,7 @@ export async function runJobs(db: any, opts: RunnerOptions): Promise<RunnerResul
         continue;
       }
 
-      await completeJob(db, job.id);
+      await completeJob(db, job.id, { worker: opts.workerId });
       result.done++;
       result.details.push({ jobId: job.id, tipo: job.tipo, estado: 'ok' });
       await recordRun(db, job, opts, startedAt, 'ok', exec.body);
@@ -513,7 +521,7 @@ export async function runJobs(db: any, opts: RunnerOptions): Promise<RunnerResul
        * para el siguiente.
        */
       if (esTimeoutDeFetch(e) && cortaElPresupuesto) {
-        await releaseJob(db, job.id, job.intentos - 1);
+        await releaseJob(db, job.id, job.intentos - 1, { worker: opts.workerId });
         result.details.push({
           jobId: job.id,
           tipo: job.tipo,
@@ -523,7 +531,7 @@ export async function runJobs(db: any, opts: RunnerOptions): Promise<RunnerResul
         break;
       }
 
-      const exhausted = await failJob(db, job, message);
+      const exhausted = await failJob(db, job, message, { worker: opts.workerId });
       result.failed++;
       result.details.push({
         jobId: job.id,

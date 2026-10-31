@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react';
 import { createClient } from '@/utils/supabase/client';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -160,14 +159,9 @@ export default function LoginPage() {
             >
               {loading ? 'Ingresando...' : 'Iniciar Sesión'}
             </Button>
+            {/* Sin registro público: las cuentas las crea un administrador. */}
             <p className="text-sm text-muted-foreground text-center">
-              ¿No tienes cuenta?{' '}
-              <Link
-                href="/signup"
-                className="text-brand-blue dark:text-brand-blue-light hover:underline underline-offset-4 font-medium transition-colors"
-              >
-                Regístrate gratis
-              </Link>
+              ¿No tienes acceso? Pide a tu administrador que te cree una cuenta.
             </p>
           </CardFooter>
         </form>

@@ -2,6 +2,8 @@ import { redirect } from 'next/navigation';
 import { Bot } from 'lucide-react';
 
 import { createClient, createAdminClient } from '@/utils/supabase/server';
+import { clientesVisiblesDeUsuario } from '@/lib/acceso/clientes';
+import { normalizarRol } from '@/lib/acceso/reglas';
 import { AgenteClient } from './components/AgenteClient';
 import {
   listarConversaciones,
@@ -43,7 +45,12 @@ export default async function AgentePage() {
       esAdmin ? listarRemitentesVistos() : Promise.resolve([]),
       leerEstadoAgente(),
       leerPoliticaModelos(),
-      db.from('clientes').select('id, nombre').order('nombre'),
+      // Solo los clientes que el usuario ve: la lista viaja al navegador.
+      clientesVisiblesDeUsuario(db, user.id, normalizarRol(role)).then(async (ids) =>
+        ids.length
+          ? await db.from('clientes').select('id, nombre').in('id', ids).order('nombre')
+          : { data: [] as { id: string; nombre: string }[] }
+      ),
     ]);
 
   const { data: usuarios } = esAdmin

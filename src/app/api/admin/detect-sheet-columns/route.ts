@@ -4,7 +4,7 @@ import type {
   ConversionesConfig,
   SheetTabConfig,
 } from '@/lib/integrations/google-sheets-conversiones';
-import { requireAdminRole } from '@/lib/report-utm/auth';
+import { exigirAjustePlataforma, guardaRuta } from '@/lib/acceso/clientes';
 
 /**
  * POST /api/admin/detect-sheet-columns
@@ -16,8 +16,9 @@ import { requireAdminRole } from '@/lib/report-utm/auth';
  * estar guardado en DB primero). No modifica nada en la DB.
  */
 export async function POST(request: NextRequest) {
-  // Guard de rol: el proxy ya exige sesión en /api/admin, esto añade el rol.
-  const denied = await requireAdminRole();
+  // Usa la cuenta de Google de la PLATAFORMA (ve las hojas y propiedades de
+  // todos los clientes): ajuste de plataforma (admin).
+  const denied = await guardaRuta(() => exigirAjustePlataforma('admin'));
   if (denied) return denied;
 
   try {

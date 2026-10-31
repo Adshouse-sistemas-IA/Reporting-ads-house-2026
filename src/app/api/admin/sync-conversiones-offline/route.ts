@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { exigirAccesoCliente, guardaRuta } from '@/lib/acceso/clientes';
 import { createClient } from '@supabase/supabase-js';
 import {
   syncClienteConversiones,
@@ -52,6 +53,8 @@ export async function POST(request: NextRequest) {
     if (!clientId) {
       return NextResponse.json({ error: 'clientId is required' }, { status: 400 });
     }
+    const denegado = await guardaRuta(() => exigirAccesoCliente(clientId, 'operacion'));
+    if (denegado) return denegado;
 
     const supabase = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -252,6 +255,8 @@ export async function GET(request: NextRequest) {
     if (!esUuid(clientId)) {
       return NextResponse.json({ error: 'clientId debe ser un UUID válido' }, { status: 400 });
     }
+    const denegado = await guardaRuta(() => exigirAccesoCliente(clientId, 'lectura'));
+    if (denegado) return denegado;
 
     const supabase = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,

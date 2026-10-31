@@ -19,6 +19,7 @@
 // render sería inaceptable. Solo se pide al abrir la configuración del bloque.
 
 import { NextRequest, NextResponse } from 'next/server';
+import { exigirAccesoCliente, guardaRuta } from '@/lib/acceso/clientes';
 import { reportUtmAdminClient } from '@/lib/report-utm/client';
 import { getUserRole } from '@/lib/report-utm/auth';
 import { loadLeadCampos } from '@/lib/report-utm/lead-campos-db';
@@ -77,6 +78,8 @@ export async function GET(req: NextRequest) {
   if (!publicClienteId) {
     return NextResponse.json({ error: 'public_cliente_id requerido' }, { status: 400 });
   }
+  const denegado = await guardaRuta(() => exigirAccesoCliente(publicClienteId, 'lectura'));
+  if (denegado) return denegado;
   const todas = sp.get('todas') === '1';
   // Clave que el bloque ya tiene guardada. Se pasa para poder devolverla aunque
   // su campo esté desactivado; ver `PreguntaSugerida.inactivo`.

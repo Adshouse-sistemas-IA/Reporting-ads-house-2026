@@ -12,18 +12,41 @@ import { colombiaToday, colombiaYesterday } from '@/lib/date-utils';
 import { format, subDays, startOfMonth, endOfMonth, parseISO } from 'date-fns';
 import { parseTabFilter, type AnyCampaignFilter } from '@/lib/campaign-filter';
 import { BRANDING_CACHE_TAG } from '@/lib/branding';
-import { getSesionActual } from '@/lib/auth-session';
+import {
+  exigirAccesoCliente,
+  exigirAjustePlataforma,
+  exigirSesion,
+  intentarGuarda,
+} from '@/lib/acceso/clientes';
 
-async function requireAdmin(): Promise<{ ok: true } | { ok: false; error: string }> {
-  // Sesión y rol memoizados por petición (`lib/auth-session.ts`). Antes cada
-  // llamada a este guard hacía su propio getUser() + lectura de user_profiles,
-  // así que una página que invoca 7 acciones pagaba 7 veces las dos consultas.
-  const { userId, role } = await getSesionActual();
-  if (!userId) return { ok: false, error: 'No autorizado' };
-  if (!['superadmin', 'admin'].includes(role)) {
-    return { ok: false, error: 'Sin permisos para configurar alertas' };
+/**
+ * Las reglas de alerta las gestiona un admin. Todo va con la service role, así
+ * que la guarda es la única barrera.
+ */
+const requireAdmin = () => intentarGuarda(() => exigirSesion('admin'));
+
+/** El cliente de una regla tiene que existir y la pestaña ser de ese cliente. */
+async function validarDestinoRegla(
+  db: Awaited<ReturnType<typeof createAdminClient>>,
+  clienteId: string | null | undefined,
+  tabId: string | null | undefined
+): Promise<string | null> {
+  if (clienteId) {
+    const acceso = await intentarGuarda(() => exigirAccesoCliente(clienteId, 'admin'));
+    if (!acceso.ok) return acceso.error;
   }
-  return { ok: true };
+  if (tabId) {
+    const { data: tab, error } = await db
+      .from('cliente_tabs')
+      .select('cliente_id')
+      .eq('id', tabId)
+      .maybeSingle();
+    if (error) return error.message;
+    const t = tab as { cliente_id: string } | null;
+    if (!t) return 'Pestaña no encontrada';
+    if (clienteId && t.cliente_id !== clienteId) return 'La pestaña no es de ese cliente';
+  }
+  return null;
 }
 
 // ── Rules CRUD ──────────────────────────────────────────────────────────────
@@ -49,6 +72,8 @@ export async function createNotificationRule(
   if (!guard.ok) return { error: guard.error };
 
   const supabase = await createAdminClient();
+  const invalido = await validarDestinoRegla(supabase, payload.cliente_id, payload.tab_id);
+  if (invalido) return { error: invalido };
   const { error } = await supabase.from('notification_rules').insert({
     cliente_id: payload.cliente_id || null,
     tab_id: payload.tab_id || null,
@@ -76,7 +101,25 @@ export async function updateNotificationRule(
   if (!guard.ok) return { error: guard.error };
 
   const supabase = await createAdminClient();
-  const { error } = await supabase.from('notification_rules').update(payload).eq('id', id);
+  // Un nuevo destino se valida.
+  const cambios = payload;
+  if ('cliente_id' in cambios || 'tab_id' in cambios) {
+    const { data: actual, error: e } = await supabase
+      .from('notification_rules')
+      .select('cliente_id, tab_id')
+      .eq('id', id)
+      .maybeSingle();
+    if (e) return { error: e.message };
+    if (!actual) return { error: 'Regla no encontrada' };
+    const a = actual as { cliente_id: string | null; tab_id: string | null };
+    const invalido = await validarDestinoRegla(
+      supabase,
+      'cliente_id' in cambios ? cambios.cliente_id : a.cliente_id,
+      'tab_id' in cambios ? cambios.tab_id : a.tab_id
+    );
+    if (invalido) return { error: invalido };
+  }
+  const { error } = await supabase.from('notification_rules').update(cambios).eq('id', id);
 
   if (error) return { error: error.message };
 
@@ -105,15 +148,20 @@ export async function getClientesAndTabs() {
 
   const supabase = await createAdminClient();
 
-  const { data: clientes } = await supabase.from('clientes').select('id, nombre').order('nombre');
+  const { data: clientes, error: ec } = await supabase
+    .from('clientes')
+    .select('id, nombre')
+    .order('nombre');
+  if (ec) throw new Error(ec.message);
 
-  const { data: tabs } = await supabase
+  const { data: tabs, error: et } = await supabase
     .from('cliente_tabs')
     .select(
       'id, nombre, cliente_id, keyword_meta, presupuesto_objetivo, fecha_inicio, fecha_finalizacion'
     )
     .eq('archived', false)
     .order('nombre');
+  if (et) throw new Error(et.message);
 
   return {
     clientes: clientes ?? [],
@@ -288,17 +336,8 @@ export async function testRule(ruleId: string) {
   }
 }
 
-async function requireSuperAdmin(): Promise<{ ok: true } | { ok: false; error: string }> {
-  // Sesión y rol memoizados por petición (`lib/auth-session.ts`). Antes cada
-  // llamada a este guard hacía su propio getUser() + lectura de user_profiles,
-  // así que una página que invoca 7 acciones pagaba 7 veces las dos consultas.
-  const { userId, role } = await getSesionActual();
-  if (!userId) return { ok: false, error: 'No autorizado' };
-  if (!['superadmin'].includes(role)) {
-    return { ok: false, error: 'Sin permisos de súper administrador' };
-  }
-  return { ok: true };
-}
+// La marca es de toda la instalación: la cambia el propietario.
+const requireSuperAdmin = () => intentarGuarda(() => exigirAjustePlataforma('superadmin'));
 
 export async function getBrandingSettings() {
   const supabase = await createClient();

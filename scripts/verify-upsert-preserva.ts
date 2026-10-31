@@ -398,7 +398,7 @@ async function comprobarCola() {
   );
   check(
     'el job devuelto a la cola no cuenta como reclamado',
-    runner.indexOf('await releaseJob(db, job.id, job.intentos - 1)') <
+    runner.indexOf('await releaseJob(db, job.id, job.intentos - 1,') <
       runner.indexOf('result.claimed++')
   );
   check(
@@ -417,7 +417,7 @@ async function comprobarCola() {
   check(
     'un rebote por cliente ocupado restituye el intento',
     !/await releaseJob\(db, job\.id\)/.test(runner) &&
-      (runner.match(/await releaseJob\(db, job\.id, job\.intentos - 1\)/g) ?? []).length === 2
+      (runner.match(/await releaseJob\(db, job\.id, job\.intentos - 1,/g) ?? []).length === 2
   );
 }
 

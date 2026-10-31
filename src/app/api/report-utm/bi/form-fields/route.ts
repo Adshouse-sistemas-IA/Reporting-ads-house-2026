@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { exigirClienteUtmOGlobal, guardaRuta } from '@/lib/acceso/clientes';
 import { createClient, createAdminClient } from '@/utils/supabase/server';
 import { fetchAllRows } from '@/lib/report-utm/bi-query';
 import { parseFieldNumber } from '@/lib/report-utm/bi-metadata';
@@ -30,6 +31,8 @@ export async function GET(req: NextRequest) {
 
   const sp = req.nextUrl.searchParams;
   const cliente_id = sp.get('cliente_id') ?? undefined;
+  const denegado = await guardaRuta(() => exigirClienteUtmOGlobal(cliente_id, 'lectura'));
+  if (denegado) return denegado;
   const date_from = sp.get('date_from') ?? undefined;
   const date_to = sp.get('date_to') ?? undefined;
 

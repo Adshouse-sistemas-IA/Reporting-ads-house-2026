@@ -6,6 +6,7 @@ import {
   getMetaAccountsForCliente,
   ingestMetaLead,
 } from '@/lib/report-utm/meta-leads';
+import { abrirToken } from '@/lib/credenciales-ads';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -132,7 +133,8 @@ export async function POST(req: NextRequest) {
 
       // Token: el page token guardado; fallback al token de cuenta del cliente.
       const page = match.config!.pages!.find((p) => String(p.page_id) === pageId);
-      let token: string | undefined = page?.page_token;
+      // Cifrado en reposo (src/lib/credenciales-ads.ts): se abre al usarlo.
+      let token: string | undefined = abrirToken(page?.page_token) || undefined;
       if (!token) {
         const { accounts } = await getMetaAccountsForCliente(supabase, match.cliente_id);
         token = accounts[0]?.token;

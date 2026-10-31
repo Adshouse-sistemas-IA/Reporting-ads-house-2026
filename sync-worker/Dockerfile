@@ -49,6 +49,10 @@ RUN npm install --omit=dev && npm cache clean --force
 
 COPY --from=build /repo/sync-worker/dist ./dist
 
+# Sin privilegios, como la app: el worker solo hace peticiones HTTP y no
+# escribe en disco. La imagen base ya trae el usuario `node`.
+USER node
+
 EXPOSE 8080
 HEALTHCHECK --interval=60s --timeout=5s --start-period=15s --retries=3 \
     CMD node -e "fetch('http://localhost:'+(process.env.PORT||8080)+'/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"

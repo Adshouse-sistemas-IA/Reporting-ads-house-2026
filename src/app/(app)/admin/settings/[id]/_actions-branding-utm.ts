@@ -1,5 +1,6 @@
 'use server';
 
+import { exigirAccesoClienteUtm } from '@/lib/acceso/clientes';
 import { revalidatePath } from 'next/cache';
 import { reportUtmClient } from '@/lib/report-utm/client';
 import { checkWriteRole } from '@/lib/report-utm/auth';
@@ -18,6 +19,7 @@ export async function updateClienteBrandingAction(
   id: string,
   branding: { logo_url?: string; accent?: string }
 ) {
+  await exigirAccesoClienteUtm(id, 'operacion');
   const { ok } = await checkWriteRole();
   if (!ok) return { ok: false, error: 'No tienes permisos para editar el branding.' };
 

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { exigirClienteUtmOGlobal, guardaRuta } from '@/lib/acceso/clientes';
 import { parseBiQueryParams, esConsultaDeValores } from '@/lib/report-utm/bi-query-params';
 import { dispatchBiQuery } from '@/lib/report-utm/bi-dispatch';
 import { createClient } from '@/utils/supabase/server';
@@ -14,6 +15,8 @@ export async function GET(req: NextRequest) {
 
   try {
     const parsed = parseBiQueryParams(req.nextUrl.searchParams);
+    const denegado = await guardaRuta(() => exigirClienteUtmOGlobal(parsed.cliente_id, 'lectura'));
+    if (denegado) return denegado;
     const result = await dispatchBiQuery(parsed);
     if (result.error) {
       return NextResponse.json({ error: result.error }, { status: result.status ?? 400 });

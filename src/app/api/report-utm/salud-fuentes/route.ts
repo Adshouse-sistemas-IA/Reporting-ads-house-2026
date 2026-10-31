@@ -5,6 +5,7 @@
 // vacío, así que nadie lo reporta.
 
 import { NextResponse } from 'next/server';
+import { exigirConsultaGlobal, guardaRuta } from '@/lib/acceso/clientes';
 import { createClient } from '@/utils/supabase/server';
 import { saludDeTodos } from '@/lib/report-utm/salud-fuentes-db';
 
@@ -16,6 +17,8 @@ export async function GET() {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  const denegado = await guardaRuta(() => exigirConsultaGlobal());
+  if (denegado) return denegado;
 
   try {
     const clientes = await saludDeTodos();

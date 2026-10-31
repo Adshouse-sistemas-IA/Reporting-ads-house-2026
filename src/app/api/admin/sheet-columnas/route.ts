@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { exigirAccesoCliente, guardaRuta } from '@/lib/acceso/clientes';
 import { createClient } from '@supabase/supabase-js';
 import { listarColumnasDisponibles } from '@/lib/sheets/campos-db';
 import { normalizeSheetConfigs } from '@/lib/integrations/google-sheets-conversiones';
@@ -26,6 +27,8 @@ export async function GET(request: NextRequest) {
   const clienteId = request.nextUrl.searchParams.get('cliente_id');
   if (!esUuid(clienteId))
     return NextResponse.json({ error: 'cliente_id debe ser un UUID válido' }, { status: 400 });
+  const denegado = await guardaRuta(() => exigirAccesoCliente(clienteId, 'lectura'));
+  if (denegado) return denegado;
 
   try {
     const db = createClient(

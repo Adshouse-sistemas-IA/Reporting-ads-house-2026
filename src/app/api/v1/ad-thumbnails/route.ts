@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createAdminClient, createClient } from '@/utils/supabase/server';
 import { clientesVisiblesDe } from '@/lib/agent/context';
+import { abrirToken } from '@/lib/credenciales-ads';
 
 export interface AdThumbnailInfo {
   thumbnail: string | null;
@@ -53,7 +54,8 @@ export async function GET(request: Request) {
   }
 
   const config = cliente.config_api as any;
-  const token: string = config?.meta_token || config?.meta_accounts?.[0]?.token || '';
+  const token: string =
+    abrirToken(config?.meta_token) || abrirToken(config?.meta_accounts?.[0]?.token);
 
   if (!token) {
     return NextResponse.json({ error: 'No Meta token configured' }, { status: 422 });

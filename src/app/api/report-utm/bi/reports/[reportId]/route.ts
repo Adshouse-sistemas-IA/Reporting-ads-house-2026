@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { exigirAccesoClienteUtm, exigirAccesoInforme, guardaRuta } from '@/lib/acceso/clientes';
 import { createClient, createAdminClient } from '@/utils/supabase/server';
 
 export const dynamic = 'force-dynamic';
@@ -13,6 +14,8 @@ export async function GET(_req: NextRequest, { params }: Params) {
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
   const { reportId } = await params;
+  const denegado = await guardaRuta(() => exigirAccesoInforme(reportId, 'lectura'));
+  if (denegado) return denegado;
   const db = await createAdminClient();
   const { data, error } = await db.from('bi_reports').select('*').eq('id', reportId).maybeSingle();
 
@@ -41,6 +44,12 @@ export async function PATCH(req: NextRequest, { params }: Params) {
   ];
   const patch: Record<string, unknown> = {};
   for (const k of allowed) if (k in body) patch[k] = body[k];
+  const denegado = await guardaRuta(async () => {
+    await exigirAccesoInforme(reportId, 'operacion');
+    // Mover un informe a otro cliente exige poder operar también el destino.
+    if (patch.cliente_id) await exigirAccesoClienteUtm(String(patch.cliente_id), 'operacion');
+  });
+  if (denegado) return denegado;
 
   const db = await createAdminClient();
   const { data, error } = await db
@@ -62,6 +71,8 @@ export async function DELETE(_req: NextRequest, { params }: Params) {
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
   const { reportId } = await params;
+  const denegado = await guardaRuta(() => exigirAccesoInforme(reportId, 'operacion'));
+  if (denegado) return denegado;
 
   // Proteger las plantillas del SISTEMA (las sembradas, sin autor). Las
   // plantillas creadas por el equipo (created_by) sí se pueden eliminar.

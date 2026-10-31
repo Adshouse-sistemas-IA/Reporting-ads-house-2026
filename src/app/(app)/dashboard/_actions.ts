@@ -1,5 +1,11 @@
 'use server';
 
+import {
+  exigirAccesoCliente,
+  exigirAccesoClienteOToken,
+  exigirSesion,
+} from '@/lib/acceso/clientes';
+import { leerFrescuraDatos } from '@/lib/dashboard/frescura-db';
 import { createAdminClient, createClient } from '@/utils/supabase/server';
 import { conZonaDeCliente } from '@/lib/zona-activa';
 import { filterCampaignList, parseTabFilter } from '@/lib/campaign-filter';
@@ -111,6 +117,7 @@ export type SheetsSyncResult = {
  * `recalcularCamposCliente`, que es lo único que repuebla el desglose diario.
  */
 export async function triggerSheetsSync(clientId: string): Promise<SheetsSyncResult> {
+  await exigirAccesoCliente(clientId, 'operacion');
   if (!clientId) return { ok: false, configured: false, error: 'Cliente inválido' };
 
   try {
@@ -181,6 +188,7 @@ export async function triggerWorkerSync(
   from: string,
   to: string
 ): Promise<SyncResult> {
+  await exigirAccesoCliente(clientId, 'operacion');
   if (!clientId || !from || !to) {
     return { ok: false, error: 'Parámetros inválidos', platform_status: null };
   }
@@ -334,6 +342,7 @@ export async function triggerWorkerSync(
  * cuando en realidad nadie ha procesado los jobs todavía.
  */
 export async function getSyncProgress(clienteId: string, from: string, to: string) {
+  await exigirAccesoCliente(clienteId, 'lectura');
   const supabase = await createAdminClient();
   // Ventana amplia para no confundir jobs de este sync con los del plan diario
   // de días anteriores (que siguen en la tabla como 'done' hasta la limpieza).
@@ -373,29 +382,12 @@ export async function getSyncProgress(clienteId: string, from: string, to: strin
  * viejos guardados).
  */
 export async function getDataFreshness(clienteId: string) {
-  const supabase = await createAdminClient();
-  const [metricaRes, runRes] = await Promise.all([
-    supabase
-      .from('metricas_diarias')
-      .select('fecha, synced_at, source_synced_at, is_partial')
-      .eq('cliente_id', clienteId)
-      .order('synced_at', { ascending: false, nullsFirst: false })
-      .limit(1)
-      .maybeSingle(),
-    supabase
-      .from('sync_runs')
-      .select('estado, finished_at, error')
-      .or(`cliente_id.eq.${clienteId},cliente_id.is.null`)
-      .order('started_at', { ascending: false })
-      .limit(1)
-      .maybeSingle(),
-  ]);
-
-  if (metricaRes.error) return { data: null, lastRun: null, error: metricaRes.error.message };
-  return { data: metricaRes.data, lastRun: runRes.data ?? null, error: null };
+  await exigirAccesoCliente(clienteId, 'lectura');
+  return leerFrescuraDatos(clienteId);
 }
 
 export async function getLeadsDiarios(clientId: string) {
+  await exigirAccesoCliente(clientId, 'lectura');
   const supabase = await createAdminClient();
   const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
   const today = new Date().toISOString().split('T')[0];
@@ -413,6 +405,7 @@ export async function getLeadsDiarios(clientId: string) {
 }
 
 export async function getConversionesOfflineDiarias(clientId: string) {
+  await exigirAccesoCliente(clientId, 'lectura');
   const supabase = await createAdminClient();
   const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
   const today = new Date().toISOString().split('T')[0];
@@ -1163,6 +1156,7 @@ async function cargarMetricasEnriquecidasEnZona(
 }
 
 export async function getDashboardData(clientId: string, startStr: string, endStr: string) {
+  await exigirAccesoCliente(clientId, 'lectura');
   const supabase = await createAdminClient();
 
   // Fetch client + global assigned layout + client tabs + conversions catalog + campaign groups + all layout templates
@@ -1330,6 +1324,7 @@ export async function getDashboardData(clientId: string, startStr: string, endSt
  * If the client already has a custom layout, it gets replaced.
  */
 export async function cloneLayoutForCliente(clienteId: string, globalLayoutId: string) {
+  await exigirAccesoCliente(clienteId, 'operacion');
   const supabase = await createAdminClient();
 
   // Fetch the global template
@@ -1389,6 +1384,7 @@ export async function saveClienteLayout(
     lead_answer_blocks?: any[];
   }
 ) {
+  await exigirAccesoCliente(clienteId, 'operacion');
   const supabase = await createAdminClient();
 
   const { nombre, ...bloques } = payload;
@@ -1422,6 +1418,7 @@ export async function saveClienteLayout(
  * Remove the client-specific layout so it falls back to global/classic.
  */
 export async function resetClienteLayout(clienteId: string) {
+  await exigirAccesoCliente(clienteId, 'operacion');
   const supabase = await createAdminClient();
   await supabase.from('clientes_layouts').delete().eq('cliente_id', clienteId);
   revalidatePath(`/dashboard/${clienteId}`);
@@ -1468,6 +1465,7 @@ export async function saveClienteTab(
     } | null;
   }
 ) {
+  await exigirAccesoCliente(clienteId, 'operacion');
   const supabase = await createAdminClient();
 
   // hotmart_funnel: undefined = no tocar (solo en edición); null o objeto = setear (incluyendo "deshabilitar")
@@ -1579,6 +1577,7 @@ export async function saveClienteTab(
  * asignan con un selector. Es la consulta que sirve `idx_hotmart_ventas_oferta`.
  */
 export async function getOfertasHotmart(clienteId: string, dias = 90) {
+  await exigirAccesoCliente(clienteId, 'lectura');
   const supabase = await createAdminClient();
   const desde = addDaysISO(colombiaToday(), -dias);
 
@@ -1639,6 +1638,7 @@ export async function getOfertasHotmart(clienteId: string, dias = 90) {
  * Delete a client tab.
  */
 export async function deleteClienteTab(clienteId: string, tabId: string) {
+  await exigirAccesoCliente(clienteId, 'operacion');
   const supabase = await createAdminClient();
   const { error } = await supabase
     .from('cliente_tabs')
@@ -1654,6 +1654,7 @@ export async function deleteClienteTab(clienteId: string, tabId: string) {
  * Toggle the archived status of a client tab.
  */
 export async function toggleTabArchived(clienteId: string, tabId: string, archived: boolean) {
+  await exigirAccesoCliente(clienteId, 'operacion');
   const supabase = await createAdminClient();
   const { error } = await supabase
     .from('cliente_tabs')
@@ -1669,6 +1670,7 @@ export async function toggleTabArchived(clienteId: string, tabId: string, archiv
  * Duplicate a client tab.
  */
 export async function duplicateClienteTab(clienteId: string, tabId: string) {
+  await exigirAccesoCliente(clienteId, 'operacion');
   const supabase = await createAdminClient();
 
   const { data: source, error: fetchError } = await supabase
@@ -1722,6 +1724,7 @@ const TAB_VIZ_FIELDS = [
  * List all global tab templates (for the "new tab" selector).
  */
 export async function listTabTemplates() {
+  await exigirSesion();
   const supabase = await createAdminClient();
   const { data, error } = await supabase
     .from('tab_templates')
@@ -1742,6 +1745,7 @@ export async function saveTabAsTemplate(
   nombre: string,
   descripcion?: string
 ) {
+  await exigirAccesoCliente(clienteId, 'operacion');
   if (!nombre?.trim()) return { error: 'El nombre de la plantilla es obligatorio' };
   const supabase = await createAdminClient();
 
@@ -1791,8 +1795,10 @@ export async function saveTabAsTemplate(
  * Apply a template's visualization onto an existing tab (replaces its layout).
  */
 export async function applyTemplateToTab(clienteId: string, tabId: string, templateId: string) {
+  await exigirAccesoCliente(clienteId, 'operacion');
   const supabase = await createAdminClient();
 
+  await exigirSesion('operacion');
   const { data: template, error: tErr } = await supabase
     .from('tab_templates')
     .select('*')
@@ -1818,6 +1824,7 @@ export async function applyTemplateToTab(clienteId: string, tabId: string, templ
  * Rename / re-describe a global tab template.
  */
 export async function renameTabTemplate(templateId: string, nombre: string, descripcion?: string) {
+  await exigirSesion('operacion');
   if (!nombre?.trim()) return { error: 'El nombre es obligatorio' };
   const supabase = await createAdminClient();
   const { error } = await supabase
@@ -1837,6 +1844,7 @@ export async function renameTabTemplate(templateId: string, nombre: string, desc
  * Delete a global tab template.
  */
 export async function deleteTabTemplate(templateId: string) {
+  await exigirSesion('operacion');
   const supabase = await createAdminClient();
   const { error } = await supabase.from('tab_templates').delete().eq('id', templateId);
   if (error) return { error: error.message };
@@ -1861,6 +1869,7 @@ export async function saveTabOverrides(
     lead_answer_blocks?: any[] | null;
   }
 ) {
+  await exigirAccesoCliente(clienteId, 'operacion');
   const supabase = await createAdminClient();
   const { data, error } = await supabase
     .from('cliente_tabs')
@@ -1910,6 +1919,7 @@ export async function updateLayoutPuzzleState(
     };
   }
 ) {
+  await exigirAccesoCliente(clienteId, 'operacion');
   const supabase = await createAdminClient();
 
   if (tabId && tabId !== 'general') {
@@ -1989,6 +1999,7 @@ export async function updateManualMetric(
   key: string,
   value: number
 ) {
+  await exigirAccesoCliente(clienteId, 'operacion');
   const supabase = await createAdminClient();
 
   // Retrieve existing metric row for this date
@@ -2040,8 +2051,11 @@ export async function getTabTotalSpend(
   clienteId: string,
   keywordFilter: string,
   fechaInicio?: string,
-  fechaFin?: string
+  fechaFin?: string,
+  /** Token del espejo público `/p/<token>`: allí no hay sesión. */
+  tokenPublico?: string | null
 ) {
+  await exigirAccesoClienteOToken(clienteId, tokenPublico);
   const supabase = await createAdminClient();
   let query = supabase
     .from('metricas_diarias')
@@ -2101,6 +2115,7 @@ async function isTeamMember(): Promise<boolean> {
 }
 
 export async function getAllSoporteTickets() {
+  await exigirSesion('admin');
   const supabase = await createAdminClient();
   const { data, error } = await supabase
     .from('soporte_tickets')
@@ -2113,6 +2128,7 @@ export async function getAllSoporteTickets() {
 }
 
 export async function getSoporteTickets(clienteId: string) {
+  await exigirAccesoCliente(clienteId, 'lectura');
   const supabase = await createAdminClient();
   const { data, error } = await supabase
     .from('soporte_tickets')
@@ -2134,6 +2150,8 @@ export async function createSoporteTicket(payload: {
   fecha_entrega?: string;
 }) {
   if (!(await isTeamMember())) return { error: 'No autorizado' };
+  if (payload.cliente_id) await exigirAccesoCliente(payload.cliente_id, 'lectura');
+  else await exigirSesion();
 
   const supabase = await createAdminClient();
   const { data, error } = await supabase
@@ -2193,6 +2211,9 @@ export async function updateSoporteTicket(
   }
 ) {
   if (!(await isTeamMember())) return { error: 'No autorizado' };
+  await exigirSesion('operacion');
+  if (clienteId) await exigirAccesoCliente(clienteId, 'operacion');
+  if (payload.cliente_id) await exigirAccesoCliente(payload.cliente_id, 'operacion');
 
   const supabase = await createAdminClient();
 
@@ -2443,6 +2464,9 @@ export async function getMirrorDashboardData(token: string, from?: string, to?: 
       availablePlatforms: Array.from(availablePlatforms),
       campaignGroups: campaignGroupsRes.data || [],
       isMirror: true,
+      // El navegador del espejo lo devuelve a las lecturas que hace por su
+      // cuenta (gasto de la pestaña): sin sesión, es lo que las autoriza.
+      tokenPublico: token,
     },
     error: null,
   };
@@ -2465,6 +2489,7 @@ export async function savePublicConfig(
   clienteId: string,
   patch: { tabIds?: string[]; branding?: PublicBranding }
 ) {
+  await exigirAccesoCliente(clienteId, 'operacion');
   const supabase = await createAdminClient();
 
   const { data: current } = await supabase
@@ -2502,12 +2527,25 @@ export async function savePublicConfig(
 
 /** Compat: guarda solo las pestañas visibles, conservando el branding. */
 export async function savePublicTabConfig(clienteId: string, tabIds: string[]) {
+  await exigirAccesoCliente(clienteId, 'operacion');
   return savePublicConfig(clienteId, { tabIds });
 }
 
 export async function getOrCreatePublicToken(id: string, type: 'client' | 'tab') {
   const supabase = await createAdminClient();
   const table = type === 'client' ? 'clientes' : 'cliente_tabs';
+  if (type === 'client') {
+    await exigirAccesoCliente(id, 'operacion');
+  } else {
+    const { data: tab, error: eTab } = await supabase
+      .from('cliente_tabs')
+      .select('cliente_id')
+      .eq('id', id)
+      .maybeSingle();
+    if (eTab) return { error: eTab.message };
+    if (!tab) return { error: 'Pestaña no encontrada' };
+    await exigirAccesoCliente(tab.cliente_id as string, 'operacion');
+  }
 
   // 1. Try to fetch existing
   const { data: existing } = await supabase
@@ -2543,6 +2581,7 @@ export async function promoverCampoLead(
   publicClienteId: string,
   input: { nombre: string; clavesOrigen: string[] }
 ): Promise<{ error?: string; clave?: string }> {
+  await exigirAccesoCliente(publicClienteId, 'admin');
   const role = await getUserRole();
   if (!role || !['superadmin', 'admin'].includes(role)) {
     return { error: 'Solo un administrador puede crear campos de lead.' };
@@ -2591,6 +2630,7 @@ export async function getArchiveMetrics(
   clientId: string,
   conFilasOffline = false
 ): Promise<{ metrics: any[] } | null> {
+  await exigirAccesoCliente(clientId, 'lectura');
   const supabase = await createAdminClient();
   try {
     const hoy = new Date().toISOString().split('T')[0];

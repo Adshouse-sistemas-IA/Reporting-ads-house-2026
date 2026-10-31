@@ -96,6 +96,7 @@ interface MetaAccount {
 function MetaAccountRow({
   account,
   sharedToken,
+  tokenGuardado,
   testStatus,
   onChange,
   onRemove,
@@ -103,6 +104,8 @@ function MetaAccountRow({
 }: {
   account: MetaAccount;
   sharedToken: string;
+  /** El servidor tiene un token propio guardado para esta cuenta (llega enmascarado). */
+  tokenGuardado: boolean;
   testStatus?: { loading: boolean; success?: boolean; error?: string };
   onChange: (updated: MetaAccount) => void;
   onRemove: () => void;
@@ -138,12 +141,13 @@ function MetaAccountRow({
         </div>
         <div className="space-y-1.5">
           <Label className="text-muted-foreground text-xs">Token propio (opcional)</Label>
-          <Input
-            type="password"
-            placeholder={sharedToken ? 'Usa token compartido' : 'EAA...'}
-            value={account.token}
-            onChange={(e) => onChange({ ...account, token: e.target.value })}
+          <CampoSecreto
+            id={`meta_token_${account.id}`}
+            valor={account.token}
+            hayGuardado={tokenGuardado}
+            onCambio={(v) => onChange({ ...account, token: v })}
             className="bg-background border-input h-8 text-sm"
+            placeholderVacio={sharedToken ? 'Usa token compartido' : 'EAA...'}
           />
         </div>
       </div>
@@ -189,6 +193,7 @@ interface TikTokAccount {
 function TikTokAccountRow({
   account,
   sharedToken,
+  tokenGuardado,
   testStatus,
   onChange,
   onRemove,
@@ -196,6 +201,8 @@ function TikTokAccountRow({
 }: {
   account: TikTokAccount;
   sharedToken: string;
+  /** El servidor tiene un token propio guardado para esta cuenta (llega enmascarado). */
+  tokenGuardado: boolean;
   testStatus?: { loading: boolean; success?: boolean; error?: string };
   onChange: (updated: TikTokAccount) => void;
   onRemove: () => void;
@@ -231,12 +238,13 @@ function TikTokAccountRow({
         </div>
         <div className="space-y-1.5">
           <Label className="text-muted-foreground text-xs">Token propio (opcional)</Label>
-          <Input
-            type="password"
-            placeholder={sharedToken ? 'Usa token compartido' : 'Token...'}
-            value={account.access_token}
-            onChange={(e) => onChange({ ...account, access_token: e.target.value })}
+          <CampoSecreto
+            id={`tiktok_token_${account.id}`}
+            valor={account.access_token}
+            hayGuardado={tokenGuardado}
+            onCambio={(v) => onChange({ ...account, access_token: v })}
             className="bg-background border-input h-8 text-sm"
+            placeholderVacio={sharedToken ? 'Usa token compartido' : 'Token...'}
           />
         </div>
       </div>
@@ -296,11 +304,16 @@ function CampoSecreto({
   valor,
   hayGuardado,
   onCambio,
+  className = 'bg-background border-input',
+  placeholderVacio = '',
 }: {
   id: string;
   valor: unknown;
   hayGuardado: boolean;
   onCambio: (valor: string) => void;
+  className?: string;
+  /** Placeholder cuando no hay nada guardado ni escrito. */
+  placeholderVacio?: string;
 }) {
   const conservado = valor === SECRETO_GUARDADO;
   const texto = conservado ? '' : String(valor ?? '');
@@ -312,12 +325,16 @@ function CampoSecreto({
         autoComplete="new-password"
         value={texto}
         placeholder={
-          conservado ? '•••••••• guardado' : hayGuardado && !texto ? 'Se borrará al guardar' : ''
+          conservado
+            ? '•••••••• guardado'
+            : hayGuardado && !texto
+              ? 'Se borrará al guardar'
+              : placeholderVacio
         }
         onChange={(e) =>
           onCambio(e.target.value === '' && hayGuardado ? SECRETO_GUARDADO : e.target.value)
         }
-        className="bg-background border-input"
+        className={className}
       />
       {hayGuardado && (
         <p className="text-xs text-muted-foreground">
@@ -631,7 +648,8 @@ export function ClientConfigForm({
     setLoadingMetaAccounts(true);
     setMetaPickerError(null);
     try {
-      const res = await fetchMetaAdAccounts(token);
+      // `token` puede ser SECRETO_GUARDADO: el servidor usa el guardado del cliente.
+      const res = await fetchMetaAdAccounts(token, cliente.id);
       if (res.error) {
         setMetaPickerError(res.error);
         setAvailableMetaAccounts([]);
@@ -788,6 +806,38 @@ export function ClientConfigForm({
           )
         );
       }
+      if (p === 'meta' || p === 'tiktok') {
+        // Los tokens ya están cifrados en la base: el campo vuelve al marcador y
+        // el token tecleado deja de vivir en la memoria de la página.
+        // La línea base se calcula con las cuentas YA enmascaradas; con las del
+        // estado anterior la pestaña quedaría marcada como «sin guardar».
+        const enmascarar = (v: unknown) =>
+          typeof v === 'string' && v.trim() !== '' ? SECRETO_GUARDADO : v;
+        const metaMasc =
+          p === 'meta'
+            ? metaAccounts.map((a) => ({ ...a, token: enmascarar(a.token) as string }))
+            : metaAccounts;
+        const tiktokMasc =
+          p === 'tiktok'
+            ? tiktokAccounts.map((a) => ({
+                ...a,
+                access_token: enmascarar(a.access_token) as string,
+              }))
+            : tiktokAccounts;
+        const siguiente = {
+          ...config,
+          ...(p === 'meta'
+            ? { meta_token: enmascarar(config.meta_token) }
+            : { tiktok_access_token: enmascarar(config.tiktok_access_token) }),
+        };
+        setMetaAccounts(metaMasc);
+        setTiktokAccounts(tiktokMasc);
+        setConfig(siguiente);
+        setGuardado((g) => ({
+          ...g,
+          [p]: huella(construirParche(construirConfigEfectiva(siguiente, metaMasc, tiktokMasc), p)),
+        }));
+      }
       if (p === 'google') {
         // Lo guardado ya tiene (o tendrá) datos colgando de su sheet_id: a
         // partir de aquí el documento no se cambia, se elimina y se añade otro.
@@ -873,7 +923,7 @@ export function ClientConfigForm({
     setLoadingTiktokAccounts(true);
     setTiktokPickerError(null);
     try {
-      const res = await fetchTikTokAdAccounts(token);
+      const res = await fetchTikTokAdAccounts(token, cliente.id);
       if (res.error) {
         setTiktokPickerError(res.error);
         setAvailableTiktokAccounts([]);
@@ -995,6 +1045,24 @@ export function ClientConfigForm({
    */
   function hayGuardado(clave: string) {
     return cliente.config_api?.[clave] === SECRETO_GUARDADO || config[clave] === SECRETO_GUARDADO;
+  }
+
+  /** ¿El servidor tiene guardado el token propio de esta cuenta (Meta o TikTok)? */
+  function tokenPropioGuardado(
+    lista: 'meta_accounts' | 'tiktok_accounts',
+    id: 'account_id' | 'advertiser_id',
+    token: 'token' | 'access_token',
+    cuenta: Record<string, any>
+  ): boolean {
+    if (cuenta[token] === SECRETO_GUARDADO) return true;
+    const guardadas = cliente.config_api?.[lista];
+    return (
+      Array.isArray(guardadas) &&
+      guardadas.some(
+        (g: Record<string, any>) =>
+          String(g?.[id] ?? '') === String(cuenta[id] ?? '') && g?.[token] === SECRETO_GUARDADO
+      )
+    );
   }
 
   async function testHotmart() {
@@ -1466,13 +1534,12 @@ export function ClientConfigForm({
                 <Label htmlFor="meta_token" className="text-foreground/90">
                   Access Token Compartido
                 </Label>
-                <Input
+                <CampoSecreto
                   id="meta_token"
-                  type="password"
-                  placeholder="EAA..."
-                  value={config.meta_token || ''}
-                  onChange={(e) => setConfig({ ...config, meta_token: e.target.value })}
-                  className="bg-background border-input"
+                  valor={config.meta_token}
+                  hayGuardado={hayGuardado('meta_token')}
+                  onCambio={(v) => setConfig({ ...config, meta_token: v })}
+                  placeholderVacio="EAA..."
                 />
                 <p className="text-xs text-muted-foreground">
                   Se completa automáticamente al conectar por OAuth. Si una cuenta no tiene token
@@ -1592,12 +1659,22 @@ export function ClientConfigForm({
                     key={acct.id}
                     account={acct}
                     sharedToken={config.meta_token || ''}
+                    tokenGuardado={tokenPropioGuardado(
+                      'meta_accounts',
+                      'account_id',
+                      'token',
+                      acct
+                    )}
                     testStatus={testStatus[`meta_${acct.id}`]}
                     onChange={(updated) => updateAccount(idx, updated)}
                     onRemove={() => removeAccount(idx)}
                     onTest={() =>
                       runTest(`meta_${acct.id}`, () =>
-                        testMetaConnection(acct.token || config.meta_token, acct.account_id)
+                        testMetaConnection(
+                          acct.token || config.meta_token,
+                          acct.account_id,
+                          cliente.id
+                        )
                       )
                     }
                   />
@@ -3274,12 +3351,12 @@ export function ClientConfigForm({
               {/* Shared token */}
               <div className="space-y-2">
                 <Label className="text-foreground/90">Access Token Compartido</Label>
-                <Input
-                  type="password"
-                  placeholder="Tu TikTok Marketing API Access Token"
-                  value={config.tiktok_access_token || ''}
-                  onChange={(e) => setConfig({ ...config, tiktok_access_token: e.target.value })}
-                  className="bg-background border-input"
+                <CampoSecreto
+                  id="tiktok_access_token"
+                  valor={config.tiktok_access_token}
+                  hayGuardado={hayGuardado('tiktok_access_token')}
+                  onCambio={(v) => setConfig({ ...config, tiktok_access_token: v })}
+                  placeholderVacio="Tu TikTok Marketing API Access Token"
                 />
                 <p className="text-xs text-muted-foreground">
                   Token OAuth o token manual. Las cuentas sin token propio usarán este.
@@ -3432,6 +3509,12 @@ export function ClientConfigForm({
                     key={acct.id}
                     account={acct}
                     sharedToken={config.tiktok_access_token || ''}
+                    tokenGuardado={tokenPropioGuardado(
+                      'tiktok_accounts',
+                      'advertiser_id',
+                      'access_token',
+                      acct
+                    )}
                     testStatus={testStatus[`tiktok_${acct.id}`]}
                     onChange={(updated) => updateTikTokAccount(idx, updated)}
                     onRemove={() => removeTikTokAccount(idx)}
@@ -3439,7 +3522,8 @@ export function ClientConfigForm({
                       runTest(`tiktok_${acct.id}`, () =>
                         testTikTokConnection(
                           acct.access_token || config.tiktok_access_token,
-                          acct.advertiser_id
+                          acct.advertiser_id,
+                          cliente.id
                         )
                       )
                     }

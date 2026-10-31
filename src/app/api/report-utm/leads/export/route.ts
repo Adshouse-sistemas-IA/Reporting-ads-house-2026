@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { exigirClienteUtmOGlobal, guardaRuta } from '@/lib/acceso/clientes';
 import { fijarZonaDeCliente } from '@/lib/zona-activa';
 import { reportUtmClient } from '@/lib/report-utm/client';
 import { columnaExcluidoDisponible, MOTIVOS_EXCLUSION } from '@/lib/report-utm/lead-exclusion';
@@ -98,6 +99,8 @@ function csvField(v: string): string {
 export async function GET(req: NextRequest) {
   const supabase = await reportUtmClient();
   const f = leerFiltros(req.nextUrl.searchParams);
+  const denegado = await guardaRuta(() => exigirClienteUtmOGlobal(f.clienteId, 'operacion'));
+  if (denegado) return denegado;
   // Días del filtro y fecha de cada fila en la zona del cliente, como la página.
   if (f.clienteId) await fijarZonaDeCliente({ rtm: f.clienteId });
 

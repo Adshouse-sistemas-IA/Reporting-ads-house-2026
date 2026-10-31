@@ -3,6 +3,7 @@ import { createAdminClient } from '@/utils/supabase/server';
 import { cifrarSecreto, hayClaveDeCifrado } from '@/lib/secretos';
 import { verificarState, COOKIE_STATE, MOTIVO_STATE } from '@/lib/hotmart/oauth-state';
 import { HOTMART_AUTH_BASE } from '@/lib/hotmart/cliente';
+import { exigirAccesoCliente, guardaRuta } from '@/lib/acceso/clientes';
 
 const TOKEN_URL = `${HOTMART_AUTH_BASE}/security/oauth/token`;
 
@@ -51,6 +52,11 @@ export async function GET(request: NextRequest) {
     return res;
   }
   const clienteId = verificacion.clienteId;
+  // Defensa en profundidad: el `state` prueba que el flujo lo empezó este
+  // navegador; además, quien vuelve tiene que poder administrar el cliente.
+  if (await guardaRuta(() => exigirAccesoCliente(clienteId, 'admin'))) {
+    return errorUrl('Sin permiso para conectar integraciones de este cliente');
+  }
   const settingsUrl = `${appUrl}/admin/settings/${clienteId}`;
 
   if (!hayClaveDeCifrado()) {

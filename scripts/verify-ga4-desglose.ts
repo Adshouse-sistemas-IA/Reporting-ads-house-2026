@@ -598,9 +598,12 @@ seccion('OAuth de Google: el state firmado de la agencia');
       cb.indexOf('verificarStateGoogle(') < cb.indexOf('oauth.getToken(')
   );
   const ini = readFileSync('src/app/api/auth/google/route.ts', 'utf8');
+  // La conexión de Google es de toda la instalación: el inicio y el callback
+  // exigen el ajuste de plataforma (admin), de @/lib/acceso.
   check(
-    'iniciar el flujo exige sesión con rol admin',
-    ini.includes('auth.getUser()') && ini.includes("'superadmin'")
+    'iniciar el flujo exige ajuste de plataforma (admin)',
+    ini.includes("exigirAjustePlataforma('admin')") &&
+      cb.includes("exigirAjustePlataforma('admin')")
   );
   check('ya no manda el state fijo', !/state:\s*'agency'/.test(ini));
 }

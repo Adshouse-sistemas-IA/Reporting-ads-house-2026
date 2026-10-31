@@ -1,9 +1,11 @@
 'use server';
 
-import { createClient, createAdminClient } from '@/utils/supabase/server';
+import { createAdminClient } from '@/utils/supabase/server';
 import { notifyUsers } from '@/lib/notifications/notify';
 import { revalidatePath } from 'next/cache';
 import { after } from 'next/server';
+import { esUuid } from '@/lib/acceso/reglas';
+import { contextoAcceso } from '@/lib/acceso/clientes';
 
 type Role = 'superadmin' | 'admin' | 'trafficker' | 'viewer';
 
@@ -14,20 +16,47 @@ const ROLE_HIERARCHY: Record<Role, number> = {
   viewer: 1,
 };
 
-async function getCurrentUserRole(): Promise<{ userId: string; role: Role } | null> {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return null;
+const ROLES_VALIDOS: Role[] = ['superadmin', 'admin', 'trafficker', 'viewer'];
 
-  const { data: profile } = await supabase
+/**
+ * Rol actual de otro usuario, o un error. Falla cerrado: si la lectura falla o
+ * el perfil no existe NO se supone `viewer` (con un error puntual, un admin
+ * habría podido cambiar o borrar a otro admin).
+ */
+async function rolDeUsuario(
+  adminSupabase: Awaited<ReturnType<typeof createAdminClient>>,
+  userId: string
+): Promise<{ role: Role } | { error: string }> {
+  if (!esUuid(userId)) return { error: 'Usuario no encontrado' };
+  const { data, error } = await adminSupabase
     .from('user_profiles')
     .select('role')
-    .eq('id', user.id)
-    .single();
+    .eq('id', userId)
+    .maybeSingle();
+  if (error) return { error: `No se pudo leer el usuario: ${error.message}` };
+  const role = data?.role as Role | undefined;
+  if (!role || !ROLES_VALIDOS.includes(role)) return { error: 'Usuario no encontrado' };
+  return { role };
+}
 
-  return { userId: user.id, role: (profile?.role ?? 'viewer') as Role };
+/** ¿Existen todos estos clientes? Los ids llegan del navegador. */
+async function clientesExisten(
+  adminSupabase: Awaited<ReturnType<typeof createAdminClient>>,
+  clientIds: string[]
+): Promise<string | null> {
+  if (clientIds.length === 0) return null;
+  if (!clientIds.every(esUuid)) return 'Alguno de los clientes elegidos no es válido';
+  const { data, error } = await adminSupabase.from('clientes').select('id').in('id', clientIds);
+  if (error) return `No se pudieron comprobar los clientes: ${error.message}`;
+  if ((data ?? []).length !== new Set(clientIds).size)
+    return 'Alguno de los clientes elegidos no existe';
+  return null;
+}
+
+async function getCurrentUserRole(): Promise<{ userId: string; role: Role } | null> {
+  // Sesión y rol memoizados por petición; un rol desconocido cuenta como viewer.
+  const ctx = await contextoAcceso();
+  return ctx ? { userId: ctx.userId, role: ctx.rol } : null;
 }
 
 export async function getUsers() {
@@ -59,9 +88,13 @@ export async function getUsers() {
 export async function updateUserRole(targetUserId: string, newRole: string) {
   const current = await getCurrentUserRole();
   if (!current) return { error: 'No autorizado' };
+  // Antes un trafficker pasaba: «no subir a alguien a tu nivel» le dejaba
+  // bajar a viewer a cualquiera, también al superadmin.
+  if (!['superadmin', 'admin'].includes(current.role)) {
+    return { error: 'Sin permisos para cambiar roles' };
+  }
 
-  const validRoles: Role[] = ['superadmin', 'admin', 'trafficker', 'viewer'];
-  if (!validRoles.includes(newRole as Role)) return { error: 'Rol inválido' };
+  if (!ROLES_VALIDOS.includes(newRole as Role)) return { error: 'Rol inválido' };
 
   const newRoleLevel = ROLE_HIERARCHY[newRole as Role];
   const currentLevel = ROLE_HIERARCHY[current.role];
@@ -78,13 +111,10 @@ export async function updateUserRole(targetUserId: string, newRole: string) {
 
   // Get target user's current role
   const adminSupabase = await createAdminClient();
-  const { data: targetProfile } = await adminSupabase
-    .from('user_profiles')
-    .select('role')
-    .eq('id', targetUserId)
-    .single();
+  const objetivo = await rolDeUsuario(adminSupabase, targetUserId);
+  if ('error' in objetivo) return { error: objetivo.error };
 
-  const targetCurrentRole = (targetProfile?.role ?? 'viewer') as Role;
+  const targetCurrentRole = objetivo.role;
   const targetCurrentLevel = ROLE_HIERARCHY[targetCurrentRole];
 
   // Admin cannot modify superadmin or other admins
@@ -97,12 +127,18 @@ export async function updateUserRole(targetUserId: string, newRole: string) {
     return { error: 'No puedes reducir tu propio rol' };
   }
 
-  const { error } = await adminSupabase
+  // Solo si el rol sigue siendo el comprobado: si otro lo cambió entretanto,
+  // no se pisa una decisión que no se ha evaluado.
+  const { data: cambiado, error } = await adminSupabase
     .from('user_profiles')
     .update({ role: newRole, updated_at: new Date().toISOString() })
-    .eq('id', targetUserId);
+    .eq('id', targetUserId)
+    .eq('role', targetCurrentRole)
+    .select('id');
 
   if (error) return { error: error.message };
+  if (!cambiado?.length)
+    return { error: 'El rol del usuario cambió; recarga y vuelve a intentarlo' };
 
   revalidatePath('/admin/configuracion');
   return { success: true };
@@ -118,13 +154,10 @@ export async function deleteUser(userId: string) {
   const adminSupabase = await createAdminClient();
 
   // Admins cannot delete other admins or superadmins
-  const { data: targetProfile } = await adminSupabase
-    .from('user_profiles')
-    .select('role')
-    .eq('id', userId)
-    .single();
+  const objetivo = await rolDeUsuario(adminSupabase, userId);
+  if ('error' in objetivo) return { error: objetivo.error };
 
-  const targetRole = (targetProfile?.role ?? 'viewer') as Role;
+  const targetRole = objetivo.role;
   if (current.role === 'admin' && ROLE_HIERARCHY[targetRole] >= ROLE_HIERARCHY['admin']) {
     return { error: 'No puedes eliminar a un admin o superadmin' };
   }
@@ -167,32 +200,47 @@ export async function setClientAssignments(targetUserId: string, clientIds: stri
 
   const adminSupabase = await createAdminClient();
 
+  // Un admin no toca las asignaciones de otro admin ni del superadmin.
+  const objetivo = await rolDeUsuario(adminSupabase, targetUserId);
+  if ('error' in objetivo) return { error: objetivo.error };
+  if (current.role === 'admin' && ROLE_HIERARCHY[objetivo.role] >= ROLE_HIERARCHY['admin']) {
+    return { error: 'No puedes modificar a un admin o superadmin' };
+  }
+  const pedidos = [...new Set(clientIds)];
+  const invalido = await clientesExisten(adminSupabase, pedidos);
+  if (invalido) return { error: invalido };
+
   // Capture previous assignments so we only notify about newly added clients
-  const { data: previous } = await adminSupabase
+  const { data: previous, error: prevError } = await adminSupabase
     .from('user_client_assignments')
     .select('client_id')
     .eq('user_id', targetUserId);
+  if (prevError) return { error: prevError.message };
   const previousIds = new Set((previous ?? []).map((r) => r.client_id));
 
-  // Delete all current assignments for this user
-  await adminSupabase.from('user_client_assignments').delete().eq('user_id', targetUserId);
+  // Solo la diferencia, y primero lo que se añade: antes se borraban todas y
+  // luego se insertaban, y un fallo entre medias dejaba al usuario sin clientes.
+  const addedIds = pedidos.filter((id) => !previousIds.has(id));
+  const removedIds = [...previousIds].filter((id) => !pedidos.includes(id));
 
-  if (clientIds.length === 0) {
-    revalidatePath('/admin/configuracion');
-    return { success: true };
+  if (addedIds.length > 0) {
+    const rows = addedIds.map((client_id) => ({
+      user_id: targetUserId,
+      client_id,
+      assigned_by: current.userId,
+    }));
+    const { error } = await adminSupabase.from('user_client_assignments').insert(rows);
+    if (error) return { error: error.message };
+  }
+  if (removedIds.length > 0) {
+    const { error } = await adminSupabase
+      .from('user_client_assignments')
+      .delete()
+      .eq('user_id', targetUserId)
+      .in('client_id', removedIds);
+    if (error) return { error: error.message };
   }
 
-  const rows = clientIds.map((client_id) => ({
-    user_id: targetUserId,
-    client_id,
-    assigned_by: current.userId,
-  }));
-
-  const { error } = await adminSupabase.from('user_client_assignments').insert(rows);
-
-  if (error) return { error: error.message };
-
-  const addedIds = clientIds.filter((id) => !previousIds.has(id));
   if (addedIds.length > 0) {
     // after() completa los inserts sin retrasar la respuesta
     after(() => notifyNewAssignments(adminSupabase, targetUserId, addedIds));
@@ -253,12 +301,19 @@ export async function createUser(input: {
     return { error: 'Sin permisos para crear usuarios' };
   }
 
+  // El tipo de TypeScript no llega al servidor: el rol se valida aquí.
+  if (!ROLES_VALIDOS.includes(input.role)) return { error: 'Rol inválido' };
   // Admin cannot create admins or superadmins
   if (current.role === 'admin' && ['superadmin', 'admin'].includes(input.role)) {
     return { error: 'Solo el superadmin puede crear admins' };
   }
 
   const adminSupabase = await createAdminClient();
+  // Los clientes se comprueban ANTES de crear el usuario: con uno inexistente
+  // no se crea nada.
+  const clientIds = [...new Set(input.clientIds ?? [])];
+  const invalido = await clientesExisten(adminSupabase, clientIds);
+  if (invalido) return { error: invalido };
 
   // 1. Create auth user
   const { data: authData, error: authError } = await adminSupabase.auth.admin.createUser({
@@ -286,16 +341,20 @@ export async function createUser(input: {
   }
 
   // 3. Assign clients if any
-  if (input.clientIds.length > 0) {
-    const rows = input.clientIds.map((client_id) => ({
+  if (clientIds.length > 0) {
+    const rows = clientIds.map((client_id) => ({
       user_id: newUserId,
       client_id,
       assigned_by: current.userId,
     }));
     const { error: assignError } = await adminSupabase.from('user_client_assignments').insert(rows);
-    if (!assignError) {
-      after(() => notifyNewAssignments(adminSupabase, newUserId, input.clientIds));
+    if (assignError) {
+      // Antes se ignoraba y se devolvía éxito: quedaba un usuario sin sus
+      // clientes. Todo o nada: se deshace el alta (el perfil cae en cascada).
+      await adminSupabase.auth.admin.deleteUser(newUserId);
+      return { error: `No se pudieron asignar sus clientes: ${assignError.message}` };
     }
+    after(() => notifyNewAssignments(adminSupabase, newUserId, clientIds));
   }
 
   revalidatePath('/admin/configuracion');
