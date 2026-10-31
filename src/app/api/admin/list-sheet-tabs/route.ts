@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { listSheetTabs } from '@/lib/integrations/google-sheets-conversiones';
 import type { ConversionesConfig } from '@/lib/integrations/google-sheets-conversiones';
-import { requireAdminRole } from '@/lib/report-utm/auth';
+import { exigirAjustePlataforma, guardaRuta } from '@/lib/acceso/clientes';
 
 /**
  * POST /api/admin/list-sheet-tabs
@@ -11,8 +11,9 @@ import { requireAdminRole } from '@/lib/report-utm/auth';
  * de teclear el nombre. No modifica nada en la DB.
  */
 export async function POST(request: NextRequest) {
-  // Guard de rol: el proxy ya exige sesión en /api/admin, esto añade el rol.
-  const denied = await requireAdminRole();
+  // Usa la cuenta de Google de la PLATAFORMA (ve las hojas y propiedades de
+  // todos los clientes): ajuste de plataforma (admin).
+  const denied = await guardaRuta(() => exigirAjustePlataforma('admin'));
   if (denied) return denied;
 
   try {

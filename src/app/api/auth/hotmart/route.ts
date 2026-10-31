@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/utils/supabase/server';
 import { firmarState, COOKIE_STATE, VENTANA_STATE_MS } from '@/lib/hotmart/oauth-state';
 import { HOTMART_AUTH_BASE } from '@/lib/hotmart/cliente';
+import { exigirAccesoCliente, guardaRuta } from '@/lib/acceso/clientes';
 
 /**
  * Inicia el flujo OAuth de Hotmart (HotConnect — authorization code).
@@ -24,21 +24,11 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'client_id requerido' }, { status: 400 });
   }
 
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) {
-    return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
-  }
-  const { data: perfil } = await supabase
-    .from('user_profiles')
-    .select('role')
-    .eq('id', user.id)
-    .single();
-  if (!['admin', 'superadmin'].includes(perfil?.role ?? '')) {
-    return NextResponse.json({ error: 'Sin permiso para conectar integraciones' }, { status: 403 });
-  }
+  // Hay que poder administrar ESTE cliente: el callback escribe el token en su
+  // configuración con la service role, así que el `state` solo se firma para
+  // un cliente que existe y que quien llama administra.
+  const denegado = await guardaRuta(() => exigirAccesoCliente(clienteId, 'admin'));
+  if (denegado) return denegado;
 
   const appClientId = process.env.HOTMART_APP_CLIENT_ID;
   if (!appClientId) {

@@ -23,6 +23,7 @@
 // la herramienta `list_report_fields` del agente.
 
 import { NextRequest, NextResponse } from 'next/server';
+import { exigirAccesoClienteUtm, guardaRuta } from '@/lib/acceso/clientes';
 import { createClient } from '@/utils/supabase/server';
 import { resolvePublicClienteId } from '@/lib/report-utm/campaign-resolver';
 import { catalogoEstatico } from '@/lib/report-utm/bi/catalogo-estatico';
@@ -40,6 +41,10 @@ export async function GET(req: NextRequest) {
   // La dimensión actual del widget: sirve para marcar de antemano qué campos
   // NO cruzan con ella, en vez de dejar que el usuario descubra el 0 después.
   const dimension = req.nextUrl.searchParams.get('dimension') ?? undefined;
+  if (clienteId) {
+    const denegado = await guardaRuta(() => exigirAccesoClienteUtm(clienteId, 'lectura'));
+    if (denegado) return denegado;
+  }
 
   try {
     // El puente `public_cliente_id` decide si media plataforma es legible.

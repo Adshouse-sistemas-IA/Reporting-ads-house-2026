@@ -6,6 +6,8 @@ import {
   pathCookieState,
   verificarStateCliente,
 } from '@/lib/integrations/oauth-state-cliente';
+import { sellarToken } from '@/lib/credenciales-ads';
+import { exigirAccesoCliente, guardaRuta } from '@/lib/acceso/clientes';
 
 const COOKIE = { name: COOKIE_STATE_OAUTH.tiktok, path: pathCookieState('tiktok') };
 
@@ -49,6 +51,11 @@ export async function GET(request: NextRequest) {
   // Sin tocar TikTok ni la base de datos: ese es el punto.
   if (!verificacion.ok) return errorUrl(MOTIVO_STATE[verificacion.motivo]);
   const clientId = verificacion.clienteId;
+  // Defensa en profundidad: el `state` prueba que el flujo lo empezó este
+  // navegador; además, quien vuelve tiene que poder administrar el cliente.
+  if (await guardaRuta(() => exigirAccesoCliente(clientId, 'admin'))) {
+    return errorUrl('Sin permiso para conectar integraciones de este cliente');
+  }
 
   const appId = process.env.TIKTOK_APP_ID!;
   const appSecret = process.env.TIKTOK_APP_SECRET!;
@@ -81,7 +88,8 @@ export async function GET(request: NextRequest) {
   const supabase = await createAdminClient();
   const { data: config, error: rpcError } = await supabase.rpc('fusionar_config_api', {
     p_cliente_id: clientId,
-    p_parche: { tiktok_access_token: accessToken },
+    // Cifrado en reposo (src/lib/credenciales-ads.ts). Lanza sin RUTM_ENCRYPTION_KEY.
+    p_parche: { tiktok_access_token: sellarToken(accessToken) },
   });
 
   if (rpcError) return errorUrl(rpcError.message, clientId);

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { exigirAccesoClienteUtm, guardaRuta } from '@/lib/acceso/clientes';
 import { createClient, createAdminClient } from '@/utils/supabase/server';
 import { loadCamposCliente } from '@/lib/sheets/campos-db';
 import { fetchAllRows } from '@/lib/supabase-paginate';
@@ -31,6 +32,8 @@ export async function GET(req: NextRequest) {
 
   const clienteId = req.nextUrl.searchParams.get('cliente_id');
   if (!clienteId) return NextResponse.json({ data: { fields: [], views: [] } });
+  const denegado = await guardaRuta(() => exigirAccesoClienteUtm(clienteId, 'lectura'));
+  if (denegado) return denegado;
 
   try {
     const admin = await createAdminClient();

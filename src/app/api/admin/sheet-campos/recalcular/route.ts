@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { exigirAccesoCliente, guardaRuta } from '@/lib/acceso/clientes';
 import { createClient } from '@supabase/supabase-js';
 import { recalcularCamposCliente } from '@/lib/sheets/campos-db';
 import { requireAdminRole } from '@/lib/report-utm/auth';
@@ -26,6 +27,8 @@ export async function POST(request: NextRequest) {
     if (!esUuid(cliente_id)) {
       return NextResponse.json({ error: 'cliente_id debe ser un UUID válido' }, { status: 400 });
     }
+    const denegado = await guardaRuta(() => exigirAccesoCliente(cliente_id, 'operacion'));
+    if (denegado) return denegado;
 
     const db = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,

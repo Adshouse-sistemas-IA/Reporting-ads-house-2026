@@ -3,6 +3,7 @@
 // se configuren scorecards que van a mostrar 0 sin explicación.
 
 import { NextRequest, NextResponse } from 'next/server';
+import { exigirClienteUtmOGlobal, guardaRuta } from '@/lib/acceso/clientes';
 import { getMetricAvailability } from '@/lib/report-utm/bi-availability';
 import { createClient } from '@/utils/supabase/server';
 
@@ -16,6 +17,8 @@ export async function GET(req: NextRequest) {
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
   const sp = req.nextUrl.searchParams;
+  const denegado = await guardaRuta(() => exigirClienteUtmOGlobal(sp.get('cliente_id'), 'lectura'));
+  if (denegado) return denegado;
   try {
     const data = await getMetricAvailability({
       cliente_id: sp.get('cliente_id') ?? undefined,

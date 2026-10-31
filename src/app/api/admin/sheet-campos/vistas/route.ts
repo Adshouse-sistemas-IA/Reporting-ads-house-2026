@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { exigirAccesoCliente, guardaRuta } from '@/lib/acceso/clientes';
 import { createClient } from '@supabase/supabase-js';
 import { loadCamposCliente } from '@/lib/sheets/campos-db';
 import { slugCampo } from '@/lib/sheets/campos';
@@ -43,6 +44,8 @@ export async function POST(request: NextRequest) {
     }
 
     const nombre = String(body.nombre ?? '').trim();
+    const denegado = await guardaRuta(() => exigirAccesoCliente(clienteId, 'operacion'));
+    if (denegado) return denegado;
     if (!nombre)
       return NextResponse.json({ error: 'La vista necesita un nombre' }, { status: 400 });
 
@@ -108,6 +111,8 @@ export async function DELETE(request: NextRequest) {
   if (!esUuid(id) || !esUuid(clienteId)) {
     return NextResponse.json({ error: 'id y cliente_id deben ser UUID válidos' }, { status: 400 });
   }
+  const denegado = await guardaRuta(() => exigirAccesoCliente(clienteId, 'operacion'));
+  if (denegado) return denegado;
 
   try {
     const db = admin();

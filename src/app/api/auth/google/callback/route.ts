@@ -6,6 +6,7 @@ import {
 } from '@/lib/integrations/google-auth';
 import { MOTIVO_STATE } from '@/lib/hotmart/oauth-state';
 import { COOKIE_STATE_GOOGLE, verificarStateGoogle } from '@/lib/integrations/google-oauth-state';
+import { exigirAjustePlataforma, guardaRuta } from '@/lib/acceso/clientes';
 
 // Callback OAuth de Google (conexión a nivel agencia).
 // Google redirige aquí con ?code={CODE}&state={STATE FIRMADO}. El `state` se
@@ -37,6 +38,14 @@ export async function GET(request: NextRequest) {
     // Sin tocar la base de datos: ese es el punto.
     const res = NextResponse.redirect(
       `${settingsUrl}?google_error=${encodeURIComponent(MOTIVO_STATE[verificacion.motivo])}`
+    );
+    res.cookies.delete(COOKIE_STATE_GOOGLE);
+    return res;
+  }
+  // La conexión de Google es de toda la instalación: ajuste de plataforma.
+  if (await guardaRuta(() => exigirAjustePlataforma('admin'))) {
+    const res = NextResponse.redirect(
+      `${settingsUrl}?google_error=${encodeURIComponent('Sin permiso para cambiar la conexión de Google de la plataforma')}`
     );
     res.cookies.delete(COOKIE_STATE_GOOGLE);
     return res;

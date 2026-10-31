@@ -6,6 +6,8 @@ import {
   pathCookieState,
   verificarStateCliente,
 } from '@/lib/integrations/oauth-state-cliente';
+import { sellarToken } from '@/lib/credenciales-ads';
+import { exigirAccesoCliente, guardaRuta } from '@/lib/acceso/clientes';
 
 const GRAPH = 'https://graph.facebook.com/v19.0';
 const COOKIE = { name: COOKIE_STATE_OAUTH.meta, path: pathCookieState('meta') };
@@ -51,6 +53,11 @@ export async function GET(request: NextRequest) {
   // Sin tocar Meta ni la base de datos: ese es el punto.
   if (!verificacion.ok) return errorUrl(MOTIVO_STATE[verificacion.motivo]);
   const clientId = verificacion.clienteId;
+  // Defensa en profundidad: el `state` prueba que el flujo lo empezó este
+  // navegador; además, quien vuelve tiene que poder administrar el cliente.
+  if (await guardaRuta(() => exigirAccesoCliente(clientId, 'admin'))) {
+    return errorUrl('Sin permiso para conectar integraciones de este cliente');
+  }
 
   const appId = process.env.META_APP_ID!;
   const appSecret = process.env.META_APP_SECRET!;
@@ -91,7 +98,8 @@ export async function GET(request: NextRequest) {
     const { data: config, error: rpcError } = await supabase.rpc('fusionar_config_api', {
       p_cliente_id: clientId,
       p_parche: {
-        meta_token: longToken,
+        // Cifrado en reposo (src/lib/credenciales-ads.ts). Lanza sin RUTM_ENCRYPTION_KEY.
+        meta_token: sellarToken(longToken),
         meta_token_expires_at: expiresAt,
         meta_connection_status: 'connected',
       },

@@ -11,6 +11,7 @@ import {
 import { enqueueJob } from '@/lib/sync/queue';
 import { colombiaToday } from '@/lib/date-utils';
 import { trocearRangoDias } from '@/lib/tiktok/rangos';
+import { abrirToken } from '@/lib/credenciales-ads';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -51,10 +52,13 @@ function resolveMetaAccounts(config: any): MetaAccount[] {
   if (Array.isArray(config?.meta_accounts) && config.meta_accounts.length > 0) {
     return config.meta_accounts
       .filter((a: any) => a.account_id)
-      .map((a: any) => ({ account_id: a.account_id, token: a.token || config.meta_token || '' }));
+      .map((a: any) => ({
+        account_id: a.account_id,
+        token: abrirToken(a.token) || abrirToken(config.meta_token),
+      }));
   }
   if (config?.meta_token && config?.meta_account_id) {
-    return [{ account_id: config.meta_account_id, token: config.meta_token }];
+    return [{ account_id: config.meta_account_id, token: abrirToken(config.meta_token) }];
   }
   return [];
 }
@@ -65,11 +69,13 @@ function resolveTikTokAccounts(config: any): TikTokAccount[] {
       .filter((a: any) => a.advertiser_id)
       .map((a: any) => ({
         advertiser_id: a.advertiser_id,
-        token: a.access_token || config.tiktok_access_token || '',
+        token: abrirToken(a.access_token) || abrirToken(config.tiktok_access_token),
       }));
   }
   if (config?.tiktok_access_token && config?.tiktok_advertiser_id) {
-    return [{ advertiser_id: config.tiktok_advertiser_id, token: config.tiktok_access_token }];
+    return [
+      { advertiser_id: config.tiktok_advertiser_id, token: abrirToken(config.tiktok_access_token) },
+    ];
   }
   return [];
 }

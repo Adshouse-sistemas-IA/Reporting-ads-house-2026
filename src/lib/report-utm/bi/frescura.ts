@@ -10,7 +10,7 @@
 // la acción desde el navegador (sería exponer al visitante una acción con el id
 // del cliente) y NO recibe el texto del último error, que es interno.
 
-import { getDataFreshness } from '@/app/(app)/dashboard/_actions';
+import { leerFrescuraDatos } from '@/lib/dashboard/frescura-db';
 import { resolvePublicClienteId } from '@/lib/report-utm/campaign-resolver';
 import type { FrescuraDatos } from '@/app/(app)/dashboard/components/SyncFreshnessBadge';
 
@@ -37,7 +37,7 @@ export async function frescuraPublicaDeInforme(
   try {
     const publicId = await clienteDashboardDeInforme(rtmClienteId);
     if (!publicId) return null;
-    const res = await getDataFreshness(publicId);
+    const res = await leerFrescuraDatos(publicId);
     if (res.error) return null;
     return {
       data: res.data

@@ -20,6 +20,7 @@
  *   npx tsx --conditions=react-server scripts/verify-borrado-cliente.ts
  */
 
+import { BUCKET_ARCHIVO_LEADS } from '../src/lib/report-utm/archivo-leads';
 import {
   PESADAS as TABLAS_PESADAS,
   TRAMOS_UUID,
@@ -115,18 +116,21 @@ function dbFalsa(opts: {
     ...cliente('public'),
     schema: (s: string) => cliente(s),
     storage: {
-      from: () => ({
+      from: (bucketId: string) => ({
         list: async (carpeta: string, o: { limit: number; offset: number }) => {
           if (opts.storageRevienta) throw new Error('storage caído');
           ops.push({ schema: 'storage', tabla: carpeta, accion: 'list', filtros: [] });
-          const todos = (opts.archivos?.[carpeta] ?? []).map((name) => ({
+          const clave = bucketId === BUCKET_ARCHIVO_LEADS ? `${bucketId}:${carpeta}` : carpeta;
+          const todos = (opts.archivos?.[clave] ?? []).map((name) => ({
             name,
             id: `id-${name}`,
           }));
           return { data: todos.slice(o.offset, o.offset + o.limit), error: null };
         },
         remove: async (rutas: string[]) => {
-          removidos.push(...rutas);
+          removidos.push(
+            ...(bucketId === BUCKET_ARCHIVO_LEADS ? rutas.map((r) => `${bucketId}:${r}`) : rutas)
+          );
           ops.push({
             schema: 'storage',
             tabla: 'remove',
@@ -223,6 +227,7 @@ const MIL_QUINIENTAS = Array.from({ length: 1500 }, (_, i) => `${i}.webp`);
 const archivosBase = {
   [PUB]: MIL_QUINIENTAS,
   branding: [`cliente_${UTM}_1.png`, `cliente_${UTM}0_2.png`, 'logo_1.webp'],
+  [`${BUCKET_ARCHIVO_LEADS}:${UTM}`]: ['2026-06_20261222T110000Z.csv.gz'],
 };
 
 const SUELTAS_VIEJAS = ['bi_reports', 'agent_channels'];
@@ -350,8 +355,12 @@ async function main() {
     );
 
     check(
+      'borra sus leads archivados en CSV',
+      f.removidos.includes(`${BUCKET_ARCHIVO_LEADS}:${UTM}/2026-06_20261222T110000Z.csv.gz`)
+    );
+    check(
       'borra las 1500 imágenes de sus bitácoras y su logo (paginando)',
-      f.removidos.length === 1501 &&
+      f.removidos.length === 1502 &&
         f.removidos.includes(`${PUB}/1499.webp`) &&
         f.removidos.includes(`branding/cliente_${UTM}_1.png`),
       `${f.removidos.length} archivos`

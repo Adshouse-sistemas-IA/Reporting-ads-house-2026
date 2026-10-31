@@ -22,6 +22,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { tiktokFetch } from '@/lib/rate-limit';
+import { abrirToken } from '@/lib/credenciales-ads';
 
 const TIKTOK_API = 'https://business-api.tiktok.com/open_api/v1.3';
 
@@ -114,14 +115,15 @@ export function cuentasTikTokDe(
       .filter((a: any) => a?.advertiser_id)
       .map((a: any) => ({
         advertiser_id: String(a.advertiser_id).trim(),
-        token: String(a.access_token || cfg.tiktok_access_token || ''),
+        // Cifrados en reposo (src/lib/credenciales-ads.ts): se abren al usarlos.
+        token: abrirToken(a.access_token) || abrirToken(cfg.tiktok_access_token),
         raw: a,
       }));
   } else if (cfg.tiktok_access_token && cfg.tiktok_advertiser_id) {
     cuentas = [
       {
         advertiser_id: String(cfg.tiktok_advertiser_id).trim(),
-        token: String(cfg.tiktok_access_token),
+        token: abrirToken(cfg.tiktok_access_token),
         raw: {},
       },
     ];

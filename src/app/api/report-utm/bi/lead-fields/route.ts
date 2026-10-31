@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { exigirAccesoClienteUtm, guardaRuta } from '@/lib/acceso/clientes';
 import { createClient } from '@/utils/supabase/server';
 import { reportUtmAdminClient } from '@/lib/report-utm/client';
 import { fetchAllRows } from '@/lib/report-utm/bi-query';
@@ -44,6 +45,8 @@ export async function GET(req: NextRequest) {
   const sp = req.nextUrl.searchParams;
   const clienteId = sp.get('cliente_id') ?? undefined;
   if (!clienteId) return NextResponse.json({ data: [] });
+  const denegado = await guardaRuta(() => exigirAccesoClienteUtm(clienteId, 'lectura'));
+  if (denegado) return denegado;
 
   const dateFrom =
     sp.get('date_from') ?? new Date(Date.now() - 90 * 86400_000).toISOString().slice(0, 10);

@@ -5,6 +5,7 @@
 //          período explícito) y la envía por los canales indicados.
 
 import { NextRequest, NextResponse } from 'next/server';
+import { exigirAccesoInforme, guardaRuta } from '@/lib/acceso/clientes';
 import { createClient, createAdminClient } from '@/utils/supabase/server';
 import { computePeriod, type ReportFrequency } from '@/lib/report-utm/report-periods';
 import { deliverReport } from '@/lib/report-utm/report-delivery';
@@ -30,6 +31,8 @@ export async function GET(_req: NextRequest, { params }: Params) {
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
   const { reportId } = await params;
+  const denegado = await guardaRuta(() => exigirAccesoInforme(reportId, 'lectura'));
+  if (denegado) return denegado;
   const db = await createAdminClient();
   const { data, error } = await db
     .from('bi_report_deliveries')
@@ -50,6 +53,8 @@ export async function POST(req: NextRequest, { params }: Params) {
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
   const { reportId } = await params;
+  const denegado = await guardaRuta(() => exigirAccesoInforme(reportId, 'operacion'));
+  if (denegado) return denegado;
   const body = await req.json().catch(() => ({}));
 
   const db = await createAdminClient();

@@ -9,6 +9,7 @@
 // `lseg__<clave>`). Hermano de esta misma carpeta: el CRUD de los campos.
 
 import { NextRequest, NextResponse } from 'next/server';
+import { exigirAccesoClienteUtm, guardaRuta } from '@/lib/acceso/clientes';
 import { reportUtmAdminClient } from '@/lib/report-utm/client';
 import { checkWriteRole, getUserRole } from '@/lib/report-utm/auth';
 import {
@@ -32,6 +33,8 @@ export async function GET(req: NextRequest) {
 
   const clienteId = req.nextUrl.searchParams.get('cliente_id');
   if (!clienteId) return NextResponse.json({ error: 'cliente_id requerido' }, { status: 400 });
+  const denegado = await guardaRuta(() => exigirAccesoClienteUtm(clienteId, 'lectura'));
+  if (denegado) return denegado;
 
   const rtm = await reportUtmAdminClient();
   const campos = await loadLeadCampos(rtm, clienteId);
@@ -47,6 +50,10 @@ export async function POST(req: NextRequest) {
   const body = await req.json().catch(() => null);
   if (!body?.cliente_id)
     return NextResponse.json({ error: 'cliente_id requerido' }, { status: 400 });
+  const denegado = await guardaRuta(() =>
+    exigirAccesoClienteUtm(String(body.cliente_id), 'operacion')
+  );
+  if (denegado) return denegado;
   if (!body?.campo_id) return NextResponse.json({ error: 'campo_id requerido' }, { status: 400 });
 
   const rtm = await reportUtmAdminClient();

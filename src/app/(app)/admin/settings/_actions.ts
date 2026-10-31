@@ -1,5 +1,12 @@
 'use server';
 
+import {
+  clientesVisiblesDeUsuario,
+  contextoAcceso,
+  exigirAccesoCliente,
+  exigirAjustePlataforma,
+  exigirSesion,
+} from '@/lib/acceso/clientes';
 import { createClient, createAdminClient } from '@/utils/supabase/server';
 import { sanearClienteParaListado } from '@/lib/cliente-seguro';
 import { revalidatePath } from 'next/cache';
@@ -19,12 +26,17 @@ import { loadCamposCliente as loadCamposClienteServer } from '@/lib/sheets/campo
 import { leerJsonRespuesta, esTimeoutDeFetch } from '@/lib/fetch-json';
 import {
   CLAVES_POR_PESTANA,
+  PREFIJO_TOKEN_CIFRADO,
+  SECRETO_GUARDADO,
   enmascararSecretosHotmart,
+  enmascararTokensAds,
   prepararParcheHotmart,
+  prepararParcheTokensAds,
   superponerFormularioHotmart,
   type Pestana,
 } from '@/lib/clientes/config-pestanas';
 import { encrypt } from '@/lib/secretos';
+import { abrirToken, sellarToken } from '@/lib/credenciales-ads';
 import {
   HOTMART_API_BASE,
   obtenerToken,
@@ -71,47 +83,19 @@ async function anotarArchivados<T extends { id: string }>(
 }
 
 export async function getClientes() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
+  // Siempre la lista de clientes que el usuario puede ver
+  // (`clientesVisiblesDeUsuario`). Antes un viewer caía en la rama de «todos»:
+  // recibía el listado completo de la base.
+  const ctx = await contextoAcceso();
+  if (!ctx) return [];
   const adminSupabase = await createAdminClient();
-
-  if (user) {
-    const { data: profile } = await supabase
-      .from('user_profiles')
-      .select('role')
-      .eq('id', user.id)
-      .single();
-
-    const role = profile?.role ?? 'viewer';
-
-    if (role === 'trafficker') {
-      // Only return clients assigned to this user
-      const { data: assignments } = await adminSupabase
-        .from('user_client_assignments')
-        .select('client_id')
-        .eq('user_id', user.id);
-
-      const clientIds = (assignments ?? []).map((a: { client_id: string }) => a.client_id);
-
-      if (clientIds.length === 0) return [];
-
-      const { data: clientes, error } = await adminSupabase
-        .from('clientes')
-        .select('*, layout:layouts_reporte(id, nombre)')
-        .in('id', clientIds)
-        .order('created_at', { ascending: false });
-
-      if (error) return [];
-      return anotarArchivados(adminSupabase, (clientes ?? []).map(sanearClienteParaListado));
-    }
-  }
+  const ids = await clientesVisiblesDeUsuario(adminSupabase, ctx.userId, ctx.rol);
+  if (ids.length === 0) return [];
 
   const { data: clientes, error } = await adminSupabase
     .from('clientes')
     .select('*, layout:layouts_reporte(id, nombre)')
+    .in('id', ids)
     .order('created_at', { ascending: false });
 
   if (error) {
@@ -125,6 +109,7 @@ export async function getClientes() {
 }
 
 export async function getCliente(id: string) {
+  await exigirAccesoCliente(id, 'operacion');
   // Es una server action: además de la página de ajustes (que el layout de
   // admin ya cierra a los viewers), cualquiera podía invocarla por POST y leer
   // el `config_api` de un cliente con el cliente de servicio. Mismo criterio
@@ -145,10 +130,14 @@ export async function getCliente(id: string) {
   }
 
   // La ficha es un componente de cliente: todo lo que devuelva esta acción
-  // viaja al navegador. Los secretos de Hotmart llegan como `SECRETO_GUARDADO`
-  // y el formulario solo los manda si el usuario escribe uno nuevo.
+  // viaja al navegador. Los secretos de Hotmart y los tokens de Meta y TikTok
+  // llegan como `SECRETO_GUARDADO` y el formulario solo los manda si el usuario
+  // escribe uno nuevo.
   return cliente?.config_api
-    ? { ...cliente, config_api: enmascararSecretosHotmart(cliente.config_api) }
+    ? {
+        ...cliente,
+        config_api: enmascararTokensAds(enmascararSecretosHotmart(cliente.config_api)),
+      }
     : cliente;
 }
 
@@ -167,21 +156,22 @@ export async function createCliente(data: {
   zonaHoraria?: string | null;
   traffickers?: string[];
 }) {
-  const sesion = await sesionActual();
-  if (!sesion || !ROLES_ADMIN.has(sesion.rol)) {
+  const ctx = await contextoAcceso();
+  if (!ctx || !ROLES_ADMIN.has(ctx.rol)) {
     return { error: 'Solo un administrador puede crear clientes.' };
   }
 
   const admin = await createAdminClient();
   const pedidos = [...new Set(data.traffickers ?? [])];
   if (pedidos.length > 0) {
-    const { data: validos, error } = await admin
+    // Los ids llegan del navegador: solo se asignan traffickers que existen.
+    const perfiles = await admin
       .from('user_profiles')
       .select('id')
       .in('id', pedidos)
       .eq('role', 'trafficker');
-    if (error) return { error: error.message };
-    if ((validos ?? []).length !== pedidos.length) {
+    if (perfiles.error) return { error: perfiles.error.message };
+    if ((perfiles.data ?? []).length !== pedidos.length) {
       return { error: 'Alguno de los usuarios elegidos no es trafficker.' };
     }
   }
@@ -191,7 +181,7 @@ export async function createCliente(data: {
     moneda: data.moneda,
     zonaHoraria: data.zonaHoraria,
     traffickers: pedidos,
-    asignadoPor: sesion.userId,
+    asignadoPor: ctx.userId,
   });
   if (!r.ok) {
     console.error('Error creating client:', r.error);
@@ -211,13 +201,14 @@ export async function puedeAdministrarClientes(): Promise<boolean> {
 
 /** Traffickers para asignar en el alta: id y nombre legible. Solo para admins. */
 export async function getTraffickersParaAlta(): Promise<Array<{ id: string; etiqueta: string }>> {
-  const sesion = await sesionActual();
-  if (!sesion || !ROLES_ADMIN.has(sesion.rol)) return [];
+  const ctx = await contextoAcceso();
+  if (!ctx || !ROLES_ADMIN.has(ctx.rol)) return [];
   const admin = await createAdminClient();
-  const { data: perfiles } = await admin
+  const { data: perfiles, error: ep } = await admin
     .from('user_profiles')
     .select('id, full_name')
     .eq('role', 'trafficker');
+  if (ep) console.error('[getTraffickersParaAlta] perfiles:', ep.message);
   if (!perfiles?.length) return [];
   const {
     data: { users },
@@ -257,6 +248,7 @@ const ROLES_ADMIN = new Set(['superadmin', 'admin']);
 
 /** Lo que se perdería al borrar, para el diálogo de confirmación. */
 export async function resumenBorradoCliente(id: string) {
+  await exigirAccesoCliente(id, 'admin');
   const rol = await rolActual();
   if (!rol || !ROLES_ADMIN.has(rol))
     return { error: 'Solo un administrador puede borrar clientes.' };
@@ -267,6 +259,7 @@ export async function resumenBorradoCliente(id: string) {
 
 /** Archiva o reactiva el cliente en los dos lados a la vez. */
 export async function setClienteArchivado(id: string, archivado: boolean) {
+  await exigirAccesoCliente(id, 'admin');
   const rol = await rolActual();
   if (!rol || !ROLES_ADMIN.has(rol)) return { error: 'Solo un administrador puede archivar.' };
 
@@ -287,39 +280,8 @@ export async function setClienteArchivado(id: string, archivado: boolean) {
   return { success: true };
 }
 
-export async function updateClienteConfig(id: string, config_api: any) {
-  const supabase = await createAdminClient();
-
-  // ─── GA4 Private Key Sanitization ──────────────────────────────────────────
-  if (config_api?.ga_private_key) {
-    let key = config_api.ga_private_key;
-    // Si el frontend envía la llave con los caracteres literales "\n" (json escape), los transformamos a saltos reales
-    if (key.includes('\\n')) {
-      key = key.replace(/\\n/g, '\n');
-    }
-
-    // Validación básica de formato
-    if (!key.includes('BEGIN PRIVATE KEY') || !key.includes('END PRIVATE KEY')) {
-      return {
-        error: 'El formato de la Private Key de GA4 es inválido. Sube el archivo JSON original.',
-      };
-    }
-    config_api.ga_private_key = key;
-  }
-
-  const { error } = await supabase.from('clientes').update({ config_api }).eq('id', id);
-
-  if (error) {
-    console.error('Error updating config:', error);
-    return { error: error.message };
-  }
-
-  revalidatePath(`/admin/settings/${id}`);
-  revalidatePath('/admin/settings');
-  return { success: true };
-}
-
 export async function assignLayoutToCliente(clienteId: string, layoutId: string | null) {
+  await exigirAccesoCliente(clienteId, 'operacion');
   const supabase = await createAdminClient();
   const { error } = await supabase
     .from('clientes')
@@ -338,6 +300,7 @@ export async function assignLayoutToCliente(clienteId: string, layoutId: string 
  * métricas. Y solo borraba este lado, dejando el cliente UTM huérfano.
  */
 export async function deleteCliente(id: string) {
+  await exigirAccesoCliente(id, 'admin');
   const rol = await rolActual();
   if (!rol) return { error: 'No autorizado' };
   if (!ROLES_ADMIN.has(rol)) {
@@ -361,9 +324,13 @@ export async function deleteCliente(id: string) {
 // ─── Layout CRUD ────────────────────────────────────────────────────────────
 
 export async function getLayouts() {
+  await exigirSesion();
   const supabase = await createAdminClient();
   const { data, error } = await supabase.from('layouts_reporte').select('*').order('nombre');
-  if (error) return [];
+  if (error) {
+    console.error('[getLayouts]', error.message);
+    return [];
+  }
   return data;
 }
 
@@ -375,6 +342,7 @@ export async function createLayout(payload: {
   source_mapping?: Record<string, string>;
   attribution_strategy?: string;
 }) {
+  await exigirSesion('operacion');
   const supabase = await createAdminClient();
   const { data, error } = await supabase
     .from('layouts_reporte')
@@ -397,6 +365,7 @@ export async function updateLayout(
     attribution_strategy?: string;
   }
 ) {
+  await exigirSesion('operacion');
   const supabase = await createAdminClient();
   const { error } = await supabase
     .from('layouts_reporte')
@@ -408,17 +377,8 @@ export async function updateLayout(
 }
 
 export async function deleteLayout(id: string) {
-  const supabaseStore = await createClient();
-  const {
-    data: { user },
-  } = await supabaseStore.auth.getUser();
-
-  if (!user) return { error: 'No autorizado' };
-
-  // TODO: Implement role-based access control
-  // const { data: profile } = await supabaseStore.from('user_profiles').select('role').eq('id', user.id).single()
-  // if (profile?.role !== 'admin') return { error: 'Solo los administradores pueden borrar layouts' }
-
+  // Antes: cualquier sesión borraba cualquier plantilla (había un TODO).
+  await exigirSesion('admin');
   const supabase = await createAdminClient();
   const { error } = await supabase.from('layouts_reporte').delete().eq('id', id);
   if (error) return { error: error.message };
@@ -429,6 +389,7 @@ export async function deleteLayout(id: string) {
 // ─── Connection Tests ───────────────────────────────────────────────────────
 
 export async function testGA4Connection(config: any) {
+  await exigirSesion('operacion');
   // Misma precedencia de credenciales que el worker (`crearClienteGa4`). Si
   // falla por permisos, `probarAccesoGa4` contrasta con las propiedades que ve
   // la cuenta de la agencia: así se descubrió que Cris tenía un ID equivocado.
@@ -437,8 +398,57 @@ export async function testGA4Connection(config: any) {
   return r.ok ? { success: true, message: r.mensaje } : { error: r.mensaje };
 }
 
-export async function testMetaConnection(token: string, accountId: string) {
+/**
+ * El token con el que probar una conexión desde la ficha.
+ *
+ * El navegador ya no tiene los tokens guardados (llega `SECRETO_GUARDADO`). Con
+ * el marcador se usa el del cliente —el propio de la cuenta si lo tiene, si no
+ * el compartido—, después de comprobar que quien llama puede operar ese
+ * cliente. Un token tecleado se usa tal cual. Uno que llegue ya cifrado se
+ * rechaza: el navegador nunca recibe uno, y aceptarlo convertiría estas
+ * acciones en un oráculo para descifrar tokens ajenos.
+ */
+async function tokenDeFormulario(
+  token: string,
+  clienteId: string | undefined,
+  plataforma: 'meta' | 'tiktok',
+  cuentaId?: string
+): Promise<{ token: string } | { error: string }> {
+  if (typeof token !== 'string' || token.startsWith(PREFIJO_TOKEN_CIFRADO)) {
+    return { error: 'Token no válido' };
+  }
+  if (token !== SECRETO_GUARDADO) return { token };
+  if (!clienteId) return { error: 'Falta el cliente para usar el token guardado' };
+  await exigirAccesoCliente(clienteId, 'operacion');
+  const admin = await createAdminClient();
+  const { data, error } = await admin
+    .from('clientes')
+    .select('config_api')
+    .eq('id', clienteId)
+    .maybeSingle();
+  if (error) return { error: error.message };
+  const cfg = (data?.config_api ?? {}) as Record<string, any>;
+  const normal = (id: unknown) => String(id ?? '').replace(/^act_/, '');
+  if (plataforma === 'meta') {
+    const propia = Array.isArray(cfg.meta_accounts)
+      ? cfg.meta_accounts.find((a: any) => cuentaId && normal(a?.account_id) === normal(cuentaId))
+      : null;
+    const t = abrirToken(propia?.token) || abrirToken(cfg.meta_token);
+    return t ? { token: t } : { error: 'El cliente no tiene token de Meta guardado' };
+  }
+  const propia = Array.isArray(cfg.tiktok_accounts)
+    ? cfg.tiktok_accounts.find((a: any) => cuentaId && String(a?.advertiser_id) === cuentaId)
+    : null;
+  const t = abrirToken(propia?.access_token) || abrirToken(cfg.tiktok_access_token);
+  return t ? { token: t } : { error: 'El cliente no tiene token de TikTok guardado' };
+}
+
+export async function testMetaConnection(token: string, accountId: string, clienteId?: string) {
+  await exigirSesion('operacion');
   if (!token || !accountId) return { error: 'Faltan credenciales' };
+  const resuelto = await tokenDeFormulario(token, clienteId, 'meta', accountId);
+  if ('error' in resuelto) return { error: resuelto.error };
+  token = resuelto.token;
 
   try {
     const actId = accountId.startsWith('act_') ? accountId : `act_${accountId}`;
@@ -457,8 +467,12 @@ export async function testMetaConnection(token: string, accountId: string) {
 
 // Lista las ad accounts disponibles con el token guardado (sin re-hacer OAuth).
 // Devuelve [{ account_id: 'act_XXX', name }] para que la UI las agregue a meta_accounts[].
-export async function fetchMetaAdAccounts(token: string) {
+export async function fetchMetaAdAccounts(token: string, clienteId?: string) {
+  await exigirSesion('operacion');
   if (!token) return { error: 'Falta el token de Meta' };
+  const resuelto = await tokenDeFormulario(token, clienteId, 'meta');
+  if ('error' in resuelto) return { error: resuelto.error };
+  token = resuelto.token;
 
   try {
     // `account_status` y `disable_reason`: al elegir la cuenta ya se ve si Meta
@@ -494,8 +508,12 @@ export async function fetchMetaAdAccounts(token: string) {
 // Lista las cuentas publicitarias disponibles con el token de TikTok guardado (sin re-hacer OAuth).
 // Devuelve [{ advertiser_id, name }] para que la UI las agregue a tiktok_accounts[].
 // El token solo trae IDs, así que usamos oauth2/advertiser/get/ para obtener también el nombre.
-export async function fetchTikTokAdAccounts(token: string) {
+export async function fetchTikTokAdAccounts(token: string, clienteId?: string) {
+  await exigirSesion('operacion');
   if (!token) return { error: 'Falta el token de TikTok' };
+  const resuelto = await tokenDeFormulario(token, clienteId, 'tiktok');
+  if ('error' in resuelto) return { error: resuelto.error };
+  token = resuelto.token;
 
   try {
     const appId = process.env.TIKTOK_APP_ID!;
@@ -534,6 +552,8 @@ export async function testHotmartConnection(config: any, clienteId?: string) {
   // Escribe en `config_api`: mismo permiso que guardar la pestaña.
   const rol = await rolActual();
   if (!rol || rol === 'viewer') return { error: 'No autorizado' };
+  if (clienteId) await exigirAccesoCliente(clienteId, 'operacion');
+  else await exigirSesion('operacion');
 
   const formulario: Record<string, unknown> =
     config && typeof config === 'object' ? (config as Record<string, unknown>) : {};
@@ -637,6 +657,7 @@ export async function testHotmartConnection(config: any, clienteId?: string) {
  * navegador ya no los envía. El segundo argumento se ignora (compatibilidad).
  */
 export async function refreshMetaCustomConversions(clienteId: string, _legacy?: unknown) {
+  await exigirAccesoCliente(clienteId, 'operacion');
   void _legacy;
   const rol = await rolActual();
   if (!rol || rol === 'viewer') return { error: 'No autorizado.' };
@@ -702,6 +723,7 @@ export interface ConversionMetaFila {
 export async function listarConversionesMeta(
   clienteId: string
 ): Promise<{ data?: ConversionMetaFila[]; migrada?: boolean; hoy?: string; error?: string }> {
+  await exigirAccesoCliente(clienteId, 'lectura');
   const rol = await rolActual();
   if (!rol) return { error: 'No autorizado.' };
   const admin = await createAdminClient();
@@ -764,6 +786,7 @@ export async function actualizarConversionMeta(
     archivada?: boolean;
   }
 ) {
+  await exigirAccesoCliente(clienteId, 'operacion');
   const rol = await rolActual();
   if (!rol || rol === 'viewer') return { error: 'No autorizado.' };
   const cambios: Record<string, unknown> = {};
@@ -803,14 +826,23 @@ export async function actualizarConversionMeta(
 
 /** Dónde se usa una conversión (antes de archivarla). */
 export async function referenciasConversionMeta(clienteId: string, conversionKey: string) {
+  await exigirAccesoCliente(clienteId, 'lectura');
   const rol = await rolActual();
   if (!rol) return { error: 'No autorizado.' };
   const admin = await createAdminClient();
   return { data: await buscarReferenciasConversion(admin, clienteId, conversionKey) };
 }
 
-export async function testTikTokConnection(accessToken: string, advertiserId: string) {
+export async function testTikTokConnection(
+  accessToken: string,
+  advertiserId: string,
+  clienteId?: string
+) {
+  await exigirSesion('operacion');
   if (!accessToken || !advertiserId) return { error: 'Faltan credenciales de TikTok' };
+  const resuelto = await tokenDeFormulario(accessToken, clienteId, 'tiktok', advertiserId);
+  if ('error' in resuelto) return { error: resuelto.error };
+  accessToken = resuelto.token;
 
   try {
     const url = `https://business-api.tiktok.com/open_api/v1.3/advertiser/info/?advertiser_ids=["${advertiserId}"]`;
@@ -838,6 +870,7 @@ export async function savePublicLayout(
     graficos: any[];
   }
 ) {
+  await exigirAccesoCliente(clienteId, 'operacion');
   const supabase = await createAdminClient();
   const { error } = await supabase
     .from('clientes')
@@ -851,6 +884,7 @@ export async function savePublicLayout(
 }
 
 export async function syncClienteMetrics(clienteId: string, startDate: string, endDate: string) {
+  await exigirAccesoCliente(clienteId, 'operacion');
   try {
     const url = `/api/worker?client_id=${clienteId}&start=${startDate}&end=${endDate}`;
     const cronSecret = process.env.CRON_SECRET;
@@ -937,6 +971,7 @@ export async function syncClienteMetrics(clienteId: string, startDate: string, e
 }
 
 export async function getPublicLayout(clienteId: string) {
+  await exigirAccesoCliente(clienteId, 'lectura');
   const supabase = await createAdminClient();
   const { data, error } = await supabase
     .from('clientes')
@@ -970,24 +1005,16 @@ export async function getActiveAlerts(): Promise<ActiveAlert[]> {
 
   const adminSupabase = await createAdminClient();
 
-  let allowedClientIds: string[] | null = null;
-
-  if (user) {
-    const { data: profile } = await supabase
-      .from('user_profiles')
-      .select('role')
-      .eq('id', user.id)
-      .single();
-
-    if (profile?.role === 'trafficker') {
-      const { data: assignments } = await adminSupabase
-        .from('user_client_assignments')
-        .select('client_id')
-        .eq('user_id', user.id);
-      allowedClientIds = (assignments ?? []).map((a: { client_id: string }) => a.client_id);
-      if (allowedClientIds.length === 0) return [];
-    }
-  }
+  // Siempre acotado a los clientes visibles del usuario (antes, sin sesión o
+  // con un rol distinto de trafficker, veía las de todos).
+  const ctx = await contextoAcceso();
+  if (!user || !ctx) return [];
+  const allowedClientIds: string[] | null = await clientesVisiblesDeUsuario(
+    adminSupabase,
+    ctx.userId,
+    ctx.rol
+  );
+  if (allowedClientIds.length === 0) return [];
 
   // Antes se leía `cliente_tabs.alert_sent_at_90/100`, que NADA en el repo
   // escribe (el comprobador de presupuesto externo que las llenaba ya no
@@ -1050,6 +1077,7 @@ export async function getActiveAlerts(): Promise<ActiveAlert[]> {
 
 // Estado de la conexión OAuth global de Google (Analytics + Sheets).
 export async function getGoogleConnectionStatus() {
+  await exigirSesion('admin');
   const { getGoogleIntegration } = await import('@/lib/integrations/google-auth');
   const row = await getGoogleIntegration();
   return {
@@ -1060,6 +1088,8 @@ export async function getGoogleConnectionStatus() {
 
 // Desconecta la cuenta de Google de la agencia (borra los tokens).
 export async function disconnectGoogle(): Promise<{ success: boolean; error?: string }> {
+  // La conexión de Google es de toda la instalación: ajuste de plataforma.
+  await exigirAjustePlataforma('admin');
   try {
     const { disconnectGoogleIntegration } = await import('@/lib/integrations/google-auth');
     await disconnectGoogleIntegration();
@@ -1076,6 +1106,7 @@ export async function detectConversionesColumns(
   sheetConfig: ConversionesConfig,
   tab?: SheetTabConfig
 ) {
+  await exigirSesion('operacion');
   try {
     const res = await internalFetch(`/api/admin/detect-sheet-columns`, {
       method: 'POST',
@@ -1107,6 +1138,7 @@ export async function previewEliminarSheet(
   clienteId: string,
   sheetId: string
 ): Promise<SheetEliminarPreview | { error: string }> {
+  await exigirAccesoCliente(clienteId, 'operacion');
   try {
     const res = await internalFetch(
       `/api/admin/sheets-conversiones/eliminar` +
@@ -1140,6 +1172,7 @@ export async function eliminarSheetConversiones(
   warning?: string;
   error?: string;
 }> {
+  await exigirAccesoCliente(clienteId, 'operacion');
   try {
     const res = await internalFetch(`/api/admin/sheets-conversiones/eliminar`, {
       method: 'POST',
@@ -1171,6 +1204,7 @@ export async function eliminarSheetConversiones(
 
 // Pestañas reales del documento, para elegirlas en vez de teclear el nombre.
 export async function listConversionesTabs(sheetConfig: ConversionesConfig) {
+  await exigirSesion('operacion');
   try {
     const res = await internalFetch(`/api/admin/list-sheet-tabs`, {
       method: 'POST',
@@ -1193,6 +1227,7 @@ export async function listConversionesTabs(sheetConfig: ConversionesConfig) {
 
 // Estado del último sync por sheet (filas ok/descartadas y avisos por pestaña).
 export async function getConversionesSyncStatus(clienteId: string) {
+  await exigirAccesoCliente(clienteId, 'lectura');
   try {
     const res = await internalFetch(
       `/api/admin/sync-conversiones-offline?clientId=${encodeURIComponent(clienteId)}`,
@@ -1208,6 +1243,7 @@ export async function getConversionesSyncStatus(clienteId: string) {
 }
 
 export async function listDriveSheets() {
+  await exigirSesion('operacion');
   try {
     const res = await internalFetch(`/api/admin/list-google-sheets`, {
       cache: 'no-store',
@@ -1224,6 +1260,7 @@ export async function listDriveSheets() {
 // Propiedades GA4 visibles para la cuenta OAuth de la agencia, para el selector
 // por cliente (evita teclear el ID numérico a mano).
 export async function listGa4Properties() {
+  await exigirSesion('operacion');
   try {
     const res = await internalFetch(`/api/admin/list-ga4-properties`, {
       cache: 'no-store',
@@ -1247,6 +1284,7 @@ export interface SheetCamposPayload {
 }
 
 export async function listSheetCampos(clienteId: string) {
+  await exigirAccesoCliente(clienteId, 'lectura');
   try {
     const res = await internalFetch(
       `/api/admin/sheet-campos?cliente_id=${encodeURIComponent(clienteId)}`,
@@ -1265,6 +1303,7 @@ export async function listSheetCampos(clienteId: string) {
 
 /** Guarda el campo y devuelve el catálogo ya recalculado (el POST recalcula). */
 export async function saveSheetCampo(clienteId: string, campo: Partial<SheetCampoDef>) {
+  await exigirAccesoCliente(clienteId, 'operacion');
   try {
     const res = await internalFetch(`/api/admin/sheet-campos`, {
       method: 'POST',
@@ -1292,6 +1331,7 @@ export async function saveSheetCampo(clienteId: string, campo: Partial<SheetCamp
 }
 
 export async function deleteSheetCampo(clienteId: string, campoId: string) {
+  await exigirAccesoCliente(clienteId, 'operacion');
   try {
     const url =
       `/api/admin/sheet-campos` +
@@ -1307,6 +1347,7 @@ export async function deleteSheetCampo(clienteId: string, campoId: string) {
 }
 
 export async function saveSheetVista(clienteId: string, vista: Partial<SheetCampoVistaDef>) {
+  await exigirAccesoCliente(clienteId, 'operacion');
   try {
     const res = await internalFetch(`/api/admin/sheet-campos/vistas`, {
       method: 'POST',
@@ -1327,6 +1368,7 @@ export async function saveSheetVista(clienteId: string, vista: Partial<SheetCamp
 }
 
 export async function deleteSheetVista(clienteId: string, vistaId: string) {
+  await exigirAccesoCliente(clienteId, 'operacion');
   try {
     const url =
       `/api/admin/sheet-campos/vistas` +
@@ -1346,6 +1388,7 @@ export async function deleteSheetVista(clienteId: string, vistaId: string) {
 
 /** Valores crudos detectados de un campo, para el agrupador. */
 export async function listCampoValores(clienteId: string, campoId: string, limite = 500) {
+  await exigirAccesoCliente(clienteId, 'lectura');
   try {
     const url =
       `/api/admin/sheet-campos/valores` +
@@ -1364,6 +1407,7 @@ export async function listCampoValores(clienteId: string, campoId: string, limit
 
 /** Recalcula desde `sheet_filas`. Nunca llama a Google. */
 export async function recalcularSheetCampos(clienteId: string, campoId?: string) {
+  await exigirAccesoCliente(clienteId, 'operacion');
   try {
     const res = await internalFetch(`/api/admin/sheet-campos/recalcular`, {
       method: 'POST',
@@ -1388,6 +1432,7 @@ export async function recalcularSheetCampos(clienteId: string, campoId?: string)
  * clave (`sf_<clave>`), que solo resuelve en los clientes que tengan ese campo.
  */
 export async function getSheetCamposCatalogo(clienteId: string) {
+  await exigirAccesoCliente(clienteId, 'lectura');
   try {
     const db = await createAdminClient();
     const { campos, vistas } = await loadCamposClienteServer(db, clienteId, { soloActivos: true });
@@ -1412,6 +1457,7 @@ export async function getSheetCamposCatalogo(clienteId: string) {
 
 /** Columnas por pestaña ya sincronizada, con muestras. No llama a Google. */
 export async function listSheetColumnas(clienteId: string) {
+  await exigirAccesoCliente(clienteId, 'lectura');
   try {
     const res = await internalFetch(
       `/api/admin/sheet-columnas?cliente_id=${encodeURIComponent(clienteId)}`,
@@ -1464,6 +1510,7 @@ export async function syncTandaConversiones(
     batchId?: string;
   }
 > {
+  await exigirAccesoCliente(clienteId, 'operacion');
   try {
     const res = await internalFetch(`/api/admin/sync-conversiones-offline`, {
       method: 'POST',
@@ -1499,6 +1546,7 @@ export async function syncConversionesOffline(
   clienteId: string,
   sheetId?: string
 ): Promise<Partial<SyncConversionesResponse>> {
+  await exigirAccesoCliente(clienteId, 'operacion');
   try {
     const res = await internalFetch(`/api/admin/sync-conversiones-offline`, {
       method: 'POST',
@@ -1551,6 +1599,7 @@ export async function guardarConfigPestana(
   pestana: Pestana,
   parche: Record<string, unknown>
 ): Promise<{ success?: boolean; error?: string }> {
+  await exigirAccesoCliente(clienteId, 'operacion');
   const rol = await rolActual();
   if (!rol || rol === 'viewer') return { error: 'No autorizado' };
 
@@ -1580,7 +1629,34 @@ export async function guardarConfigPestana(
     }
   }
 
-  // Misma validación de la clave privada de GA4 que hacía `updateClienteConfig`:
+  // Tokens de Meta y TikTok: cifrados en su clave, y `SECRETO_GUARDADO` (lo que
+  // tiene el navegador) se resuelve contra lo guardado.
+  if (pestana === 'meta' || pestana === 'tiktok') {
+    const lectura = await createAdminClient();
+    const { data: previa, error: ep } = await lectura
+      .from('clientes')
+      .select('config_api')
+      .eq('id', clienteId)
+      .maybeSingle();
+    if (ep) return { error: ep.message };
+    try {
+      limpio = prepararParcheTokensAds(
+        limpio,
+        (previa?.config_api ?? {}) as Record<string, unknown>,
+        (v) => String(sellarToken(v))
+      );
+    } catch (e) {
+      console.error('[guardarConfigPestana] cifrado de tokens', (e as Error)?.message ?? e);
+      return {
+        error:
+          (e as Error)?.message === 'Token con formato no válido'
+            ? 'Token con formato no válido'
+            : 'No se pudieron cifrar los tokens (¿falta RUTM_ENCRYPTION_KEY en el servidor?).',
+      };
+    }
+  }
+
+  // Validación de la clave privada de GA4 (la que hacía el antiguo `updateClienteConfig`):
   // el JSON de la service account trae los saltos de línea escapados.
   if (typeof limpio.ga_private_key === 'string' && limpio.ga_private_key) {
     // `/\\n/g`: la secuencia escapada. Con `/\n/g` era un no-op (salto → salto).
@@ -1640,6 +1716,7 @@ export async function guardarConfigPestana(
  * ninguna pestaña de la ficha manda esa clave, así que guardarlas no la pisa.
  */
 export async function marcarPasoPuestaEnMarcha(clienteId: string, clave: string, omitir: boolean) {
+  await exigirAccesoCliente(clienteId, 'operacion');
   const rol = await rolActual();
   if (!rol || rol === 'viewer') return { error: 'No autorizado' };
   if (!/^[a-z0-9_]{1,40}$/.test(clave)) return { error: 'Paso desconocido.' };

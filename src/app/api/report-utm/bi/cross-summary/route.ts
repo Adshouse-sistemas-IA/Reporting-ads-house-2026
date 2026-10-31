@@ -10,6 +10,7 @@
 // informe lo dice y enlaza a donde se arregla.
 
 import { NextRequest, NextResponse } from 'next/server';
+import { exigirAccesoClienteUtm, guardaRuta } from '@/lib/acceso/clientes';
 import { createClient } from '@/utils/supabase/server';
 import { getCrossDiagnostics } from '@/lib/report-utm/campaign-data';
 
@@ -24,6 +25,10 @@ export async function GET(req: NextRequest) {
 
   const sp = req.nextUrl.searchParams;
   const cliente_id = sp.get('cliente_id');
+  if (cliente_id) {
+    const denegado = await guardaRuta(() => exigirAccesoClienteUtm(cliente_id, 'lectura'));
+    if (denegado) return denegado;
+  }
   if (!cliente_id) {
     return NextResponse.json({ error: 'cliente_id is required' }, { status: 400 });
   }

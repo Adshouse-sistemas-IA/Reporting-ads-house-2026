@@ -4,6 +4,8 @@ import { excluirDuplicadosLote } from './lead-duplicados';
 import { adaptarIds, columnasIdDisponibles, idsPublicitarios, insertarLeads } from './lead-ids';
 import { guardarPreguntas, sincronizarOpcionesEnCampos } from '@/lib/leads/respuestas/preguntas-db';
 import type { PreguntaPlataforma, TipoPlataforma } from '@/lib/leads/respuestas/preguntas-db';
+import { abrirToken } from '@/lib/credenciales-ads';
+import { abrirPaginas, sellarPaginas } from '@/lib/credenciales-ads';
 
 /**
  * Núcleo compartido para ingerir leads de **Meta Lead Ads** (formularios
@@ -92,10 +94,13 @@ export async function getMetaAccountsForCliente(
       .filter((a) => a?.account_id)
       .map((a) => ({
         account_id: String(a.account_id),
-        token: String(a.token || config.meta_token || ''),
+        // Cifrados en reposo (src/lib/credenciales-ads.ts): se abren al usarlos.
+        token: abrirToken(a.token) || abrirToken(config.meta_token),
       }));
   } else if (config.meta_token && config.meta_account_id) {
-    accounts = [{ account_id: String(config.meta_account_id), token: String(config.meta_token) }];
+    accounts = [
+      { account_id: String(config.meta_account_id), token: abrirToken(config.meta_token) },
+    ];
   }
 
   accounts = accounts.filter((a) => a.account_id && a.token);
@@ -775,8 +780,9 @@ export async function syncMetaLeadsForCliente(
     let scopedForms: ScopedForm[];
     let scopedPages: MetaPage[];
 
+    // Los page tokens se guardan cifrados (credenciales-ads): se abren al leerlos.
     const cached = Array.isArray(config.scoped_forms)
-      ? (config.scoped_forms as ScopedForm[])
+      ? abrirPaginas(config.scoped_forms as ScopedForm[])
       : null;
     // La caché se renueva una vez al día. Antes solo se redescubría tras un
     // error, así que un formulario creado después del primer backfill no se
@@ -786,7 +792,7 @@ export async function syncMetaLeadsForCliente(
     let formsAt = cacheAt;
     if (!isBackfill && cached && cached.length > 0 && cacheVigente) {
       scopedForms = cached;
-      scopedPages = Array.isArray(config.pages) ? (config.pages as MetaPage[]) : [];
+      scopedPages = Array.isArray(config.pages) ? abrirPaginas(config.pages as MetaPage[]) : [];
     } else {
       const targets = await getClienteScopedTargets(supabase, clienteId);
       if (targets.matchedForms.length === 0 && !isBackfill && cached && cached.length > 0) {
@@ -794,7 +800,7 @@ export async function syncMetaLeadsForCliente(
         // caché y se reintenta en la próxima corrida, en vez de parar la ingesta.
         console.warn('[meta-leads] no se pudo renovar la lista de formularios:', targets.error);
         scopedForms = cached;
-        scopedPages = Array.isArray(config.pages) ? (config.pages as MetaPage[]) : [];
+        scopedPages = Array.isArray(config.pages) ? abrirPaginas(config.pages as MetaPage[]) : [];
       } else if (targets.matchedForms.length === 0) {
         const msg = targets.error ?? 'Sin formularios para este cliente';
         await db
@@ -897,8 +903,9 @@ export async function syncMetaLeadsForCliente(
           sync_cursor: nextCursor,
           last_imported: imported,
           last_forms_detected: formCount,
-          pages: scopedPages,
-          scoped_forms: scopedForms,
+          // Cifrados en reposo: el page token da acceso a los leads de la Página.
+          pages: sellarPaginas(scopedPages),
+          scoped_forms: sellarPaginas(scopedForms),
           scoped_forms_at: formsAt,
           form_offset: siguienteOffset,
           forms_leidos: [...leidos],

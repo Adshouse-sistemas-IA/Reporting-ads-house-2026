@@ -1,4 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
+import {
+  clientesUtmVisibles,
+  exigirAccesoClienteUtm,
+  exigirAccesoInforme,
+  exigirSesion,
+  guardaRuta,
+  respuestaAccesoDenegado,
+} from '@/lib/acceso/clientes';
 import { createClient, createAdminClient } from '@/utils/supabase/server';
 
 export const dynamic = 'force-dynamic';
@@ -10,14 +18,37 @@ export async function GET() {
   } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
+  // Solo los informes de clientes visibles y las plantillas (antes: los 100
+  // últimos de toda la base).
+  let visibles: Awaited<ReturnType<typeof clientesUtmVisibles>>;
+  try {
+    visibles = await clientesUtmVisibles();
+  } catch (e) {
+    return respuestaAccesoDenegado(e);
+  }
   const db = await createAdminClient();
-  const { data, error } = await db
-    .from('bi_reports')
-    .select('id,nombre,descripcion,filters,created_at,updated_at,cliente_id,is_template')
-    .order('updated_at', { ascending: false })
-    .limit(100);
-
+  const columnas = 'id,nombre,descripcion,filters,created_at,updated_at,cliente_id,is_template';
+  const [deClientes, plantillas] = await Promise.all([
+    visibles.ids.length > 0
+      ? db
+          .from('bi_reports')
+          .select(columnas)
+          .in('cliente_id', visibles.ids)
+          .order('updated_at', { ascending: false })
+          .limit(100)
+      : Promise.resolve({ data: [], error: null }),
+    db
+      .from('bi_reports')
+      .select(columnas)
+      .is('cliente_id', null)
+      .order('updated_at', { ascending: false })
+      .limit(100),
+  ]);
+  const error = deClientes.error ?? plantillas.error;
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  const data = [...(deClientes.data ?? []), ...(plantillas.data ?? [])]
+    .sort((a, b) => String(b.updated_at).localeCompare(String(a.updated_at)))
+    .slice(0, 100);
   return NextResponse.json({ data });
 }
 
@@ -43,6 +74,14 @@ export async function POST(req: NextRequest) {
   } = body;
 
   if (!nombre) return NextResponse.json({ error: 'nombre is required' }, { status: 400 });
+
+  const denegado = await guardaRuta(async () => {
+    if (cliente_id) await exigirAccesoClienteUtm(String(cliente_id), 'operacion');
+    else await exigirSesion('operacion');
+    if (source_report_id) await exigirAccesoInforme(String(source_report_id), 'lectura');
+  });
+  if (denegado) return denegado;
+  await exigirSesion('operacion');
 
   const db = await createAdminClient();
 

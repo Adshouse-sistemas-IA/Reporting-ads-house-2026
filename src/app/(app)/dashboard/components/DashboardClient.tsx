@@ -587,7 +587,8 @@ function DynamicDashboard({
           cliente.id,
           tab.keyword_meta,
           tab.fecha_inicio,
-          tab.fecha_finalizacion
+          tab.fecha_finalizacion,
+          isPublic ? (data.tokenPublico ?? null) : null
         );
         setGlobalSpend(spend);
         setFetchingSpend(false);
@@ -596,7 +597,7 @@ function DynamicDashboard({
       }
     };
     fetchSpend();
-  }, [activeTabId, tabs, cliente.id]);
+  }, [activeTabId, tabs, cliente.id, isPublic, data.tokenPublico]);
 
   // Prevent dnd-kit hydration mismatch (aria-describedby IDs differ server/client)
   const [isMounted, setIsMounted] = useState(false);

@@ -5,19 +5,16 @@ import { revalidatePath } from 'next/cache';
 import * as gateway from '@/lib/whatsapp/gateway';
 import { sendWhatsAppNotification } from '@/lib/whatsapp/notify';
 import { NOTIFICATION_TYPES, type NotificationType } from '@/lib/whatsapp/types';
-import { getSesionActual } from '@/lib/auth-session';
+import { exigirAccesoCliente, exigirAjustePlataforma, intentarGuarda } from '@/lib/acceso/clientes';
 
-async function requireAdmin(): Promise<{ ok: true } | { ok: false; error: string }> {
-  // Sesión y rol memoizados por petición (`lib/auth-session.ts`). Antes cada
-  // llamada a este guard hacía su propio getUser() + lectura de user_profiles,
-  // así que una página que invoca 7 acciones pagaba 7 veces las dos consultas.
-  const { userId, role } = await getSesionActual();
-  if (!userId) return { ok: false, error: 'No autorizado' };
-  if (!['superadmin', 'admin'].includes(role)) {
-    return { ok: false, error: 'Sin permisos para gestionar WhatsApp' };
-  }
-  return { ok: true };
-}
+/**
+ * WhatsApp es UN número para toda la instalación (`whatsapp_session`) y sus
+ * grupos son de ese número: todo este panel es ajuste de plataforma (admin).
+ *
+ * Las lecturas también llevan guarda: una server action se puede invocar por
+ * POST aunque la página no se muestre.
+ */
+const requireAdmin = () => intentarGuarda(() => exigirAjustePlataforma('admin'));
 
 // ── Estado de conexión / QR ──────────────────────────────────────
 export async function getWhatsAppStatus() {
@@ -69,6 +66,8 @@ export async function syncGroups() {
 }
 
 export async function getGroups() {
+  const guard = await requireAdmin();
+  if (!guard.ok) return [];
   const admin = await createAdminClient();
   const { data } = await admin
     .from('whatsapp_groups')
@@ -79,20 +78,26 @@ export async function getGroups() {
 
 // ── Clientes (lista mínima para el selector de rutas) ────────────
 export async function getClientesMin() {
+  const guard = await requireAdmin();
+  if (!guard.ok) return [];
   const admin = await createAdminClient();
-  const { data } = await admin.from('clientes').select('id, nombre').order('nombre');
+  const { data, error } = await admin.from('clientes').select('id, nombre').order('nombre');
+  if (error) throw new Error(`[whatsapp] clientes: ${error.message}`);
   return data ?? [];
 }
 
 // ── Rutas ────────────────────────────────────────────────────────
 export async function getRoutes() {
+  const guard = await requireAdmin();
+  if (!guard.ok) return [];
   const admin = await createAdminClient();
-  const { data } = await admin
+  const { data, error } = await admin
     .from('whatsapp_routes')
     .select(
       'id, cliente_id, notification_type, group_id, enabled, cliente:clientes(nombre), grupo:whatsapp_groups(group_name)'
     )
     .order('created_at', { ascending: false });
+  if (error) throw new Error(`[whatsapp] rutas: ${error.message}`);
   return data ?? [];
 }
 
@@ -108,6 +113,10 @@ export async function upsertRoute(input: {
     return { error: 'Tipo de notificación inválido' };
   }
   if (!input.groupId) return { error: 'Grupo requerido' };
+  if (input.clienteId) {
+    const acceso = await intentarGuarda(() => exigirAccesoCliente(input.clienteId!, 'admin'));
+    if (!acceso.ok) return { error: acceso.error };
+  }
 
   const admin = await createAdminClient();
   const { error } = await admin.from('whatsapp_routes').insert({
@@ -156,6 +165,10 @@ export async function sendManualWhatsApp(input: { clienteId: string | null; mess
   if (!guard.ok) return { error: guard.error };
 
   if (!input.message.trim()) return { error: 'El mensaje no puede estar vacío' };
+  if (input.clienteId) {
+    const acceso = await intentarGuarda(() => exigirAccesoCliente(input.clienteId!, 'admin'));
+    if (!acceso.ok) return { error: acceso.error };
+  }
 
   const admin = await createAdminClient();
   const result = await sendWhatsAppNotification({
@@ -179,6 +192,8 @@ export async function getAlertTeamGroup(): Promise<{
   group_id: string | null;
   enabled: boolean;
 }> {
+  const guard = await requireAdmin();
+  if (!guard.ok) return { group_id: null, enabled: false };
   const admin = await createAdminClient();
   const { data } = await admin
     .from('system_settings')
@@ -211,13 +226,16 @@ export async function setAlertTeamGroup(input: { groupId: string | null; enabled
 
 // ── Log reciente ─────────────────────────────────────────────────
 export async function getRecentMessages() {
+  const guard = await requireAdmin();
+  if (!guard.ok) return [];
   const admin = await createAdminClient();
-  const { data } = await admin
+  const { data, error } = await admin
     .from('whatsapp_messages')
     .select(
       'id, cliente_id, notification_type, group_id, message, status, error, created_at, cliente:clientes(nombre)'
     )
     .order('created_at', { ascending: false })
     .limit(20);
+  if (error) throw new Error(`[whatsapp] mensajes: ${error.message}`);
   return data ?? [];
 }

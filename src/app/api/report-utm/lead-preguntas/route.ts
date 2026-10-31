@@ -10,6 +10,7 @@
 // `cliente_id` es el id de report_utm.
 
 import { NextRequest, NextResponse } from 'next/server';
+import { exigirAccesoClienteUtm, guardaRuta } from '@/lib/acceso/clientes';
 import { reportUtmAdminClient } from '@/lib/report-utm/client';
 import { getUserRole } from '@/lib/report-utm/auth';
 import { detectarPreguntas } from '@/lib/leads/respuestas/deteccion-db';
@@ -25,6 +26,8 @@ export async function GET(req: NextRequest) {
   const sp = req.nextUrl.searchParams;
   const clienteId = sp.get('cliente_id');
   if (!clienteId) return NextResponse.json({ error: 'cliente_id requerido' }, { status: 400 });
+  const denegado = await guardaRuta(() => exigirAccesoClienteUtm(clienteId, 'operacion'));
+  if (denegado) return denegado;
 
   try {
     const rtm = await reportUtmAdminClient();

@@ -9,24 +9,13 @@
 
 import { revalidatePath } from 'next/cache';
 import { createAdminClient } from '@/utils/supabase/server';
-import { getSesionActual } from '@/lib/auth-session';
+import { contextoAcceso, exigirSesion, intentarGuarda } from '@/lib/acceso/clientes';
 
 type Resultado<T = unknown> = { success: true; data?: T } | { error: string };
 
-/**
- * Guard compartido.
- *
- * `requireAdmin()` está duplicado con dos firmas distintas en otros dos
- * `_actions.ts` del proyecto; aquí se usa `getSesionActual()`, que ya está
- * memoizado por petición.
- */
+/** Guard compartido: el de `@/lib/acceso`, con el contrato `{ ok, error }`. */
 async function exigirAdmin(): Promise<{ ok: true; userId: string } | { ok: false; error: string }> {
-  const sesion = await getSesionActual();
-  if (!sesion.userId) return { ok: false, error: 'Hay que iniciar sesión.' };
-  if (!['superadmin', 'admin'].includes(sesion.role)) {
-    return { ok: false, error: 'Solo un administrador puede hacer esto.' };
-  }
-  return { ok: true, userId: sesion.userId };
+  return intentarGuarda(() => exigirSesion('admin'));
 }
 
 // ─── Conversaciones ─────────────────────────────────────────────────────────
@@ -39,8 +28,8 @@ export type ConversacionResumen = {
 };
 
 export async function listarConversaciones(): Promise<ConversacionResumen[]> {
-  const sesion = await getSesionActual();
-  if (!sesion.userId) return [];
+  const sesion = await contextoAcceso();
+  if (!sesion) return [];
 
   const db = await createAdminClient();
   const { data } = await db
@@ -64,8 +53,8 @@ export type MensajeConversacion = {
 };
 
 export async function leerConversacion(id: string): Promise<MensajeConversacion[]> {
-  const sesion = await getSesionActual();
-  if (!sesion.userId) return [];
+  const sesion = await contextoAcceso();
+  if (!sesion) return [];
 
   const db = await createAdminClient();
   const { data: conv } = await db
@@ -88,8 +77,8 @@ export async function leerConversacion(id: string): Promise<MensajeConversacion[
 }
 
 export async function borrarConversacion(id: string): Promise<Resultado> {
-  const sesion = await getSesionActual();
-  if (!sesion.userId) return { error: 'Hay que iniciar sesión.' };
+  const sesion = await contextoAcceso();
+  if (!sesion) return { error: 'Hay que iniciar sesión.' };
 
   const db = await createAdminClient();
   const { error } = await db
@@ -121,6 +110,7 @@ export type EstrategiaTipoRow = {
 };
 
 export async function listarEstrategias(): Promise<EstrategiaTipoRow[]> {
+  await exigirSesion();
   const db = await createAdminClient();
   const { data } = await db.from('estrategia_tipos').select('*').order('orden');
   return (data ?? []) as EstrategiaTipoRow[];
@@ -217,6 +207,9 @@ export type CanalRow = {
 };
 
 export async function listarCanales(): Promise<CanalRow[]> {
+  // Las lecturas también llevan guarda: una server action se invoca por POST
+  // aunque la página no se muestre. Antes no comprobaban ni la sesión.
+  await exigirSesion('admin');
   const db = await createAdminClient();
   const { data } = await db
     .from('agent_channels')
@@ -262,6 +255,7 @@ export type ContactoConIdentidades = ContactoRow & {
 };
 
 export async function listarContactos(): Promise<ContactoConIdentidades[]> {
+  await exigirSesion('admin');
   const db = await createAdminClient();
   const { TECHO_POR_ROL, nivelEfectivo } = await import('@/lib/agent/types');
 
@@ -352,6 +346,7 @@ export type RemitenteVisto = {
 };
 
 export async function listarRemitentesVistos(): Promise<RemitenteVisto[]> {
+  await exigirSesion('admin');
   const db = await createAdminClient();
   const { data } = await db
     .from('whatsapp_seen_senders')
@@ -442,6 +437,7 @@ export type EstadoAgente = {
  * abrir el canal de WhatsApp y desde fuera parece que el agente está muerto.
  */
 export async function leerEstadoAgente(): Promise<EstadoAgente> {
+  await exigirSesion('operacion');
   const db = await createAdminClient();
 
   const [pend, err, prop] = await Promise.all([
@@ -465,6 +461,7 @@ export async function leerEstadoAgente(): Promise<EstadoAgente> {
 // ─── Política de modelos ────────────────────────────────────────────────────
 
 export async function leerPoliticaModelos(): Promise<Record<string, unknown>> {
+  await exigirSesion('operacion');
   const db = await createAdminClient();
   const { POLITICA_POR_DEFECTO } = await import('@/lib/agent/llm/client');
 

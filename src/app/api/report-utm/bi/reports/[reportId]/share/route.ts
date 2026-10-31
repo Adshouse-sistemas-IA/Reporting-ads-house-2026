@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { exigirAccesoInforme, guardaRuta } from '@/lib/acceso/clientes';
 import { randomBytes } from 'crypto';
 import { createClient, createAdminClient } from '@/utils/supabase/server';
 
@@ -15,6 +16,8 @@ export async function POST(_req: NextRequest, { params }: Params) {
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
   const { reportId } = await params;
+  const denegado = await guardaRuta(() => exigirAccesoInforme(reportId, 'operacion'));
+  if (denegado) return denegado;
   const db = await createAdminClient();
 
   const { data: existing } = await db
@@ -45,6 +48,8 @@ export async function DELETE(_req: NextRequest, { params }: Params) {
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
   const { reportId } = await params;
+  const denegado = await guardaRuta(() => exigirAccesoInforme(reportId, 'operacion'));
+  if (denegado) return denegado;
   const db = await createAdminClient();
   const { error } = await db.from('bi_reports').update({ public_token: null }).eq('id', reportId);
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });

@@ -106,6 +106,8 @@ export type SyncJob = {
   triggered_by: string;
   created_at: string;
   updated_at: string;
+  /** No se entrega antes de este instante (backoff de reintentos). */
+  disponible_desde?: string;
 };
 
 /** Días por job de métricas. Corto para que cada unidad quepa holgada en 60s. */
@@ -232,20 +234,77 @@ export async function claimJob(
 }
 
 /**
- * Renueva el lease de un job largo sin soltarlo, opcionalmente guardando
- * progreso. El runner actual reanuda reencolando el tramo restante, así que esto
- * es para ejecutores que procesen unidades dentro de un mismo job.
+ * Renueva el lease de un job largo sin soltarlo.
+ *
+ * Usa `heartbeat_sync_job`, que solo renueva si `worker` sigue siendo el dueño
+ * del lease. Devuelve `false` si lo perdió (venció y otro ejecutor reclamó el
+ * job): el llamador debe abandonar el trabajo en vez de seguir escribiendo en
+ * paralelo con el nuevo dueño. El runner actual no lo necesita (cada job cabe
+ * en su lease); es para ejecutores que procesen unidades dentro de un mismo job.
  */
-export async function heartbeat(
+export async function heartbeat(db: any, jobId: string, worker: string): Promise<boolean> {
+  const { data, error } = await db.rpc('heartbeat_sync_job', { p_job_id: jobId, p_worker: worker });
+  if (error) throw new Error(`heartbeat: ${error.message}`);
+  return data === true;
+}
+
+/**
+ * Espera antes de reintentar un job fallido: 30 s, 1 min, 2 min… hasta 30 min,
+ * con un ±20 % de dispersión para que los jobs que fallaron juntos (una API
+ * caída) no vuelvan todos en el mismo segundo.
+ *
+ * Sin espera, `failJob` devolvía el job a la cola en el acto y el siguiente
+ * ciclo (cada 15 s) lo reintentaba: tres intentos se quemaban en menos de un
+ * minuto contra un servicio caído, y cada uno le añadía carga (incidente del
+ * 20-sep, docs/00 §4.2).
+ *
+ * @param intentos Intentos ya gastados (el que acaba de fallar incluido).
+ * @param azar Inyectable para las pruebas; por defecto `Math.random`.
+ */
+export function esperaReintentoMs(intentos: number, azar: () => number = Math.random): number {
+  const base = 30_000 * 2 ** Math.max(0, intentos - 1);
+  const tope = 30 * 60_000;
+  const dispersion = 0.8 + 0.4 * azar();
+  return Math.round(Math.min(base, tope) * dispersion);
+}
+
+/** Espera de un job devuelto porque su cliente estaba ocupado por otro ejecutor. */
+export const ESPERA_CLIENTE_OCUPADO_MS = 20_000;
+
+/** Opciones de las transiciones que cierran o sueltan un job reclamado. */
+export type OpcionesTransicion = {
+  /**
+   * Ejecutor que tenía el job. Con él, la transición solo se aplica si sigue
+   * siendo el dueño del lease: un ejecutor que lo perdió (lo dio por muerto
+   * otro) no puede marcar como terminado o fallido el trabajo del nuevo dueño.
+   */
+  worker?: string;
+  /** Solo `releaseJob`: no entregarlo de nuevo antes de este margen. */
+  esperaMs?: number;
+};
+
+/**
+ * Aplica una transición a un job reclamado. Con `worker`, la acota a que siga
+ * siendo suyo y en curso; devuelve `false` si no lo era (lease perdido).
+ */
+async function transicion(
   db: any,
   jobId: string,
-  cursor?: Record<string, any>
-): Promise<void> {
-  const { error } = await db
-    .from('sync_jobs')
-    .update({ locked_at: new Date().toISOString(), ...(cursor ? { cursor } : {}) })
-    .eq('id', jobId);
-  if (error) throw new Error(`heartbeat: ${error.message}`);
+  patch: Record<string, unknown>,
+  etiqueta: string,
+  worker?: string
+): Promise<boolean> {
+  let q = db.from('sync_jobs').update(patch).eq('id', jobId);
+  if (worker) q = q.eq('locked_by', worker).eq('estado', 'running');
+  const { data, error } = await q.select('id');
+  if (error) throw new Error(`${etiqueta}: ${error.message}`);
+  const aplicada = !worker || (Array.isArray(data) && data.length > 0);
+  if (!aplicada) {
+    console.warn(
+      `[queue] ${etiqueta}: el job ${jobId} ya no es de ${worker} (lease perdido); no se toca`
+    );
+  }
+  return aplicada;
 }
 
 /**
@@ -261,17 +320,27 @@ export async function heartbeat(
  *   conserva el valor actual, que es lo correcto cuando el job sí llegó a
  *   entregarse a un ejecutor.
  */
-export async function releaseJob(db: any, jobId: string, intentos?: number): Promise<void> {
-  const { error } = await db
-    .from('sync_jobs')
-    .update({
+export async function releaseJob(
+  db: any,
+  jobId: string,
+  intentos?: number,
+  opciones: OpcionesTransicion = {}
+): Promise<boolean> {
+  return transicion(
+    db,
+    jobId,
+    {
       estado: 'pending',
       locked_at: null,
       locked_by: null,
       ...(intentos !== undefined ? { intentos: Math.max(0, intentos) } : {}),
-    })
-    .eq('id', jobId);
-  if (error) throw new Error(`releaseJob: ${error.message}`);
+      ...(opciones.esperaMs
+        ? { disponible_desde: new Date(Date.now() + opciones.esperaMs).toISOString() }
+        : {}),
+    },
+    'releaseJob',
+    opciones.worker
+  );
 }
 
 /**
@@ -311,31 +380,50 @@ export async function clienteOcupado(
   return (data ?? []).length > 0;
 }
 
-export async function completeJob(db: any, jobId: string): Promise<void> {
-  const { error } = await db
-    .from('sync_jobs')
-    .update({ estado: 'done', locked_at: null, locked_by: null, last_error: null })
-    .eq('id', jobId);
-  if (error) throw new Error(`completeJob: ${error.message}`);
+export async function completeJob(
+  db: any,
+  jobId: string,
+  opciones: OpcionesTransicion = {}
+): Promise<boolean> {
+  return transicion(
+    db,
+    jobId,
+    { estado: 'done', locked_at: null, locked_by: null, last_error: null },
+    'completeJob',
+    opciones.worker
+  );
 }
 
 /**
- * Marca el fallo. Si quedan intentos vuelve a 'pending' (lo retomará el próximo
- * ciclo); si se agotaron queda en 'error' para que el panel lo muestre.
+ * Marca el fallo. Si quedan intentos vuelve a 'pending', pero no se entrega
+ * otra vez hasta pasada su espera (`esperaReintentoMs`); si se agotaron queda
+ * en 'error' para que el panel lo muestre.
  * Devuelve true si el job quedó definitivamente en error.
  */
-export async function failJob(db: any, job: SyncJob, message: string): Promise<boolean> {
+export async function failJob(
+  db: any,
+  job: SyncJob,
+  message: string,
+  opciones: OpcionesTransicion = {}
+): Promise<boolean> {
   const exhausted = job.intentos >= job.max_intentos;
-  const { error } = await db
-    .from('sync_jobs')
-    .update({
+  await transicion(
+    db,
+    job.id,
+    {
       estado: exhausted ? 'error' : 'pending',
       last_error: message.slice(0, 2000),
       locked_at: null,
       locked_by: null,
-    })
-    .eq('id', job.id);
-  if (error) throw new Error(`failJob: ${error.message}`);
+      ...(exhausted
+        ? {}
+        : {
+            disponible_desde: new Date(Date.now() + esperaReintentoMs(job.intentos)).toISOString(),
+          }),
+    },
+    'failJob',
+    opciones.worker
+  );
   return exhausted;
 }
 

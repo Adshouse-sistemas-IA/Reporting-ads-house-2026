@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { requireAdminRole } from '@/lib/report-utm/auth';
 import {
   COOKIE_STATE_OAUTH,
   firmarStateCliente,
   opcionesCookieState,
 } from '@/lib/integrations/oauth-state-cliente';
+import { exigirAccesoCliente, guardaRuta } from '@/lib/acceso/clientes';
 
 /**
  * Inicia el flujo OAuth de Meta (Facebook) Ads.
@@ -26,7 +26,10 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'client_id requerido' }, { status: 400 });
   }
 
-  const denegado = await requireAdminRole();
+  // Hay que poder administrar ESTE cliente: el callback escribe el token en su
+  // configuración con la service role, así que el `state` solo se firma para
+  // un cliente que existe y que quien llama administra.
+  const denegado = await guardaRuta(() => exigirAccesoCliente(clientId, 'admin'));
   if (denegado) return denegado;
 
   const appId = process.env.META_APP_ID;

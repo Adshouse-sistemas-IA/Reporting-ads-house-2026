@@ -2,6 +2,7 @@ import { createClient } from '@supabase/supabase-js';
 import { NextRequest, NextResponse } from 'next/server';
 import { authenticateCron } from '@/lib/cron-auth';
 import { ApiError } from '@/lib/error-handler';
+import { abrirToken } from '@/lib/credenciales-ads';
 
 /**
  * POST /api/backfill-forms
@@ -76,10 +77,12 @@ export async function POST(request: NextRequest) {
         .filter((a: any) => a.account_id)
         .map((a: any) => ({
           account_id: String(a.account_id),
-          token: a.token || config.meta_token || '',
+          token: abrirToken(a.token) || abrirToken(config.meta_token),
         }));
     } else if (config.meta_token && config.meta_account_id) {
-      accounts = [{ account_id: String(config.meta_account_id), token: config.meta_token }];
+      accounts = [
+        { account_id: String(config.meta_account_id), token: abrirToken(config.meta_token) },
+      ];
     }
 
     if (accounts.length === 0) {

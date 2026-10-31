@@ -218,6 +218,108 @@ export function prepararParcheHotmart(parche: Config, cifrar: (valor: string) =>
   return salida;
 }
 
+// ─── Tokens de Meta y TikTok ────────────────────────────────────────────────
+// Se guardan cifrados en su misma clave (`enc:v1:…`, src/lib/credenciales-ads.ts)
+// y, como los secretos de Hotmart, el navegador nunca los recibe: llega
+// `SECRETO_GUARDADO`. Aquí está la parte pura (enmascarar y preparar el parche);
+// el cifrado llega como argumento porque este módulo lo importa el navegador.
+
+/** Prefijo de un token cifrado. Lo comparte `src/lib/credenciales-ads.ts`. */
+export const PREFIJO_TOKEN_CIFRADO = 'enc:v1:';
+
+/** Tokens compartidos de Meta y TikTok que edita el formulario. */
+export const TOKENS_ADS_COMPARTIDOS = ['meta_token', 'tiktok_access_token'] as const;
+
+/** Cuentas con token propio: lista, clave del id y clave del token. */
+const CUENTAS_CON_TOKEN = [
+  { lista: 'meta_accounts', id: 'account_id', token: 'token' },
+  { lista: 'tiktok_accounts', id: 'advertiser_id', token: 'access_token' },
+] as const;
+
+function esDict(v: unknown): v is Record<string, unknown> {
+  return typeof v === 'object' && v !== null && !Array.isArray(v);
+}
+
+function hayToken(v: unknown): boolean {
+  return typeof v === 'string' && v.trim() !== '';
+}
+
+/**
+ * Cambia cada token de Meta/TikTok guardado (compartido y por cuenta) por
+ * `SECRETO_GUARDADO` antes de mandar la config al navegador.
+ */
+export function enmascararTokensAds(config: Config): Config {
+  const salida: Config = { ...config };
+  for (const clave of TOKENS_ADS_COMPARTIDOS) {
+    if (hayToken(salida[clave])) salida[clave] = SECRETO_GUARDADO;
+  }
+  for (const c of CUENTAS_CON_TOKEN) {
+    const lista = salida[c.lista];
+    if (!Array.isArray(lista)) continue;
+    salida[c.lista] = lista.map((a) =>
+      esDict(a) && hayToken(a[c.token]) ? { ...a, [c.token]: SECRETO_GUARDADO } : a
+    );
+  }
+  return salida;
+}
+
+/**
+ * El parche de la pestaña de Meta o TikTok tal y como debe llegar a la base.
+ *
+ *  - Token compartido: `SECRETO_GUARDADO` = no tocarlo (sale del parche);
+ *    vacío = `null`; un valor nuevo se cifra.
+ *  - Token de una cuenta: las listas se guardan enteras, así que
+ *    `SECRETO_GUARDADO` se sustituye por el token GUARDADO de esa misma cuenta
+ *    (por su id); una cuenta nueva con el marcador se queda sin token propio.
+ *  - Un valor que ya viene cifrado se rechaza: el navegador nunca recibe uno,
+ *    y aceptarlo permitiría copiar a un cliente el token cifrado de otro.
+ *
+ * `cifrar` es `sellarToken`: idempotente (un valor ya cifrado, como el
+ * guardado que se restaura, no se vuelve a cifrar) y lanza si el servidor no
+ * tiene clave, así que el guardado falla en voz alta.
+ */
+export function prepararParcheTokensAds(
+  parche: Config,
+  guardada: Config,
+  cifrar: (valor: string) => string
+): Config {
+  const rechazar = (v: unknown) => {
+    if (typeof v === 'string' && v.startsWith(PREFIJO_TOKEN_CIFRADO)) {
+      throw new Error('Token con formato no válido');
+    }
+  };
+  const salida: Config = { ...parche };
+  for (const clave of TOKENS_ADS_COMPARTIDOS) {
+    if (!(clave in salida)) continue;
+    const v = salida[clave];
+    if (v === SECRETO_GUARDADO) {
+      delete salida[clave];
+      continue;
+    }
+    rechazar(v);
+    salida[clave] = esValorNuevo(v) ? cifrar(v.trim()) : null;
+  }
+  for (const c of CUENTAS_CON_TOKEN) {
+    const lista = salida[c.lista];
+    if (!Array.isArray(lista)) continue;
+    const guardadas = new Map<string, unknown>();
+    for (const g of Array.isArray(guardada[c.lista]) ? (guardada[c.lista] as unknown[]) : []) {
+      if (esDict(g) && g[c.id] != null) guardadas.set(String(g[c.id]), g[c.token]);
+    }
+    salida[c.lista] = lista.map((a) => {
+      if (!esDict(a)) return a;
+      const v = a[c.token];
+      if (v === SECRETO_GUARDADO) {
+        const previo = guardadas.get(String(a[c.id]));
+        return { ...a, [c.token]: hayToken(previo) ? cifrar(String(previo)) : '' };
+      }
+      rechazar(v);
+      return { ...a, [c.token]: esValorNuevo(v) ? cifrar(v.trim()) : '' };
+    });
+  }
+  return salida;
+}
+
 /** Las claves del formulario que cuentan como credencial al probar la conexión. */
 const CREDENCIALES_FORMULARIO = ['hotmart_client_id', ...Object.keys(SECRETOS_HOTMART)];
 

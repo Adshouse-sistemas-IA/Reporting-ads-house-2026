@@ -31,6 +31,7 @@
 
 import { esMonedaReporte } from '../moneda-reporte';
 import { zonaValida } from '../zona-horaria';
+import { BUCKET_ARCHIVO_LEADS } from '../report-utm/archivo-leads';
 
 type Db = any;
 type Fetch = typeof fetch;
@@ -729,6 +730,16 @@ async function borrarArchivos(admin: Db, r: Reunido): Promise<string[]> {
     for (let i = 0; i < rutas.length; i += LOTE_STORAGE) {
       const { error } = await bucket.remove(rutas.slice(i, i + LOTE_STORAGE));
       if (error) throw new Error(error.message);
+    }
+    // Sus leads archivados (`<id UTM>/…csv.gz`, report-utm/archivo-leads.ts):
+    // son datos del cliente como los de `lead_events`, se van con él.
+    const archivo = admin.storage.from(BUCKET_ARCHIVO_LEADS);
+    for (const utmId of r.utmIds) {
+      const csv = (await listarArchivos(archivo, utmId)).map((n) => `${utmId}/${n}`);
+      for (let i = 0; i < csv.length; i += LOTE_STORAGE) {
+        const { error } = await archivo.remove(csv.slice(i, i + LOTE_STORAGE));
+        if (error) throw new Error(error.message);
+      }
     }
     return [];
   } catch (e) {

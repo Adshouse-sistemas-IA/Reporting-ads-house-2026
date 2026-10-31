@@ -1,5 +1,6 @@
 'use server';
 
+import { exigirAccesoCliente } from '@/lib/acceso/clientes';
 import { createClient, createAdminClient } from '@/utils/supabase/server';
 import { revalidatePath } from 'next/cache';
 
@@ -39,6 +40,7 @@ export interface Bitacora {
 }
 
 export async function getBitacoras(clienteId: string): Promise<Bitacora[]> {
+  await exigirAccesoCliente(clienteId, 'lectura');
   const supabase = await createClient();
   const { data, error } = await supabase
     .from('bitacoras')
@@ -59,6 +61,7 @@ export async function createBitacora(
   contenido: string,
   visibilidad: BitacoraVisibilidad
 ): Promise<{ success?: boolean; error?: string }> {
+  await exigirAccesoCliente(clienteId, 'operacion');
   const supabase = await createClient();
   const {
     data: { user },

@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server';
 import { requireCronAuth } from '@/lib/cron-auth';
 import { createClient as createSSRClient } from '@/utils/supabase/server';
 import { notifyUsers } from '@/lib/notifications/notify';
+import { abrirToken, sellarToken } from '@/lib/credenciales-ads';
 
 const GRAPH = 'https://graph.facebook.com/v19.0';
 
@@ -49,7 +50,8 @@ export async function GET(request: Request) {
 
   for (const cliente of clientes) {
     const config = cliente.config_api || {};
-    const token: string | undefined = config.meta_token;
+    // Cifrado en reposo: se abre para canjearlo y el nuevo se guarda cifrado.
+    const token: string = abrirToken(config.meta_token);
     const expiresAt: string | undefined = config.meta_token_expires_at;
 
     // Solo procesar clientes con token OAuth y fecha de expiración registrada.
@@ -75,10 +77,13 @@ export async function GET(request: Request) {
 
       if (data.error || !data.access_token) {
         // Token vencido o revocado: marcar para que la UI pida reconexión.
-        await supabase
-          .from('clientes')
-          .update({ config_api: { ...config, meta_connection_status: 'expired' } })
-          .eq('id', cliente.id);
+        // Parche atómico: reescribir `config_api` entero pisaba lo que otra
+        // escritura hubiera cambiado entre la lectura y este UPDATE.
+        const { error: eExp } = await supabase.rpc('fusionar_config_api', {
+          p_cliente_id: cliente.id,
+          p_parche: { meta_connection_status: 'expired' },
+        });
+        if (eExp) console.error('[refresh-meta-tokens] marcar expirado', cliente.id, eExp.message);
         results.push({
           id: cliente.id,
           nombre: cliente.nombre,
@@ -92,17 +97,15 @@ export async function GET(request: Request) {
       const expiresIn: number = data.expires_in ?? 60 * 24 * 60 * 60;
       const newExpiresAt = new Date(now + expiresIn * 1000).toISOString();
 
-      await supabase
-        .from('clientes')
-        .update({
-          config_api: {
-            ...config,
-            meta_token: newToken,
-            meta_token_expires_at: newExpiresAt,
-            meta_connection_status: 'connected',
-          },
-        })
-        .eq('id', cliente.id);
+      const { error: eGuardar } = await supabase.rpc('fusionar_config_api', {
+        p_cliente_id: cliente.id,
+        p_parche: {
+          meta_token: sellarToken(newToken),
+          meta_token_expires_at: newExpiresAt,
+          meta_connection_status: 'connected',
+        },
+      });
+      if (eGuardar) throw new Error(`guardar token: ${eGuardar.message}`);
 
       results.push({
         id: cliente.id,

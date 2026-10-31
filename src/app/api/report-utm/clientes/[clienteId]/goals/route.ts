@@ -8,6 +8,7 @@
 //   PATCH → requiere sesión con rol de escritura.
 
 import { NextRequest, NextResponse } from 'next/server';
+import { exigirAccesoClienteUtm, guardaRuta } from '@/lib/acceso/clientes';
 import { reportUtmAdminClient } from '@/lib/report-utm/client';
 import { checkWriteRole } from '@/lib/report-utm/auth';
 import type { ClienteGoals } from '@/lib/report-utm/bi-metadata';
@@ -61,6 +62,8 @@ export async function PATCH(req: NextRequest, { params }: Params) {
 
   const { clienteId } = await params;
   const body = await req.json().catch(() => ({}));
+  const denegado = await guardaRuta(() => exigirAccesoClienteUtm(clienteId, 'operacion'));
+  if (denegado) return denegado;
   const goals = sanitizeGoals(body?.goals);
 
   const rtm = await reportUtmAdminClient();
